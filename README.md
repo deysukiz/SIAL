@@ -195,7 +195,7 @@ Puedes ver el código de conducta para este proyecto en el siguiente archivo [CO
   
 
 ---
-* **[Deysi Helen Ortega Román](https://github.com/deysukiz "Github")** - [Email](deysukiz@gmail.com)
+* **[Deysi Helen Ortega Román](https://github.com/deysukiz "Github")** - [Email](mailto:deysukiz@gmail.com "Correo electrónico")
 * **[Ramiro Gabriel Alférez Chavez](mailto:ramiro.alferez@gmail.com "Correo electrónico")**
 * **[Eliecer Ramirez Esquinca](https://github.com/checherman "Github")**
 * **[Joram Roblero Pérez](https://github.com/joramdeveloper  "Github")**
