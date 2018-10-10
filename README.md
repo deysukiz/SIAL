@@ -6,7 +6,7 @@ Esta herramienta digital forma parte del catálogo de herramientas del **Banco I
   
 ### Descripción y contexto
 
-Iniciativa Salud Mesoamérica,
+Iniciativa Salud Mesoamérica, ME-G1001 & ME-G1004
 
 La secretaría de salud (ISECH) a través de la Dirección de Informática, con el apoyo del Proyecto Salud Mesoamérica 2015 (SM2015), desarrolla el proyecto Sistema de Información para la Administración Logística (SIAL), cuyo objetivo es facilitar y fortalecer el control de almacenes, a nivel central y jurisdiccional.
 Una de las principales funciones de la Secretaría de Salud es abastecer a las diferentes unidades médicas del estado de Chiapas de medicamentos y materiales necesarios para una atención adecuada a la población. Es por ello, que implementar herramientas para el control y distribución de los insumos médicos es una prioridad.
