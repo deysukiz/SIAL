@@ -44,7 +44,10 @@ Se creará una carpeta dentro del proyecto llamada **documentation**, dentro de 
 
 ##### Software:
 
-El desarrollo del Cliente web de SIAL se programó en [Angular 4](https://angular.io/)
+El desarrollo del Cliente web de SIAL se programó con:
+- [Angular 4](https://angular.io/)
+- [Bulma](https://bulma.io/)
+- [Angular CLI](https://cli.angular.io/)
 
   
 Para poder instalar y utilizar el Cliente web, deberá asegurarse que su servidor cumpla con los siguientes requisitos, se dejan los links de descarga:
