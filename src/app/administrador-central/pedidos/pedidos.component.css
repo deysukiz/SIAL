@@ -1,0 +1,39 @@
+td.causes {
+    background-color: #cdff8c;
+}
+
+td.no-causes {
+    background-color: #ffa838;
+}
+
+td.material-curacion {
+    background-color: #ffff7c;
+}
+
+.borrador{
+    color:#aaaaaa;
+}
+
+.farmacia{
+    color:#a8c0ff;
+}
+
+.sin-surtir{
+    color:#dddddd;
+}
+
+.surtiendo{
+    color:#3273dc;
+}
+
+.surtido{
+    color:#4aba53;
+}
+
+.expirado{
+    color:#e8dd14;
+}
+
+.cancelado{
+    color:red;
+}

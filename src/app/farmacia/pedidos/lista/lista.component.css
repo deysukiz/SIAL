@@ -1,0 +1,31 @@
+.estatus-rojo{
+    color:red !important;
+}
+.estatus-amarillo{
+    color:orange !important;
+}
+.estatus-verde{
+    color:#23d160;
+}
+.estatus-azul{
+    color:#3273dc;
+}
+.estatus-normal{
+    color:#555555;
+}
+
+.proyecto-estatus-amarillo td a,.proyecto-estatus-amarillo th a {
+    color:orange !important;
+}
+.proyecto-estatus-rojo td a,.proyecto-estatus-rojo th a {
+    color:red !important;
+}
+.proyecto-estatus-verde td a,.proyecto-estatus-verde th a {
+    color:#23d160 !important;
+}
+.proyecto-estatus-azul td a,.proyecto-estatus-azul th a {
+    color:#3273dc !important;
+}
+.proyecto-estatus-normal td a,.proyecto-estatus-normal th a {
+    color:#555555;
+}

@@ -1,0 +1,123 @@
+<formulario #ctrl URL="servidor" titulo="Servidor / Catalogo" [dato]="dato"></formulario>
+<app-menu-catalogo></app-menu-catalogo>
+<div style="height:50px;"></div>
+<div class="contenedor columns " style="height:90%; padding-top: 1em;">
+    <div class="column is-one-quarter is-hidden-mobile">
+        <panel-control-menu-aside></panel-control-menu-aside>
+    </div>
+    <div class="column" style="padding: 0em 2em 0em 0em;">
+        <!-- formulario -->
+        <form name="form" novalidate [formGroup]="dato" (ngSubmit)="ctrl.enviar()">
+            <div style="background: #FFF; overflow: hidden;">
+                <section class="hero is-primary">
+                    <div class="hero-body">
+                        <!-- Opciones  -->
+                        <formulario-opciones [ctrl]="ctrl" class="control is-grouped" style="position:absolute; top:8em; right:3em;">
+                        </formulario-opciones>
+                        <div class="container is-fluid">
+                            <h1 class="title">
+                                <span *ngIf="!ctrl.cargando" class="icon is-medium"><i class="fa fa-edit"></i></span>
+                                <span *ngIf="ctrl.cargando" class="icon is-medium"><i class="fa fa-refresh fa-spin"></i></span>                                {{ctrl.moduloTitulo}} servidor
+                            </h1>
+
+                        </div>
+                    </div>
+                </section>
+                <div class="is-fullwidth has-text-centered" *ngIf="!ctrl.datosCargados">
+                    <br>
+                    <span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span>                    &nbsp;<span>Cargando...</span></span>
+                </div>
+                <section class="section">
+
+
+                    <div class="field">
+                        <label class="label">ID:</label>
+                        <p class="control is-expanded  has-icon has-icon-right">
+                            <input class="input" type="text" [ngClass]="{'is-danger': ctrl.dato.get('id').hasError('required') && ctrl.dato.get('id').touched}"
+                                placeholder="id" formControlName="id">
+                            <span class="icon is-small" *ngIf="ctrl.dato.get('id').hasError('required') && ctrl.dato.get('id').touched">
+                                <i class="fa fa-warning"></i>
+                            </span>
+                            <span class="help is-danger" *ngIf="ctrl.dato.get('id').hasError('required') && ctrl.dato.get('id').touched">Este campo es requerido.</span>
+                        </p>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">Nombre:</label>
+                        <p class="control is-expanded  has-icon has-icon-right">
+                            <input class="input" type="text" [ngClass]="{'is-danger': ctrl.dato.get('nombre').hasError('required')}" placeholder="nombre"
+                                formControlName="nombre">
+                            <span class="icon is-small" *ngIf="ctrl.dato.get('nombre').hasError('required')">
+                                <i class="fa fa-warning"></i>
+                            </span>
+                            <span class="help is-danger" *ngIf="ctrl.dato.get('nombre').hasError('required')">Este campo es requerido.</span>
+                        </p>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">Clave secreta:</label>
+                        <p class="control is-expanded  has-icon has-icon-right">
+                            <input class="input" type="text" [ngClass]="{'is-danger': ctrl.dato.get('secret_key').hasError('required') && ctrl.dato.get('secret_key').touched}"
+                                placeholder="Clave secreta" formControlName="secret_key">
+                            <span class="icon is-small" *ngIf="ctrl.dato.get('secret_key').hasError('required') && ctrl.dato.get('secret_key').touched">
+                                <i class="fa fa-warning"></i>
+                            </span>
+                            <span class="help is-danger" *ngIf="ctrl.dato.get('secret_key').hasError('required') && ctrl.dato.get('secret_key').touched">Este campo es requerido.</span>
+                        </p>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">Versión:</label>
+                        <p class="control is-expanded  has-icon has-icon-right">
+                            <input class="input" type="text" [ngClass]="{'is-danger': ctrl.dato.get('version').hasError('required') && ctrl.dato.get('version').touched}"
+                                placeholder="Versión" formControlName="version">
+                            <span class="icon is-small" *ngIf="ctrl.dato.get('version').hasError('required') && ctrl.dato.get('version').touched">
+                                <i class="fa fa-warning"></i>
+                            </span>
+                            <span class="help is-danger" *ngIf="ctrl.dato.get('version').hasError('required') && ctrl.dato.get('version').touched">Este campo es requerido.</span>
+                        </p>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">Período de sincronización:</label>
+                        <p class="control is-expanded  has-icon has-icon-right">
+                            <input class="input" type="number" min="1" max="31" [ngClass]="{'is-danger': ctrl.dato.get('periodo_sincronizacion').hasError('required') && ctrl.dato.get('periodo_sincronizacion').touched}"
+                                placeholder="secret key" formControlName="periodo_sincronizacion">
+                            <span class="icon is-small" *ngIf="ctrl.dato.get('periodo_sincronizacion').hasError('required') && ctrl.dato.get('periodo_sincronizacion').touched">
+                                <i class="fa fa-warning"></i>
+                            </span>
+                            <span class="help is-danger" *ngIf="ctrl.dato.get('periodo_sincronizacion').hasError('required') && ctrl.dato.get('periodo_sincronizacion').touched">Este campo es requerido.</span>
+                        </p>
+                    </div>
+                    <br>
+                    <br>
+                    <div class="control is-grouped">
+                        <div class="b-checkbox control is-expanded  has-icon has-icon-right">
+
+                            <input type="checkbox" id="principal" class="styled" [checked]="ctrl.dato.get('principal').value == '1' ? true : false" (change)="ctrl.dato.get('principal').patchValue(ctrl.dato.get('principal').value == '1' ? '0' : '1')">
+                            <label for="principal">  Es principal?
+                            </label>
+                        </div>
+
+                        <div class="b-checkbox control is-expanded  has-icon has-icon-right">
+
+                            <input type="checkbox" id="tiene_internet" class="styled" [checked]="ctrl.dato.get('tiene_internet').value == '1' ? true : false"
+                                (change)="ctrl.dato.get('tiene_internet').patchValue(ctrl.dato.get('tiene_internet').value == '1' ? '0' : '1')">
+                            <label for="tiene_internet">   Tiene internet?
+                            </label>
+                        </div>
+
+                        <div class="b-checkbox control is-expanded  has-icon has-icon-right">
+
+                            <input type="checkbox" id="catalogos_actualizados" class="styled" [checked]="ctrl.dato.get('catalogos_actualizados').value == '1' ? true : false"
+                                (change)="ctrl.dato.get('catalogos_actualizados').patchValue(ctrl.dato.get('catalogos_actualizados').value == '1' ? '0' : '1')">
+                            <label for="catalogos_actualizados">   Los catálogos estan actualizados?
+                            </label>
+                        </div>
+                    </div>
+
+                </section>
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,180 @@
+<formulario #ctrl URL="almacenes" titulo="Almacenes / Catalogo" [dato]="dato"></formulario>
+<articulos-catalogo-menu></articulos-catalogo-menu>
+<div style="height:50px;"></div>
+<div class="contenedor columns " style="height:100%">
+    <div class="column is-one-quarter is-hidden-mobile">
+        <panel-control-menu-aside></panel-control-menu-aside>
+    </div>
+    <div class="column" style="padding: 0em 2em 0em 0em;">
+        <!-- formulario -->
+        <form name="dato" novalidate [formGroup]="dato" (ngSubmit)="ctrl.enviar()">
+            <div style="background: #FFF; overflow: hidden;">
+                <section class="hero is-primary">
+                    <div class="hero-body">
+                        <!-- Opciones  -->
+                        <formulario-opciones [ctrl]="ctrl" class="control is-grouped" style="position:absolute; top:8em; right:3em;">
+                        </formulario-opciones>
+                        <div class="container is-fluid">
+                            <h1 class="title">
+                                <span *ngIf="!ctrl.cargando" class="icon is-medium"><i class="fa fa-edit"></i></span>
+                                <span *ngIf="ctrl.cargando" class="icon is-medium"><i class="fa fa-refresh fa-spin"></i></span>                                {{ctrl.moduloTitulo}} almacen
+                            </h1>
+
+                        </div>
+                    </div>
+                </section>
+                <div class="is-fullwidth has-text-centered" *ngIf="!ctrl.datosCargados">
+                    <br>
+                    <span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span>                    &nbsp;<span>Cargando...</span></span>
+                </div>
+                <section class="section">
+                    
+                        <div class="tabs is-boxed">
+                            <ul>
+                                <li [ngClass]="{ 'is-active' : tab == 1}">
+                                    <a (click)="tab=1">
+                                    <span class="icon is-small"><i class="fa fa-file"></i></span>
+                                    <span>Datos del almacén</span>
+                                </a>
+                                </li>
+                                <li [ngClass]="{ 'is-active' : tab == 2}">
+                                    <a (click)="tab=2">
+                                    <span class="icon is-small"><i class="fa fa-home"></i></span>
+                                    <span>Tipos de movimientos</span>
+                                </a>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div [ngClass]="{ 'is-hidden': tab != 1}">
+
+                            <div class="field">
+                                <label class="label">ID:</label>
+                                <p class="control is-expanded  has-icon has-icon-right">
+                                    <input class="input" type="text" [ngClass]="{'is-danger': ctrl.dato.get('id').hasError('required') && ctrl.dato.get('id').touched}"
+                                        placeholder="id" formControlName="id" [readonly]="tieneid">
+                                    <span class="icon is-small" *ngIf="ctrl.dato.get('id').hasError('required') && ctrl.dato.get('id').touched">
+                                    <i class="fa fa-warning"></i>
+                                </span>
+                                    <span class="help is-danger" *ngIf="ctrl.dato.get('id').hasError('required') && ctrl.dato.get('id').touched">Este campo es requerido.</span>
+                                </p>
+                            </div>
+
+                            <div class="field">
+                                <label class="label">Nombre:</label>
+                                <p class="control is-expanded  has-icon has-icon-right">
+                                    <input class="input" type="text" [ngClass]="{'is-danger': ctrl.dato.get('nombre').hasError('required')}" placeholder="nombre"
+                                        formControlName="nombre">
+                                    <span class="icon is-small" *ngIf="ctrl.dato.get('nombre').hasError('required')">
+                                    <i class="fa fa-warning"></i>
+                                </span>
+                                    <span class="help is-danger" *ngIf="ctrl.dato.get('nombre').hasError('required')">Este campo es requerido.</span>
+                                </p>
+                            </div>
+
+                            <div class="field">
+                                <label class="label">Nivel de almacén:</label>
+                                <p class="control is-expanded  has-icon has-icon-right">
+                                    <select class="select" name="nivel_almacen" formControlName="nivel_almacen" [ngClass]="{'is-warning': nivel_almacen?.length ==0 }">
+                                    <option *ngFor="let item of niveles_almacen" value="{{item.id}}" [attr.selected]="ctrl.dato.get('nivel_almacen').value == item.id > -1">{{ item.nombre }}</option>
+                                </select>
+                                    <span class="icon is-small" *ngIf="ctrl.dato.get('nivel_almacen').hasError('required') && ctrl.dato.get('nivel_almacen').touched">
+                                    <i class="fa fa-warning"></i>
+                                </span>
+                                    <span class="help is-danger" *ngIf="ctrl.dato.get('nivel_almacen').hasError('required') && ctrl.dato.get('nivel_almacen').touched">Este campo es requerido.</span>
+                                </p>
+                            </div>
+
+                            <div class="field">
+                                <label class="label">Tipo de almacén:</label>
+                                <p class="control is-expanded  has-icon has-icon-right">
+                                    <select class="select" name="tipo_almacen" formControlName="tipo_almacen" [ngClass]="{'is-warning': tipo_almacen?.length ==0 }">
+                                    <option *ngFor="let item of tipos_almacen" value="{{item.id}}" [attr.selected]="ctrl.dato.get('tipo_almacen').value == item.id > -1">{{ item.nombre }}</option>
+                                </select>
+                                    <span class="icon is-small" *ngIf="ctrl.dato.get('tipo_almacen').hasError('required') && ctrl.dato.get('tipo_almacen').touched">
+                                    <i class="fa fa-warning"></i>
+                                </span>
+                                    <span class="help is-danger" *ngIf="ctrl.dato.get('tipo_almacen').hasError('required') && ctrl.dato.get('tipo_almacen').touched">Este campo es requerido.</span>
+                                </p>
+                            </div>
+
+
+
+                            <div class="field">
+                                <label class="label">Clues:</label>
+                                <p class="control is-expanded  has-icon has-icon-right">
+                                    <input ngui-auto-complete [source]="clues_term" [list-formatter]="autocompleListFormatter" value-property-name="clues" display-property-name="clues"
+                                        path-to-data="" loading-text="Cargando..." no-match-found-text="No hay resultados." (valueChanged)="ctrl.select_item_autocomplete('clues', 'clues', $event)"
+                                        min-chars="1" class="input" type="text" [ngClass]="{'is-danger': ctrl.dato.get('clues').hasError('required') && ctrl.dato.get('clues').touched}"
+                                        placeholder="Clues" formControlName="clues">
+
+                                    <span class="icon is-small" *ngIf="ctrl.dato.get('clues').hasError('required') && ctrl.dato.get('clues').touched">
+                                    <i class="fa fa-warning"></i>
+                                </span>
+                                    <span class="help is-danger" *ngIf="ctrl.dato.get('clues').hasError('required') && ctrl.dato.get('clues').touched">Este campo es requerido.</span>
+                                </p>
+                            </div>
+
+                            <div class="field">
+                                <label class="label" id="catalogos" (click)="ctrl.cargarCatalogo('proveedores', 'proveedor'); ctrl.cargarCatalogo('tipos_movimientos', 'tipo-movimiento');">Proveedor:</label>
+                                <p class="control is-expanded  has-icon has-icon-right">
+                                    <select class="select" name="proveedor_id" formControlName="proveedor_id" [ngClass]="{'is-warning': proveedor_id?.length ==0 }">
+                                    <option *ngFor="let item of ctrl.proveedores" value="{{item.id}}" [attr.selected]="ctrl.dato.get('proveedor_id').value == item.id > -1">{{ item.nombre }}</option>
+                                </select>
+                                </p>
+                            </div>
+
+                            <br>
+                            <div class="control is-grouped">
+                                <div class="b-checkbox control is-expanded  has-icon has-icon-right">
+
+                                    <input type="checkbox" id="subrogado" class="styled" [checked]="ctrl.dato.get('subrogado').value == '1' ? true : false" (change)="ctrl.dato.get('subrogado').patchValue(ctrl.dato.get('subrogado').value == '1' ? '0' : '1')">
+                                    <label for="subrogado">  Es Subrogado?
+                                </label>
+                                </div>
+
+                                <div class="b-checkbox control is-expanded  has-icon has-icon-right">
+
+                                    <input type="checkbox" id="unidosis" class="styled" [checked]="ctrl.dato.get('unidosis').value == '1' ? true : false" (change)="ctrl.dato.get('unidosis').patchValue(ctrl.dato.get('unidosis').value == '1' ? '0' : '1')">
+                                    <label for="unidosis">   Maneja unidosis?
+                                </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div [ngClass]="{ 'is-hidden': tab != 2}">
+
+                            <div formArrayName="almacen_tipos_movimientos">
+                                <div *ngFor="let item of ctrl.dato.controls.almacen_tipos_movimientos.controls; let i=index" class="column is-4" style="float:left">
+                                    <nav class="panel" [formGroupName]="i">
+                                        <div class="panel-heading">
+                                            Tipo de movimiento {{i + 1}}
+                                            <a style="float:right" class="is-danger" (click)="ctrl.quitar_form_array('almacen_tipos_movimientos', i)"><span class="icon"><i class="fa fa-trash-o"></i></span></a>
+                                        </div>
+                                        <label class="panel-block">                                                  
+                                        <select class="select" name="tipo_movimiento_id" formControlName="tipo_movimiento_id" [ngClass]="{'is-warning': tipo_movimiento_id?.length ==0 }">
+                                            <option *ngFor="let val of ctrl.tipos_movimientos" value="{{val.id}}" >{{ val.nombre }}</option>
+                                        </select>
+                                        <span class="help is-danger" *ngIf="!ctrl.dato.controls.almacen_tipos_movimientos.controls[i].controls.tipo_movimiento_id.valid">Este campo es requerido.</span>                                            
+                                    </label>
+                                    </nav>
+                                </div>
+                            </div>
+
+                            <div class="block">
+                                <a class="button is-primary is-outlined is-fullwidth" (click)="ctrl.agregar_form_array('almacen_tipos_movimientos', form_almacen_tipos_movimientos)">
+                                <span class="icon">
+                                    <i class="fa fa-plus"> </i> 
+                                </span> 
+                                &nbsp; Agregar
+                            </a>
+                            </div>
+
+                        </div>
+
+
+                </section>
+            </div>
+            </form>
+    </div>
+</div>

@@ -1,0 +1,145 @@
+<panel-control-menu></panel-control-menu>
+<div style="height:50px;"></div>
+<div class="contenedor columns " style="height:100%">
+    <div class="column is-one-quarter is-hidden-mobile">
+        <panel-control-menu-aside></panel-control-menu-aside>
+    </div>
+    <div class="column" style="padding:2em; overflow:auto;">
+        <div style="background: #FFF; border-radius: 1em; overflow: hidden;">
+            <section class="hero is-primary">
+                <div class="hero-body">
+                    <div class="container is-fluid">
+                        <h1 class="title">
+                            <span  *ngIf="!cargando" class="icon is-medium"><i class="fa fa-wrench"></i></span>
+                            <span  *ngIf="cargando" class="icon is-medium"><i class="fa fa-refresh fa-spin"></i></span> 
+                            Actualizar sistema
+                        </h1>
+                        
+                    </div>
+                </div>
+            </section>
+            <br>
+            <div class="tabs is-centered is-boxed is-medium">
+                <ul>
+                    <li [ngClass]="{ 'is-active': tabParches}">
+                        <a (click)="tabParches=true;tabOnline=false;">
+                            <span class="icon is-small"><i class="fa fa-puzzle-piece"></i></span>
+                            <span>Parches</span>
+                        </a>
+                    </li>
+                    <li [ngClass]="{ 'is-active': tabOnline}">
+                        <a (click)="tabParches=false;tabOnline=true;">
+                        <span class="icon is-small"><i class="fa fa-wifi"></i></span>
+                        <span>Actualización en línea</span>
+                        </a>
+                    </li>    
+                </ul>
+            </div>
+			<section class="section" *ngIf="tabOnline">
+				<h1 class="title">Importante</h1>
+                <p>Antes de realizar cualquier actualización al sistema, es recomendable hacer una <a routerLink="/panel-control/opciones-avanzadas/base-datos">copia de la base de datos</a>.</p>
+                <hr>
+			  	<p>Para realizar esta operación es necesario contar con una <strong>conexión a internet</strong>. Este proceso se realizará <span class="icon"><i class="fa fa-magic"></i></span> <strong>automágicamente</strong> <span class="icon"><i class="fa fa-magic"></i></span> después de presionar el siguiente botón:</p>
+				<br>
+			  	<div style="text-align:center;"><a class="button is-primary is-medium" [ngClass]="{ 'is-loading': cargando}" (click)="actualizarViaGit()"><span class="icon"><i class="fa fa-refresh"></i></span> <span>Actualizar ahora</span></a></div>
+			</section>
+            <section class="section" *ngIf="tabParches">
+                <h1 class="title">Importante</h1>
+                <p>Antes de realizar cualquier actualización al sistema, es recomendable hacer una <a routerLink="/panel-control/opciones-avanzadas/base-datos">copia de la base de datos</a>.</p>
+                <br>
+                <p>No altere el nombre del archivo, suba los parches en el orden númerico correcto, por ejemplo si el último parche es el # 2, el siguiente que debe de subir es el # 3, no el # 4 o el #1. Si hay muchos parches, suba 1 a 1 en el orden correcto: 3, 4, 5, etc. Realizar este procedimiento solo si ha recibido la capacitación correspondiente, si tiene dudas pregunte con el personal del <strong>Área de Informática</strong> de la <i>Dirección de Planeación y Desarrollo</i> de  <i>Oficina Central</i>.</p>                
+                <hr>               
+                <div style="text-align:center;"><a class="button is-primary is-medium" [ngClass]="{ 'is-loading': enviandoDatoss}" (click)="mostrarModalSubirParche = true; archivoSubido = false;" ><span class="icon"><i class="fa fa-upload"></i></span> <span>Subir parche</span></a></div>
+                <br>
+                <div class="tabs is-centered is-boxed is-medium">
+                    <ul>
+                        <li [ngClass]="{ 'is-active': tabParchesCliente}">
+                            <a (click)="tabParchesCliente=true;tabParchesAPI=false;">
+                                <span class="icon is-small"><i class="fa fa-desktop"></i></span>
+                                <span>Parches Cliente</span>
+                            </a>
+                        </li>
+                        <li [ngClass]="{ 'is-active': tabParchesAPI}">
+                            <a (click)="tabParchesCliente=false;tabParchesAPI=true;">
+                            <span class="icon is-small"><i class="fa fa-server"></i></span>
+                            <span>Parches API</span>
+                            </a>
+                        </li>    
+                    </ul>
+                </div>
+                <table class="table" *ngIf="tabParchesCliente" style="font-size:0.9em;">
+                    <thead>
+                        <tr><th>Número de parche</th> <th>Fecha del Parche</th> <th>Actualizado</th> </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let item of parches_cliente"><td>{{ item.nombre }}</td><td>{{ item.fecha }}</td><td>{{ (item.fecha_aplicacion)?(item.fecha_aplicacion | date:'y-MM-dd' ):'Actualizado sin Parches' }}</td></tr>  
+                        <tr *ngIf="parches_cliente.length == 0"><td colspan="2">No se ha ejecutado ningún parche nunca.</td></tr>                        
+                    </tbody>
+                </table>
+                <table class="table" *ngIf="tabParchesAPI" style="font-size:0.9em;">
+                    <thead>
+                        <tr><th>Número de parche</th> <th>Fecha del Parche</th> <th>Actualizado</th> <th>Estatus</th> </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngIf="cargandoParches"><td colspan="2" style="text-align:center;"><i class="fa  fa-spin fa-cog"></i> Cargando parches... </td></tr>
+                        <tr *ngFor="let item of parches_api"><td>{{ item.nombre }}</td><td>{{ item.fecha }}</td><td>{{ (item.fecha_aplicacion)?(item.fecha_aplicacion | date:'y-MM-dd' ):'-----' }}</td> <td> <a *ngIf="!item.fecha_ejecucion" class="button is-primary is-inverted is-small" [ngClass]="{ 'is-loading': enviandoDatos}" (click)="ejecutarParcheApi(item)" ><span class="icon is-small"><i class="fa fa-circle-o"></i></span> <span>Ejecutar</span></a> <span *ngIf="item.fecha_ejecucion" class="button is-inverted is-static is-success is-small"><span class="icon is-small"><i class="fa fa-dot-circle-o"></i></span> <span>Ejecutado</span></span> </td></tr>
+                        <tr *ngIf="!cargandoParches && parches_api.length == 0"><td colspan="2">No se ha ejecutado ningún parche nunca.</td></tr>                        
+                    </tbody>
+                </table>
+            </section>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<div class="modal"  [ngClass]="{ 'is-active': mostrarModalSubirParche }">
+<div class="modal-background" (click)="mostrarModalSubirParche =!mostrarModalSubirParche"></div>
+<div class="modal-card">
+    <header class="modal-card-head">
+    <p class="modal-card-title"><span class="icon"><i class="fa fa-cloud-upload"></i></span> Subir parche</p>
+    <button class="delete" (click)="mostrarModalSubirParche = !mostrarModalSubirParche; progreso = 0"></button>
+    </header>
+    <section class="modal-card-body">    
+        <div class="notification is-danger" *ngIf="mensajeErrorSync!=''"><span class="icon"><i class="fa fa-exclamation-circle"></i></span> {{ mensajeErrorSync }}</div>
+
+        
+        <div class="field" [ngClass]="{ 'is-hidden' : enviandoDatos || archivoSubido }">
+                <label for="sql" class="label" [ngClass]="{ 'is-danger': errores.archivo != null }">Elige el archivo .patch</label>                         
+                <input type="file"  class="input-file" #archivoInput style="width:100%" name="sql" is="sql" (change)="fileChange($event)"  accept=".patch">
+        </div>    
+        <div *ngIf="enviandoDatos || archivoSubido">
+            <h1 class="subtitle" *ngIf="enviandoDatos">Subiendo parche...</h1>
+            <h1 class="subtitle" *ngIf="archivoSubido "><span class="icon"><i class="fa fa-check-circle"></i></span> ¡El parche se ha subido exitosamente!</h1>
+            <progress class="progress is-primary" value="{{ progreso }}" max="100">{{ progreso}}%</progress>
+        </div>
+    </section>
+    <footer class="modal-card-foot">
+        <a class="button is-success" [ngClass]="{ 'is-disabled' : !archivoSubido }" *ngIf="archivoSubido" (click)="recargarCliente()"><span class="icon"><i class="fa fa-refresh"></i></span> <span>Recargar Página</span></a>  
+        <a class="button is-primary" [ngClass]="{ 'is-disabled' : enviandoDatos || !archivo  }" *ngIf="!archivoSubido" (click)="adjuntarParche()">Subir parche</a>  
+        <a class="button" [ngClass]="{ 'is-disabled' : enviandoDatos  }" (click)="mostrarModalSubirParche = !mostrarModalSubirParche">Cerrar</a>      
+    </footer>
+</div>
+</div>
+
+<div class="modal" [ngClass]="{ 'is-active': mostrarLog }">
+    <div class="modal-background" (click)="mostrarLog = !mostrarLog"></div>
+    <div class="modal-card">
+        <header class="modal-card-head">
+        <p class="modal-card-title">Detalles de la actualización</p>
+        <button class="delete" (click)="mostrarLog = !mostrarLog"></button>
+        </header>
+        <section class="modal-card-body is-paddingless">
+            <div class="content ">
+                <pre>{{ logActualizacion }}</pre>
+            </div>
+        </section>
+        <footer class="modal-card-foot">
+        <a class="button" (click)="mostrarLog = !mostrarLog">Cerrar</a>
+        </footer>
+    </div>
+</div>
+        
+        

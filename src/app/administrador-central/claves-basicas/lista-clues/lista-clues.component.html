@@ -1,0 +1,89 @@
+<div class="modal is-active">
+	<div class="modal-background" (click)="cerrar()"></div>
+	<div class="modal-card" style="width:95%; height:100%;">
+		<header class="modal-card-head" style="background: #00d1b2;">
+			<div class="container is-fluid" style="width:100%;">
+				<h1 class="title" style="color:#FFF;">
+					Clues asignadas a: <b>{{ lista.nombre }}</b>
+				</h1>
+			</div>
+			<a class="button  is-primary" style="position:absolute; top:1em; right:1em;" (click)="cerrar()"><span class="icon "><i class="fa fa-close"></i></span></a>
+		</header>
+		<section class="modal-card-body" style="padding:0px;">
+
+			<div class="is-fullwidth has-text-centered" *ngIf="cargando">
+				<br>
+				<span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span> &nbsp;<span>Cargando...</span></span>
+				<br>
+				<br>
+			</div>
+
+			<table class="table" *ngIf="!cargando" style="font-size: 0.8em;">
+				<thead>
+					<tr>
+						<th>Clues</th>
+						<th>Nombre</th>
+						<th>Fecha</th>
+						<th>Por usuario</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr *ngFor="let item of unidadesMedicas; let i = index">
+						<td>{{ item.clues }}</td>
+						<td>{{ item.nombre }}</td>
+						<td>{{ item.created_at }}</td>
+						<td>{{ item.usuario_id }}</td>
+						<td style="width:70px !important;">
+							<span class="icon " *ngIf="item.cargando"><i class="fa fa-circle-o-notch fa-spin"></i></span>
+							<a (click)="eliminar(item,i)" *ngIf="!item.cargando"><span class="icon"><i class="fa fa-trash"></i></span></a>
+						</td>
+					</tr>
+					<tr *ngIf="unidadesMedicas.length == 0">
+						<td colspan="4" style="vertical-align: middle; color:#888;">No hay unidades médicas asiganadas a esta lista.</td>
+					</tr>
+				</tbody>
+			</table>
+			<br>
+
+		</section>
+		<footer class="" style="position:relative; padding:1em;background: #FFF; border-top:1px solid #EEE; border-radius:0 0 0.8em 0.8em ">
+
+			<paginacion [total]="total" [paginasTotales]="paginasTotales" [resultadosPorPagina]="resultadosPorPagina" [paginaActual]="paginaActual"
+			 [indicePaginas]="indicePaginas" (onSiguiente)="paginaSiguiente()" (onAnterior)="paginaAnterior()" (onListar)="listar($event)"
+			 *ngIf="total > 0 && total > resultadosPorPagina "></paginacion>
+
+
+
+			<div class="notification is-dark is-unselectable mensaje-agregar" [ngClass]="{ 'mostrar': mensajeAgregado.mostrar}" *ngIf="mensajeAgregado.mostrar"
+			 (click)="mensajeAgregado.mostrar=false">
+				<span class="icon"><i class="fa fa-check-circle"></i></span> <span>Agregado</span>
+			</div>
+
+			<form (submit)="agregar($event)">
+				<div class="control is-grouped">
+					<p class="control is-expanded " [ngClass]="{ 'is-loading': cargandoUnidadesMedicasSinAsignar }">
+						<span class="select is-fullwidth" >              
+							<select (change)="seleccionarClues($event.target.value)" #cluesSelect  [disabled]="unidadesMedicasSinAsignar.length == 0 || agregandoUnidadMedica">
+							<option value="-1">Seleccione una clues</option>
+							<option value="TODAS" *ngIf="unidadesMedicasSinAsignar.length > 1">Todas las unidades médicas</option>
+							<option *ngFor="let um of unidadesMedicasSinAsignar" value="{{ um.clues }}" >{{ um.clues }} - {{ um.nombre }}</option>
+						</select>
+					</span>
+					</p>
+					<p class="control">
+						<button [disabled]="clues == -1 || unidadesMedicasSinAsignar.length == 0" [ngClass]="{ 'is-loading': agregandoUnidadMedica }" class="button is-primary">
+							<span class="icon"><i class="fa fa-plus"></i></span><span>Agregar</span>
+						</button>
+					</p>
+				</div>
+
+			</form>
+		</footer>
+
+		<div class="notification is-danger" style="position:fixed; left:1em;  bottom:1em;" *ngIf="mensajeError.mostrar">
+			<button class="delete" (click)="mensajeError.mostrar = false"></button>
+			<b>Error:</b> {{ mensajeError.texto }}
+		</div>
+	</div>
+</div>

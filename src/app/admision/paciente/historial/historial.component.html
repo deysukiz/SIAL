@@ -1,0 +1,87 @@
+<admision-menu></admision-menu>
+<div style="height:50px;"></div>
+<div class="contenedor columns " style="height:100%; ">
+    <div class="column is-one-quarter is-hidden-mobile">
+        <admision-menu-lateral></admision-menu-lateral>
+    </div>
+    <div class="column" style="padding:2em;">
+        <div style="background: #FFF; border-radius: 1em; overflow: hidden;">
+            <section class="hero is-primary" >
+                
+                <div class="hero-body" style="position:relative;">
+                    <a class="button  is-primary" *ngIf="!busquedaActivada" style="position:absolute; top:1em; right:1em;" (click)="listar(1)"><span class="icon "><i class="fa fa-refresh"></i></span></a>
+                    <div class="container is-fluid">
+                        
+                        <h1 class="title">
+                            <span class="icon is-medium"><i class="fa fa-user"></i></span> Historial del Paciente
+                        </h1>
+                        <div class="control is-grouped">
+                        <p class="control">
+                            <a class="button is-medium is-primary is-inverted "  (click)="regresar()">
+                            <span>Regresar</span>
+                            </a>
+                        </p>
+                        </div>
+                        
+                    </div>
+                </div>
+            </section>
+            <br>
+            <section class="section" style="background-color: #00d1b2;">
+                    <div class="container">
+                      <div class="heading">
+                        <h1 class="title" style="color: #FFF">Datos del Paciente</h1>
+                        <h2 class="subtitle" style="color: #FFF">
+                          ID: {{ id_paciente }}<BR>
+                          NOMBRE: {{ nombre_paciente }} <BR>
+                          LOCALIDAD: {{ localidad_paciente }}<BR>
+
+
+                        </h2>
+                      </div>
+                    </div>
+                  </section>
+            
+            <table class="table" *ngIf="!cargando">
+                <thead>
+                    <tr>
+                    <th></th>
+                    <th><abbr title="Paciente ID">ID</abbr></th>
+                    <th>Fecha Ingreso</th>
+                    <th>Area Ingreso</th>
+                    <th>Fecha Egreso</th>
+                    <th>Motivo Egreso</th>
+                    <th>Unidad</th>
+                    </tr>
+                </thead>
+                <tbody  >
+                    <tr *ngFor="let item of pacientes; let i=index">
+                        <th><img style="min-width: 1.5em; width:2em;" src="assets/{{ item.avatar || 'avatar-unknow' }}.svg" alt="avatar"></th>
+                        <th style="vertical-align: middle;">{{ item.id }}</th>
+                        <th style="vertical-align: middle;">{{ item.fecha_hora_ingreso }}</th>
+                        <th style="vertical-align: middle;">{{ item['estado_triage']['descripcion'] }}</th>
+                        <td style="vertical-align: middle;" *ngIf="item.fecha_hora_egreso">{{item.fecha_hora_egreso }}</td>
+                        <th style="vertical-align: middle;" *ngIf="!item.fecha_hora_egreso">--</th>
+
+                        <td style="vertical-align: middle;" *ngIf="item['motivo_egreso']">{{item['motivo_egreso']['descripcion'] }}</td>
+                        <th style="vertical-align: middle;" *ngIf="!item['motivo_egreso']">--</th>
+
+                        <td style="vertical-align: middle;" *ngIf="item['unidad']">{{item['unidad']['nombre'] }}</td>
+                        <th style="vertical-align: middle;" *ngIf="!item['unidad']">--</th>
+                        
+                        
+                        
+                    </tr>
+                    <tr *ngIf="pacientes.length == 0">
+                        <td colspan="5" style="vertical-align: middle; color:#888;">Esta lista está vacía.</td>                    
+                    </tr>
+                </tbody>
+               
+            </table>
+            
+            
+        </div>
+    </div>        
+   
+</div>
+

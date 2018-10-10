@@ -1,0 +1,291 @@
+<!-- crud asignar url de la api URL="url de la api" titulo="un titulo para la pestaña de la pagina" [dato]="variable que contiene el formulario]-->
+<formulario #ctrl URL="salida" titulo="Salida" [dato]="dato"></formulario>
+
+<!-- Menu principal "-->
+<articulos-catalogo-menu></articulos-catalogo-menu>
+<div style="height:50px;"></div>
+<form name="form" novalidate [formGroup]="dato" (ngSubmit)="enviar();">
+    <div class="contenedor columns " style=" overflow:auto;" [style.maxHeight.px]="tamano-50">
+
+        <!-- apartado de movimientos_articulos -->
+        <div class="column">
+            <div style="background: #FFF; border-radius: 1em; ">
+                <section class="hero is-primary">
+                    <div class="hero-body">
+                        <div class="container is-fluid">
+                            <h1 class="title">
+                                <span *ngIf="!ctrl.cargando || !cargando" class="icon is-medium"><i class="fa fa-edit"></i></span>
+                                <span *ngIf="ctrl.cargando || cargando" class="icon is-medium"><i class="fa fa-refresh fa-spin"></i></span>                                Artículos
+                            </h1>
+
+                        </div>
+                    </div>
+                </section>
+                <div class="is-fullwidth has-text-centered" *ngIf="!ctrl.datosCargados">
+                    <br>
+                    <span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span> &nbsp;<span>Cargando...</span></span>
+                </div>
+                <section class="section">
+                    
+                    <div class="notification is-danger" *ngIf="error_salida">
+                        ¡No se completo la devolución! <strong>Intente de nuevo</strong>, Si no contacte con soporte
+                    </div>
+                    <div class="notification is-success" *ngIf="salida_ok">
+                        Devolución realizada con exito <strong>Puede seguir</strong>
+                    </div>
+                   
+                    <table class="table is-narrow is-bordered is-striped">
+                        <thead>
+                            <tr>
+                                <th>Articulo</th>
+                                <th>Precio</th>
+                                <th>Cantidad</th>
+                                <th>Cantidad a devolver</th>
+                                <th>Importe</th>
+                            </tr>
+                        </thead>
+                        <tbody formArrayName="movimientos_articulos">
+                            <tr *ngFor="let val of ctrl.dato.controls.movimientos_articulos.controls;  let i = index;" [formGroupName]="i">
+                                <td>{{val.get("articulos").value.nombre}} </td>                                
+                                <td *ngIf="tieneid">{{val.get("precio_unitario_unitario").value}}</td>
+                                <td *ngIf="ctrl.permisos.indexOf('ArticuloPreciocontroller.index') < 0 && !tieneid">{{val.get("precio_unitario_unitario").value}}</td>
+                                <td *ngIf="ctrl.permisos.indexOf('ArticuloPreciocontroller.index') > -1 && !tieneid">
+                                    {{(val.get("precio_unitario_unitario").value) | currency:'MXN':true}}
+                                </td>
+                                <td><strong class="tag is-info is-medium">{{val.get("cantidad").value}}</strong></td>
+                                <td>
+                                    <input class="input has-text-centered"  type="number" step="1" min="1" max="{{val.get('cantidad').value}}" 
+                                    placeholder="Cantidada devolver" formControlName="cantidad_devolucion"
+                                    (change)="cambio_cantidad_articulo(ctrl.dato.controls.movimientos_articulos.controls[i].controls);"
+                                    (keyup)="cambio_cantidad_articulo_key($event, ctrl.dato.controls.movimientos_articulos.controls[i].controls);" > 
+                                </td>
+                                <td>
+                                    <span class="tag is-medium">{{(val.get("cantidad").value * val.get("precio_unitario_unitario").value) | currency:'MXN':true}}</span>
+                                    <span class="tag is-success is-medium">{{(val.get("cantidad").value - val.get("cantidad_devolucion").value ) * (val.get("precio_unitario_unitario").value) | currency:'MXN':true}}</span></td>
+                            
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </section>
+            </div>
+        </div>
+
+        <!-- datos del cliente y los importes -->
+        <div class="column is-one-third">
+
+            <div style="background: #FFF; border-radius: 1em; ">
+                <section class="hero is-primary">
+                    <h1 class="title" style="margin:0.5em; ">
+                        <span class="icon is-medium">
+                            <i class="fa fa-file-text"></i>
+                        </span> Salida
+                    </h1>
+                    <div class="control is-grouped" style="position:absolute; top:7.5em; right:2em;">
+                            <p class="control" >
+                                <a class="button is-primary tooltip" (click)="ctrl.regresar()">
+                                    <span class="icon ">
+                                        <i class="fa fa-arrow-left"> </i>
+                                    </span>
+                                    <span class="tooltiptext">Regresar</span>
+                                </a>
+                            </p>
+                            <p class="control" *ngIf="ctrl.id">
+                                <a class="button is-primary tooltip" (click)="ctrl.cargarDatos()" id="cargar_datos_actualizar">
+                                    <span class="icon ">
+                                        <i class="fa fa-refresh"></i>
+                                    </span>
+                                    <span class="tooltiptext">Actualizar</span>
+                                </a>
+                            </p>
+                            <p class="control" *ngIf="ctrl.id">
+                                <a  class="button is-primary tooltip"  routerLink="{{url_nuevo}}">
+                                    <span class="icon ">
+                                        <i class="fa fa-file"></i>
+                                    </span>
+                                    <span class="tooltiptext">Nuevo</span>
+                                </a>
+                            </p>
+                            <p class="control" *ngIf="!tieneid">
+                                <button class="button is-primary tooltip" type="submit" [ngClass]="{'is-loading': ctrl.cargando}" [disabled]="ctrl.dato.invalid">
+                                    <span class="icon ">
+                                        <i class="fa fa-save"> </i>
+                                    </span>
+                                    <span class="tooltiptext">Guardar</span>
+                                </button>
+                            </p>                        
+                            <p class="control" *ngIf="reimprimir">
+                                <button class="button is-primary tooltip" type="button" (click)="imprimir()">
+                                    <span class="icon ">
+                                        <i class="fa fa-print"> </i>
+                                    </span>
+                                    <span class="tooltiptext">Reimprimir el ticket</span>                                
+                                </button>
+                            </p>
+                        </div>
+
+                </section>
+                <div style="padding: 1em;">
+
+                    <!-- cargar los catalogos que se requieran parametro 1 modelo donde se guarda el catalogo, parametro 2 ruta de la api -->
+                    <a id="catalogos" (click)="ctrl.cargarCatalogo('clientes', 'cliente?id=2'); ctrl.cargarCatalogo('metodos_pagos', 'tipo-metodo-pago');"></a>
+                    <h3 class="title">
+                        <i class="fa fa-file"></i> Datos de la salida
+                    </h3>
+                    <div class="field">
+                        <label class="label">Cliente (opcional):</label>
+                        <select2 name="personas_id" [options]="ctrl.optionSelect" [value]="startValue" (valueChanged)="ctrl.seleccionarValorSelect2($event, ctrl.dato.controls.personas_id); "
+                            [data]="ctrl.clientes"></select2>
+                    </div>
+                    <div class="field">
+                        <label class="label">Comentarios:</label>
+                        <p class="control is-expanded  has-icon has-icon-right">
+                            <textarea class="textarea" type="text" rows="2" placeholder="Comentarios" formControlName="comentarios"></textarea>
+                        </p>
+                    </div>
+
+                    <hr>
+
+                    <div class="card">
+                        <header class="card-header">
+                            <p class="card-header-title">
+                                Formas de pago
+                            </p>
+                            <a class="card-header-icon">
+                            <span class="icon">
+                                <i class="fa fa-money"></i>
+                            </span>
+                            </a>
+                        </header>
+                        <div class="card-content">
+
+                            <div formArrayName="pagos">
+                                <div class="content" *ngFor="let item of ctrl.dato.controls.pagos.controls; let i=index">
+                                    <div class="box" [formGroupName]="i">
+                                        <article class="media">
+                                            
+                                            <div class="media-content">
+                                                <div class="columns">
+                                                    <div class="column is-6">
+                                                        <label>Forma de pago: </label>
+                                                        {{item.value.tipos_metodos_pagos.nombre}}
+
+                                                    </div>
+                                                    <div class="column is-6">
+                                                        <label>Pago: </label>
+                                                        {{item.value.importe | currency:'MXN':true}}
+                                                        
+                                                    </div>
+                                                </div>
+                                                <div class="columns">
+                                                    <div class="column is-6">
+                                                        <label>Paga con: </label>
+                                                        {{item.value.paga_con | currency:'MXN':true}}
+                                                        
+                                                    </div>
+                                                    <div class="column is-6">
+                                                        <label>Devolver: </label>
+                                                        {{item.value.cambio | currency:'MXN':true}}
+                                                        
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </article>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+
+                    <nav class="panel" style="font-size:1.5em">
+                        <p class="panel-heading">
+                            Cobro <span class="tag is-medium is-warning">{{ctrl.dato.get('temp_total').value | currency:'MXN':true}}</span>
+                        </p>                        
+
+                        <a class="panel-block is-active">
+                            <span class="panel-icon">
+                            <i class="fa fa-money"></i>
+                            </span>
+                            <div class="columns" style="width:100%">
+                                <div class="column is-6">
+                                    Subtotal: 
+                                </div>
+                                <div class="column is-6">
+                                   {{ctrl.dato.get('subtotal').value  | currency:'MXN':true}}
+                                </div>
+                            </div>
+                        </a>
+                        <a class="panel-block" *ngIf="ctrl.dato.get('descuento').value > 0">
+                            <span class="panel-icon">
+                            <i class="fa fa-money"></i>
+                            </span>
+                            <div class="columns" style="width:100%">
+                                <div class="column is-6">
+                                    Descuento: 
+                                </div>
+                                <div class="column is-6">
+                                    {{ctrl.dato.get('descuento').value  | currency:'MXN':true}}
+                                </div>
+                            </div>
+                        </a>
+                        <a class="panel-block" *ngIf="ctrl.dato.get('iva').value > 0">
+                            <span class="panel-icon">
+                            <i class="fa fa-money"></i>
+                            </span>
+                            <div class="columns" style="width:100%">
+                                <div class="column is-6">
+                                    Iva: 
+                                </div>
+                                <div class="column is-6">
+                                    {{ctrl.dato.get('iva').value  | currency:'MXN':true}}
+                                </div>
+                            </div>
+                        </a>
+                        <a class="panel-block">
+                            <span class="panel-icon">
+                            <i class="fa fa-money"></i>
+                            </span>
+                            <div class="columns" style="width:100%">
+                                <div class="column is-6">
+                                    Total: 
+                                </div>
+                                <div class="column is-6"> 
+                                    {{ctrl.dato.get('total').value  | currency:'MXN':true}}
+                                </div>
+                            </div>
+                        </a>
+                        <a class="panel-block" *ngIf="ctrl.dato.get('total_recibido').value > 0">
+                            <span class="panel-icon">
+                            <i class="fa fa-money"></i>
+                            </span>
+                            <div class="columns" style="width:100%">
+                                <div class="column is-6">
+                                    Total recibido: 
+                                </div>
+                                <div class="column is-6">
+                                   {{ctrl.dato.get('total_recibido').value  | currency:'MXN':true}}
+                                </div>
+                            </div>
+                        </a>
+                        <a class="panel-block" *ngIf="ctrl.dato.get('cambio').value > 0">
+                            <span class="panel-icon">
+                            <i class="fa fa-money"></i>
+                            </span>
+                            <div class="columns" style="width:100%; color: red">
+                                <div class="column is-6">
+                                    Devolver: 
+                                </div>
+                                <div class="column is-6">
+                                   {{ctrl.dato.get('cambio').value  | currency:'MXN':true}}
+                                </div>
+                            </div>
+                        </a>
+                    </nav>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</form>

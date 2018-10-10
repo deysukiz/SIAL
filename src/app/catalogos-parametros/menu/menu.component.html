@@ -1,0 +1,33 @@
+<section  class="top-nav hero is-primary">
+            
+    <nav class="nav">
+        <a title="Catalogo" class="nav-item pull-left nav-hub-active"  routerLink="'/catalogos-parametros'" routerLinkActive="is-active" >
+            
+            <img src="assets/hub-catalogos-params.svg" alt="icono">
+        
+        </a>
+        <div class="nav-left">
+            <a class="nav-item" routerLink="'/catalogos-parametros'" >
+            <!-- <img src="{{ icono }}" alt="icono">-->
+                <h1 class="title">&nbsp;Catálogos y parámetros del sistema</h1>                     
+            </a>
+        </div>
+        <a class="nav-item"  (click)="hub.toggle()">
+            <span class="icon">
+                <i class="fa fa-th"></i>
+            </span>
+        </a>
+        <a class="nav-item is-hidden-mobile" (click)="perfil.toggle()">                    
+            <figure class="image" style="width:26px;"><img src="assets/{{ usuario.avatar || 'avatar-unknow' }}.svg" alt="avatar"></figure>
+            &nbsp;
+            <span>{{ usuario.nombre }} {{ usuario.apellidos }}</span>
+        </a>
+        <a class="nav-item is-hidden-tablet" (click)="perfil.toggle()">
+            
+            <figure class="image" style="width:26px;"><img src="assets/{{ usuario.avatar || 'avatar-unknow' }}.svg" alt="avatar"></figure>
+        </a>        
+    </nav>
+</section>
+
+<app-hub #hub></app-hub>
+<app-perfil #perfil></app-perfil>

@@ -1,0 +1,118 @@
+<panel-control-menu></panel-control-menu>
+<div style="height:50px;"></div>
+<div class="contenedor columns " style="height:100%">
+    <div class="column is-one-quarter is-hidden-mobile">
+        <panel-control-menu-aside></panel-control-menu-aside>
+    </div>
+    <div class="column" style="padding:2em; overflow:auto;">
+        <div style="background: #FFF; border-radius: 1em; overflow: hidden;">
+            <section class="hero" [ngClass] = " {'is-dark': busquedaActivada, 'is-primary': !busquedaActivada } " >
+                    
+                <div class="hero-body" style="position:relative;">
+                    <a class="button  is-dark" *ngIf="busquedaActivada" style="position:absolute; top:1em; right:1em;" (click)="busquedaActivada=false;searchBox.value='';resultadosBusqueda=[]"><span class="icon "><i class="fa fa-close"></i></span></a>
+                    <a class="button  is-dark" *ngIf="busquedaActivada" style="position:absolute; top:1em; right:3.5em;" (click)="listarBusqueda(searchBox.value,1)"><span class="icon "><i class="fa fa-refresh"></i></span></a>
+                    <a class="button  is-primary" *ngIf="!busquedaActivada" style="position:absolute; top:1em; right:1em;" (click)="listar(1)"><span class="icon "><i class="fa fa-refresh"></i></span></a>
+                    <div class="container is-fluid">
+                        
+                        <h1 class="title" *ngIf="!busquedaActivada">
+                            <span class="icon is-medium"><i class="fa fa-server"></i></span> Estatus
+                        </h1>
+                        <h1 class="title" *ngIf="busquedaActivada">
+                            <span class="icon is-medium"><i class="fa fa-search"></i></span> Búsqueda 
+                        </h1>
+                        <div class="control is-grouped">
+                        <p class="control is-expanded">
+                            <input class="input is-medium" type="text" placeholder="Buscar servidor" #searchBox id="search-box" (keyup)="buscar(searchBox.value)">
+                        </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <div class="is-fullwidth has-text-centered" *ngIf="cargando">
+                <br>
+                <span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span> &nbsp;<span>Cargando...</span></span>
+                <br>
+                <br>
+            </div>
+            
+            <table class="table" style="font-size:0.9em;" *ngIf="!cargando">
+                <thead>
+                    <tr>
+                        <th style="width:48px;"></th>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>¿Internet?</th>
+                        <th><abbr title="¿Catálogos Actualizados?">¿C.A.?</abbr></th>
+                        <th><abbr title="Versión del servidor">Ver.</abbr></th>
+                        <th>Periodo</th>
+                        <th>Última Sync</th>
+                        <th style="width:60px">Retraso</th>
+                    </tr>
+                </thead>
+                <tbody  *ngIf="!busquedaActivada">
+                    <tr *ngFor="let item of lista; let i=index" [ngClass]="{ 'warning': item.alerta_retraso && !item.principal }">    
+                        <td style="vertical-align: middle;"><span class="icon" *ngIf="item.principal"><i class="fa fa-home"></i></span><span class="icon" *ngIf="item.alerta_retraso"><i class="fa fa-warning"></i></span><span class="icon" *ngIf="!item.alerta_retraso && !item.principal" style="color:green"><i class="fa fa-check-circle"></i></span></td>                
+                        <td style="vertical-align: middle;">{{ item.id }}</td>   
+                        <td style="vertical-align: middle;">{{ item.nombre }}</td>    
+                        <td style="vertical-align: middle;">{{ item.tiene_internet ? 'Sí': 'No' }}</td>
+                        <td style="vertical-align: middle;">{{ item.catalogos_actualizados ? 'Sí': 'No' }}</td>                       
+                        <td style="vertical-align: middle;">{{ item.version}}</td>
+                        <td style="vertical-align: middle;">{{ item.periodo_sincronizacion }} Hrs</td>
+                        <td style="vertical-align: middle;"><small>{{ item.ultima_sincronizacion == null ? 'Nunca' :  item.ultima_sincronizacion }}</small></td>     
+                        <td style="vertical-align: middle;">{{ item.horas_sin_sincronizar }}</td>                            
+                    </tr>
+                    <tr *ngIf="lista.length == 0">
+                        <td colspan="5" style="vertical-align: middle; color:#888;">Esta lista está vacía.</td>                    
+                    </tr>
+                </tbody>
+                <tbody *ngIf="busquedaActivada">
+                    <tr *ngFor="let item of resultadosBusqueda; let i=index" [ngClass]="{ 'warning': item.alerta_retraso && !item.principal }">
+                        <td style="vertical-align: middle;"><span class="icon" *ngIf="item.principal"><i class="fa fa-home"></i></span><span class="icon" *ngIf="item.alerta_retraso"><i class="fa fa-warning"></i></span><span class="icon" *ngIf="!item.alerta_retraso && !item.principal" style="color:green"><i class="fa fa-check-circle"></i></span></td>                
+                        <td style="vertical-align: middle;">{{ item.id }}</td>   
+                        <td style="vertical-align: middle;">{{ item.nombre }}</td>    
+                        <td style="vertical-align: middle;">{{ item.tiene_internet ? 'Sí': 'No' }}</td>
+                        <td style="vertical-align: middle;">{{ item.catalogos_actualizados ? 'Sí': 'No' }}</td>                       
+                        <td style="vertical-align: middle;">{{ item.version}}</td>
+                        <td style="vertical-align: middle;">{{ item.periodo_sincronizacion }} Hrs</td>
+                        <td style="vertical-align: middle;"><small>{{ item.ultima_sincronizacion == null ? 'Nunca' :  item.ultima_sincronizacion }}</small></td>  
+                        <td style="vertical-align: middle;">{{ item.horas_sin_sincronizar }}</td>                            
+                    </tr>
+
+                    <tr *ngIf="resultadosBusqueda.length == 0 && busquedaActivada">
+                        <td colspan="5" style="vertical-align: middle; color:#888;">No se encontraron resultados.</td>                    
+                    </tr>
+                </tbody>
+            </table>
+            <!-- Paginación para la lista  -->
+            <paginacion 
+                [total]="total" 
+                [paginasTotales]="paginasTotales" 
+                [resultadosPorPagina]="resultadosPorPagina" 
+                [paginaActual]="paginaActual" 
+                [indicePaginas]="indicePaginas"
+                (onSiguiente)="paginaSiguiente()" 
+                (onAnterior)="paginaAnterior()" 
+                (onListar)="listar($event)" 
+                *ngIf="total>0 && total > resultadosPorPagina && !busquedaActivada"></paginacion>
+            <!-- Paginación para la búsqueda  -->
+            <paginacion 
+                [total]="totalBusqueda" 
+                [paginasTotales]="paginasTotalesBusqueda" 
+                [resultadosPorPagina]="resultadosPorPaginaBusqueda" 
+                [paginaActual]="paginaActualBusqueda" 
+                [indicePaginas]="indicePaginasBusqueda"
+                (onSiguiente)="paginaSiguienteBusqueda(searchBox.value)" 
+                (onAnterior)="paginaAnteriorBusqueda(searchBox.value)" 
+                (onListar)="listarBusqueda(searchBox.value,$event)" 
+                *ngIf="totalBusqueda > 0 && totalBusqueda > resultadosPorPaginaBusqueda && busquedaActivada"></paginacion>
+
+        </div>
+        <br>
+       
+       
+    </div>
+</div>
+
+
+
+

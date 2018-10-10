@@ -1,0 +1,20 @@
+.mensaje-agregar {
+    position:absolute; width: auto;  bottom:0em; right:1em;
+    opacity: 0;
+    animation: mostrar 0.2s forwards ease-out;
+    -webkit-animation: mostrar 0.2s forwards ease-out;
+}
+
+
+@keyframes mostrar {
+    0%   {  bottom:0em; opacity:0.0; }
+    100% {  bottom:3em; opacity:1.0; }
+}
+
+.item-seleccionado {
+    background: #F5F5F5 !important; font-weight: bold !important;
+}
+
+.is-disabled{
+    color: #DDDDDD;
+}

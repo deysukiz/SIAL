@@ -1,0 +1,80 @@
+<listar #ctrl URL="material-curacion" titulo="Material curación / Catalogo"></listar>
+<app-menu-catalogo></app-menu-catalogo>
+<div style="height:50px;"></div>
+<div class="contenedor columns " style="height:90%; padding-top: 1em;">
+    <div class="column is-one-quarter is-hidden-mobile">
+        <panel-control-menu-aside></panel-control-menu-aside>
+    </div>
+    <div class="column" style="padding: 0em 2em 0em 0em">
+        <div style="background: #FFF; border-radius: 1em; ">
+                    
+            <!-- Opciones y busqueda -->
+            <tabla-opciones 
+                #opciones
+                [ctrl]="ctrl"
+                [nombre]="'Material de curación'"
+                [ruta]="'material-curacion'"
+                [ruta_pdf]="'catalogos-parametros/lista-material-curacion.js'"></tabla-opciones>
+
+            <div style="overflow:auto; display:block" [style.maxHeight.px]="ctrl.tamano-300">
+
+                <div class="is-fullwidth has-text-centered" *ngIf="opciones.cargandoPdf">
+                    <br>
+                    <span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span> &nbsp;<span>Generando PDF...</span></span>
+                    <br>
+                    <br>
+                </div>
+                <table class="table" *ngIf="!ctrl.cargando && !opciones.cargandoPdf">
+
+                    <thead>
+                        <tr>
+                            <th><abbr title="Usuario ID">ID</abbr></th>
+                            <th>Cantidad por envase</th>
+                            <th>Clave</th>
+                            <th>Nombre</th>
+                            <th>Funcion</th>
+                            <th>Unidad de medida</th>                        
+                            <th style="text-align:center;">Opciones</th>
+                        </tr>
+                    </thead>
+                    <tbody *ngIf="!ctrl.busquedaActivada">
+                        <tr *ngFor="let item of ctrl.dato; let i=index">
+                            <th style="vertical-align: middle;"><a routerLink="/catalogos-parametros/material-curacion/editar/{{item.insumo_medico_clave}}">{{ item.id }}</a></th>
+                            <td style="vertical-align: middle;"><a routerLink="/catalogos-parametros/material-curacion/editar/{{item.insumo_medico_clave}}">{{ item.cantidad_x_envase }} </a></td>
+                            <td style="vertical-align: middle;"><a routerLink="/catalogos-parametros/material-curacion/editar/{{item.insumo_medico_clave}}">{{ item.insumo_medico_clave }} </a></td>
+                            <td style="vertical-align: middle;"><a routerLink="/catalogos-parametros/material-curacion/editar/{{item.insumo_medico_clave}}">{{ item.nombre_generico_especifico }} </a></td>
+                            <td style="vertical-align: middle;"><a routerLink="/catalogos-parametros/material-curacion/editar/{{item.insumo_medico_clave}}">{{ item.funcion }} </a></td>
+                            <td style="vertical-align: middle;"><a routerLink="/catalogos-parametros/material-curacion/editar/{{item.insumo_medico_clave}}">{{ item.unidad_medida.nombre }} </a></td>
+                            <td style="vertical-align: middle;" class="has-text-centered"><span class="icon " *ngIf="item.cargando"><i class="fa fa-circle-o-notch fa-spin"></i></span><a *ngIf="!item.cargando"
+                                    class="is-danger" (click)="ctrl.eliminar(item, i, 'insumo_medico_clave')"><span class="icon"><i class="fa fa-trash-o"></i></span></a></td>
+
+                        </tr>
+                        <tr *ngIf="ctrl.dato.length == 0">
+                            <td colspan="5" style="vertical-align: middle; color:#888;">Esta lista está vacía.</td>
+                        </tr>
+                    </tbody>
+                    <tbody *ngIf="ctrl.busquedaActivada">
+                        <tr *ngFor="let item of ctrl.resultadosBusqueda; let i=index">
+                            <th style="vertical-align: middle;"><a routerLink="/catalogos-parametros/material-curacion/editar/{{item.insumo_medico_clave}}">{{ item.id }}</a></th>
+                            <td style="vertical-align: middle;"><a routerLink="/catalogos-parametros/material-curacion/editar/{{item.insumo_medico_clave}}">{{ item.cantidad_x_envase }} </a></td>
+                            <td style="vertical-align: middle;"><a routerLink="/catalogos-parametros/material-curacion/editar/{{item.insumo_medico_clave}}">{{ item.insumo_medico_clave }} </a></td>
+                            <td style="vertical-align: middle;"><a routerLink="/catalogos-parametros/material-curacion/editar/{{item.insumo_medico_clave}}">{{ item.nombre_generico_especifico }} </a></td>
+                            <td style="vertical-align: middle;"><a routerLink="/catalogos-parametros/material-curacion/editar/{{item.insumo_medico_clave}}">{{ item.funcion }} </a></td>
+                            <td style="vertical-align: middle;"><a routerLink="/catalogos-parametros/material-curacion/editar/{{item.insumo_medico_clave}}">{{ item.unidad_medida.nombre }} </a></td>
+                            <td style="vertical-align: middle;" class="has-text-centered"><span class="icon " *ngIf="item.cargando"><i class="fa fa-circle-o-notch fa-spin"></i></span><a *ngIf="!item.cargando"
+                                    class="is-danger" (click)="ctrl.eliminar(item, i, 'insumo_medico_clave')"><span class="icon"><i class="fa fa-trash-o"></i></span></a></td>
+
+                        </tr>
+
+                        <tr *ngIf="ctrl.resultadosBusqueda.length == 0 && ctrl.busquedaActivada">
+                            <td colspan="5" style="vertical-align: middle; color:#888;">No se encontraron resultados.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- Paginación para la lista  -->
+            <paginacion [ctrl]="ctrl"></paginacion>
+        </div>
+
+    </div>
+</div>

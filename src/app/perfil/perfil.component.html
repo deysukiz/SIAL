@@ -1,0 +1,180 @@
+<div class="modal" [ngClass]="{'is-active': mostrar}">
+    <div class="modal-background" (click)="toggle()"></div>
+    <div class="modal-content">
+
+        <header class="modal-card-head" style="background: white !important;">
+            <p class="modal-card-title"><span class="icon"><i class="fa fa-{{ configurarFechaHora ? 'clock-o' : edicionPerfil? 'edit':'user-circle' }}"></i></span> <span *ngIf="!edicionPerfil && !configurarFechaHora">Mi cuenta</span><span *ngIf="edicionPerfil">Editar perfil</span><span *ngIf="configurarFechaHora">Configuración manual de fecha y hora del servidor</span></p>
+            <button class="delete"  (click)="toggle()"></button>
+        </header>
+        <section class="modal-card-body" *ngIf="configurarFechaHora">
+            <div class="notification is-primary" *ngIf="mostrarMensajeExitosoFechaHora">
+                <button class="delete" (click)="mostrarMensajeExitosoFechaHora = false"></button>
+                Fecha y hora del servidor actualizada exitosamente.
+            </div>
+            <div class="notification is-danger" *ngIf="mensajeErrorFechaHora!=''">
+                <button class="delete" (click)="mensajeErrorFechaHora = ''"></button>
+                {{mensajeErrorFechaHora}}
+            </div>
+            <div class="field"> 
+                <label>Fecha y hora:</label>
+                <div class="control is-grouped">
+                    <p class="control is-expanded ">
+                        <input class="input" autofocus type="date" [ngClass]="{'is-danger': false, 'is-disabled': enviandoDatosFechaHora}"  placeholder="AAAA/MM/DD" [ngModel] = "fechaServidor | date:'yyyy-MM-dd'" (ngModelChange)=" fechaServidor = $event">
+                        
+                        <span class="help is-danger" *ngIf="errores.fecha == 'required'">Este campo es requerido.</span>
+                    </p>
+                    <p class="control is-expanded">
+                        <input class="input" type="time"  [ngClass]="{'is-danger': false, 'is-disabled': enviandoDatosFechaHora}" placeholder="HH:MM 24hrs" [ngModel]="horaServidor" (ngModelChange)=" horaServidor = $event">
+                        
+                        <span class="help is-danger" *ngIf="errores.hora == 'required'">Este campo es requerido.</span>
+                    </p>
+                </div>
+                <a class="button is-white is-small" [ngClass]="{ 'is-loading':cargandoFechaHora }" (click)="cargarFechaHora()"><span class="icon is-small"><i class="fa fa-refresh"></i></span><span>Cargar fecha del servidor</span></a>    
+            </div>
+        </section>
+        <footer class="modal-card-foot" *ngIf="configurarFechaHora">
+            <a class="button is-warning is-medium is-fullwidth " [ngClass]="{ 'is-loading':enviandoDatosFechaHora, 'is-disabled': (fechaServidor == '' || horaServidor == '')}" (click)="editarFechaHora()"><span class="icon"><i class="fa fa-save"></i></span><span>Aplicar cambios</span></a>
+            <a class="button  is-medium is-fullwidth " [ngClass]="{ 'is-disabled': enviandoDatosFechaHora}"(click)="configurarFechaHora=false"><span class="icon"><i class="fa fa-arrow-left"></i></span><span>Atrás</span></a><br>    
+        </footer>
+        <section class="modal-card-body" *ngIf="edicionPerfil">
+            <div class="notification is-primary" *ngIf="mostrarMensajeExitoso">
+                <button class="delete" (click)="mostrarMensajeExitoso = false"></button>
+                Perfil actualizado exitosamente.
+            </div>
+            <div class="notification is-danger" *ngIf="mensajeError!=''">
+                <button class="delete" (click)="mensajeError = ''"></button>
+                {{mensajeError}}
+            </div>
+            <div class="field"> 
+                <label>Elige una imagen de perfil:</label><br>
+                <p class="control">                
+                    <label class="radio" [ngClass]="{'is-disabled': enviandoDatosPerfil}" *ngFor="let item of avatars">
+                        <input type="radio" name="avatar" [(ngModel)]="nuevoPerfil.avatar" [value]="item.value" >
+                        <figure class="image is-64x64" >
+                        <img src="assets/{{item.value}}.svg" alt="{{item.title}}">
+                        </figure>
+                    </label>  
+                </p>
+            </div>
+            <br>
+            <div class="field"> 
+                <label>Nombre completo:</label>
+                <div class="control is-grouped">
+                    <p class="control is-expanded  has-icon has-icon-right">
+                        <input class="input" autofocus type="text" [ngClass]="{'is-danger': false, 'is-disabled': enviandoDatosPerfil}"  placeholder="Nombre" [(ngModel)]="nuevoPerfil.nombre">
+                        <span class="icon is-small" *ngIf="false">
+                        <i class="fa fa-warning"></i>
+                        </span>
+                        <span class="help is-danger" *ngIf="errores.nombre == 'required'">Este campo es requerido.</span>
+                    </p>
+                    <p class="control is-expanded has-icon has-icon-right">
+                        <input class="input" type="text" placeholder="Apellidos" [ngClass]="{'is-danger': false, 'is-disabled': enviandoDatosPerfil}" [(ngModel)]="nuevoPerfil.apellidos">
+                        <span class="icon is-small" *ngIf="false">
+                        <i class="fa fa-warning"></i>
+                        </span>
+                        <span class="help is-danger" *ngIf="errores.apellidos == 'required'">Este campo es requerido.</span>
+                    </p>
+                </div>
+            </div>
+            <br>
+            <p class="control" >
+            <label class="checkbox"  [ngClass]="{ 'is-disabled': enviandoDatosPerfil}">
+                <input type="checkbox"  (change)="nuevoPerfil.cambiarPassword = !nuevoPerfil.cambiarPassword" [checked]="nuevoPerfil.cambiarPassword">
+                Cambiar contraseña
+            </label>
+            </p>
+            <p class="control is-expanded has-icon has-icon-right" *ngIf="nuevoPerfil.cambiarPassword">
+                <input class="input" type="password" placeholder="Contraseña" [ngClass]="{'is-danger': false, 'is-disabled': enviandoDatosPerfil}"  [(ngModel)]="nuevoPerfil.passwordAnterior">
+                <span class="icon is-small" *ngIf="false">
+                    <i class="fa fa-warning"></i>
+                </span>
+                <span class="help is-danger" *ngIf="errores.passwordAnterior == 'required'">Este campo es requerido.</span>
+                <span class="help is-danger" *ngIf="errores.passwordAnterior == 'wrong'">Las contraseña incorrecta.</span> 
+            </p>
+            <div class="control is-grouped" *ngIf="nuevoPerfil.cambiarPassword">
+                
+                <p class="control is-expanded has-icon has-icon-right">
+                    <input class="input" type="password" placeholder="Nueva contraseña" [ngClass]="{'is-danger': nuevoPerfil.passwordNuevo != nuevoPerfil.passwordNuevoConfirmacion, 'is-disabled': enviandoDatosPerfil}"  [(ngModel)]="nuevoPerfil.passwordNuevo">
+                    <span class="icon is-small" *ngIf="false">
+                        <i class="fa fa-warning"></i>
+                    </span>
+                    <span class="help is-danger" *ngIf="errores.passwordNuevo == 'required'">Este campo es requerido.</span>
+                    <span class="help is-danger" *ngIf="nuevoPerfil.passwordNuevo != nuevoPerfil.passwordNuevoConfirmacion">Las contraseñas no coinciden.</span>
+                </p>
+                <p class="control is-expanded has-icon has-icon-right">
+                    <input class="input" type="password" placeholder="Confirmar nueva contraseña" [ngClass]="{'is-danger': nuevoPerfil.passwordNuevo != nuevoPerfil.passwordNuevoConfirmacion, 'is-disabled': enviandoDatosPerfil}"  [(ngModel)]="nuevoPerfil.passwordNuevoConfirmacion">
+                    <span class="icon is-small" *ngIf="false">
+                        <i class="fa fa-warning"></i>
+                    </span>
+                </p>
+                
+            </div>
+            
+        </section>
+        <footer class="modal-card-foot" *ngIf="edicionPerfil">
+            <a class="button is-primary is-medium is-fullwidth " [ngClass]="{ 'is-loading':enviandoDatosPerfil, 'is-disabled': ((nuevoPerfil.passwordNuevo != nuevoPerfil.passwordNuevoConfirmacion || nuevoPerfil.passwordAnterior == '' || nuevoPerfil.passwordNuevo == ''   ) && nuevoPerfil.cambiarPassword ) || nuevoPerfil.nombre == '' || nuevoPerfil.apellidos == '' }" (click)="editarPerfil()"><span class="icon"><i class="fa fa-save"></i></span><span>Guardar cambios</span></a>
+            <a class="button  is-medium is-fullwidth " [ngClass]="{ 'is-disabled': enviandoDatosPerfil}"(click)="edicionPerfil=false"><span class="icon"><i class="fa fa-arrow-left"></i></span><span>Atrás</span></a><br>
+
+        </footer>
+
+        <section class="modal-card-body has-text-centered" *ngIf="!edicionPerfil&&!configurarFechaHora">            
+            <p class="has-text-right"><small *ngIf="cargandoFechaHora">Cargando fecha y hora del servidor...</small><small *ngIf="!cargandoFechaHora">{{ fechaServidor | date: 'dd/MM/yyyy' }} <strong>{{ horaServidor  }}</strong></small><a class="button is-white is-small" *ngIf="permisos.indexOf(keyPermisoCambiarFechaHora) > -1" [ngClass]="{'is-disabled': cargandoFechaHora}" title="Cambiar fecha y hora del servidor" (click)="configurarFechaHora = true;" ><span class="icon"><i class="fa fa-cog" [ngClass]="{'fa-spin': cargandoFechaHora}"></i></span></a></p>
+            <nav class="level">
+                <div class="level-item has-text-centered">
+                    <figure class="image is-128x128" style="position:relative;">
+                        <img src="assets/{{ usuario.avatar || 'avatar-unknow' }}.svg" alt="avatar">
+                        <a class="button is-primary is-inverted" title="Editar perfil" (click)="edicionPerfil = true;" style="position: absolute; top: 0px; right:-2em;"><span class="icon"><i class="fa fa-edit"></i></span></a>
+                    </figure>
+
+                </div>
+
+            </nav>
+            <h1 class="title">{{ usuario.nombre }} {{ usuario.apellidos }}</h1>
+            <h2 class="subtitle"><span class="icon"><i class="fa fa-user-circle"></i></span> {{usuario.id}}</h2>
+
+            <div class="field " *ngIf="usuario.unidades_medicas.length > 0">
+                <p class="control is-expanded">
+                    <span class="select is-fullwidth">
+                        <select (change)="seleccionarClues($event.target.value)">
+                            <option *ngFor="let um of usuario.unidades_medicas" value="{{ um.clues }}" [selected]="usuario.clues_activa && usuario.clues_activa.clues== um.clues">{{ um.clues }} {{ um.nombre}}</option>
+                        </select>
+                    </span>
+                </p>
+            </div>
+
+            <div class="field" *ngIf="usuario.clues_activa && usuario.clues_activa.almacenes && (usuario.clues_activa.almacenes.length > 0 || usuario.clues_activa.almacenes_externos.length > 0 )">
+                <p class="control is-expanded">
+                    <span class="select is-fullwidth">
+                        <select (change)="seleccionarAlmacen($event.target.value)">
+                            <optgroup label="Internos">
+                                <option *ngFor="let almacen of usuario.clues_activa.almacenes" value="{{ almacen.id }}" [selected]="usuario.almacen_activo.id== almacen.id">{{ almacen.nombre }}</option>
+                            </optgroup>
+                            <optgroup label="Externos">
+                                <option *ngFor="let almacen of usuario.clues_activa.almacenes_externos" value="{{ almacen.id }}" [selected]="usuario.almacen_activo.id== almacen.id">{{ almacen.nombre }}</option>
+                            </optgroup>
+                        </select>
+                    </span>
+                </p>
+            </div>
+
+            <div class="field " *ngIf="usuario.proveedores">
+                <p class="control is-expanded">
+                    <span class="select is-fullwidth">
+                        <select (change)="seleccionarProveedor($event.target.value)">
+                            <option *ngFor="let proveedor of usuario.proveedores" value="{{ proveedor.id }}" [selected]="usuario.proveedor_activo && usuario.proveedor_activo.id == proveedor.id">{{ proveedor.nombre }}</option>
+                        </select>
+                    </span>
+                </p>
+            </div>
+
+            <a *ngIf="mostrarCambiarEntorno" class="button  is-medium is-fullwidth is-primary" (click)="cambiarEntorno()"><span class="icon"><i class="fa fa-exchange"></i></span><span>Cambiar entorno</span></a>            
+            
+            <p class="has-text-centered"><small>Cliente Versión {{ cliente_version }} &nbsp;&nbsp; Servidor API Versión {{ server_info.api_version }}</small></p>
+        </section>        
+        <footer class="modal-card-foot" *ngIf="!edicionPerfil && !configurarFechaHora">
+            <a class="button  is-medium is-fullwidth " (click)="bloquear()"><span class="icon"><i class="fa fa-lock"></i></span><span>Bloquear aplicación</span></a>
+            <a class="button is-danger is-medium is-fullwidth is-outlined" (click)="logout()"><span class="icon"><i class="fa fa-sign-out"></i></span><span>Cerrar sesión</span></a><br>
+
+        </footer>
+    </div>
+</div>

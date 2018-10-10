@@ -1,0 +1,81 @@
+<panel-control-menu></panel-control-menu>
+<div style="height:50px;"></div>
+<div class="contenedor columns " style="height:100%; overflow:scroll">
+    <div class="column is-one-quarter is-hidden-mobile">
+        <panel-control-menu-aside></panel-control-menu-aside>
+    </div>
+    <div class="column" >
+        <div style="background: #FFF; border-radius: 1em; overflow: hidden; margin:2em;">
+            <section class="hero is-primary">
+                <div class="hero-body">
+                    <div class="container is-fluid">
+                        <h1 class="title">
+                            <span  *ngIf="!cargando" class="icon is-medium"><i class="fa fa-plus"></i></span>
+                            <span  *ngIf="cargando" class="icon is-medium"><i class="fa fa-refresh fa-spin"></i></span> 
+                            Nuevo rol
+                        </h1>
+                        
+                    </div>
+                </div>
+            </section>
+            <section class="section">
+              <div class="control is-grouped">
+                <p class="control is-expanded">
+                    <input class="input is-medium" [(ngModel)]="rol.nombre"  [ngClass]="{ 'is-danger': errores.nombre != null}"  type="text" placeholder="Nombre" >
+                </p>
+                
+                <p class="control">
+                    <a class="button is-medium is-primary " [ngClass]="{ 'is-loading': enviando}" (click)="guardar()" >
+                    <span class="icon"><i class="fa fa-save"></i></span><span>Guardar</span>
+                    </a>
+                </p><p class="control">
+                    <a class="button is-medium is-white " [ngClass]="{ 'is-disabled': enviando}" routerLink="/panel-control/roles">Cancelar</a>
+                </p>
+                
+              </div>
+              <label class="checkbox">
+                <input type="checkbox" [(ngModel)]="rol.es_offline" >
+                Para servidores offline
+              </label>
+              <p class="help is-danger" *ngIf="errores.nombre == 'required'">Por favor especifique el nombre del rol.</p>              
+              <p class="help is-danger" *ngIf="errores.nombre == 'unique'">Este nombre ya fue utilizado, por favor elija otro.</p>              
+              <hr>
+              <table class="table">
+                <thead>
+                  <tr>
+                    <td style="width:42px; cursor:pointer;" (click)="seleccionarTodos()">
+                      <span class="icon" style="color:#00d1b2"><i class="fa" [ngClass]="{ 'fa-square-o': !todosSeleccionados, 'fa-check-square': todosSeleccionados }"></i></span>
+                    </td>
+                    <td><span style="color:red" *ngIf="errores.permisos == 'required'"><span class="icon"><i class="fa fa-exclamation-circle"></i></span> <span>Elija un permiso:</span></span><span *ngIf="errores.permisos == null">Permiso</span></td>
+                    <td>Grupo</td>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let item of permisos" (click)="item.seleccionado = !item.seleccionado" style="cursor:pointer">
+                    <td><span class="icon"><i class="fa" [ngClass]="{ 'fa-square-o': !item.seleccionado, 'fa-check-square': item.seleccionado }"></i></span></td>
+                    <td>{{ item.descripcion }}</td>
+                    <td>{{ item.grupo }}</td>
+                  </tr>
+                </tbody>
+              </table>
+
+
+            </section>
+            
+        </div>
+        
+    </div>
+</div>
+
+<div class="notification is-danger" style="position:fixed; left:1em;  bottom:1em;" *ngIf="mensajeError.mostrar">
+    <button class="delete" (click)="mensajeError.mostrar = false"></button>        
+    <b>Error:</b> {{ mensajeError.texto }}<br> 
+    <p style="text-align: center;"><small >Este mensaje desaparecerá en {{ mensajeError.cuentaAtras }} segundos.</small></p>       
+</div>
+
+<div class="notification is-success" style="position:fixed; left:1em;  bottom:1em; width: auto" *ngIf="mensajeExito.mostrar">       
+    <button class="delete" (click)="mensajeExito.mostrar = false"></button>
+    <p><span class="icon" style="margin-right: 0.5em;"><i class="fa fa-check-circle"></i></span> <span>{{ mensajeExito.texto }}</span></p>
+    <br>
+    <p style="text-align: center;"><small >Este mensaje desaparecerá en {{ mensajeExito.cuentaAtras }} segundos.</small></p>       
+</div>

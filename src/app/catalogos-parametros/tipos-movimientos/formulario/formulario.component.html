@@ -1,0 +1,92 @@
+<formulario #ctrl URL="tipo-movimiento" titulo="Tipo Movimiento / Catalogo" [dato]="dato" ></formulario>
+<app-menu-catalogo></app-menu-catalogo>
+<div style="height:50px;"></div>
+<div class="contenedor columns" style="height:90%;  padding-top: 1em;">
+    <div class="column is-one-quarter is-hidden-mobile">
+        <panel-control-menu-aside></panel-control-menu-aside>
+    </div>
+    <div class="column" style="padding: 0em 2em 0em 0em;">
+        <form name="form" novalidate [formGroup]="dato" (ngSubmit)="ctrl.enviar()">
+            <div style="background: #FFF; overflow: hidden;">
+                <section class="hero is-primary">
+                    <div class="hero-body">
+                        <!-- Opciones  -->                         
+                        <formulario-opciones
+                            [ctrl]="ctrl"
+                            class="control is-grouped"
+                            style="position:absolute; top:8em; right:3em;">
+                        </formulario-opciones>
+                        <div class="container is-fluid">
+                            <h1 class="title">
+                                <span *ngIf="!ctrl.cargando" class="icon is-medium"><i class="fa fa-edit"></i></span>
+                                <span *ngIf="ctrl.cargando" class="icon is-medium"><i class="fa fa-refresh fa-spin"></i></span>
+                                {{ctrl.moduloTitulo}} tipo de movimiento
+                            </h1>
+
+                        </div>
+                    </div>
+                </section>
+                <div class="is-fullwidth has-text-centered" *ngIf="!ctrl.datosCargados">
+                    <br>
+                    <span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span> &nbsp;<span>Cargando...</span></span>
+                </div>
+                <section class="section" >
+
+                    <!-- formulario -->
+                    
+
+                        <div class="field">
+                            <label class="label">ID:</label>
+                            <p class="control is-expanded  has-icon has-icon-right">
+                                <input class="input"  type="text" [ngClass]="{'is-danger': ctrl.dato.get('id').hasError('required') && ctrl.dato.get('id').touched}"
+                                    placeholder="id" formControlName="id">
+                                <span class="icon is-small" *ngIf="ctrl.dato.get('id').hasError('required') && ctrl.dato.get('id').touched">
+                                    <i class="fa fa-warning"></i>
+                                </span>
+                                <span class="help is-danger" *ngIf="ctrl.dato.get('id').hasError('required') && ctrl.dato.get('id').touched">Este campo es requerido.</span>
+                            </p>
+                        </div>
+
+
+                        <h2 class="subtitle">Tipo de movimiento</h2>
+                        <div class="control" >
+
+                            <select name="tipo" formControlName="tipo" class="select">
+                                <option *ngFor="let item of tipo" value="{{item.id}}" [attr.selected]="ctrl.dato.get('tipo').value == item.id ? true:false">{{ item.nombre }}</option>
+                            </select>
+                            <span class="help is-danger" *ngIf="ctrl.dato.get('tipo').hasError('required') && ctrl.dato.get('tipo').touched">Debe elegir un tipo.</span>
+                            
+                        </div>
+
+                        <div class="field">
+                            <label class="label">Nombre:</label>
+                            <p class="control is-expanded  has-icon has-icon-right">
+                                <input class="input"  type="text" [ngClass]="{'is-danger': ctrl.dato.get('nombre').hasError('required')}"
+                                    placeholder="nombre" formControlName="nombre">
+                                <span class="icon is-small" *ngIf="ctrl.dato.get('nombre').hasError('required')">
+                                    <i class="fa fa-warning"></i>
+                                </span>
+                                <span class="help is-danger" *ngIf="ctrl.dato.get('nombre').hasError('required')">Este campo es requerido.</span>
+                            </p>
+                        </div>
+
+
+                        <br><br>
+                        <!-- <div class="control is-grouped">
+                            <p class="control">
+                                <button class="button is-primary" type="submit" [ngClass]="{'is-loading': ctrl.cargando}" [disabled]="ctrl.dato.invalid">Guardar</button>
+                            </p>
+                            <p class="control" *ngIf="ctrl.id">
+                                <button class="button is-danger" type="button" [ngClass]="{'is-loading': ctrl.cargando}" (click)="ctrl.eliminar(ctrl.id)">Eliminar </button>
+                            </p>
+                            <p class="control">
+                                <a class="button is-white" (click)="ctrl.regresar()">Regresar</a>
+                            </p>
+                        </div> -->
+
+                
+                </section>
+            </div>
+        </form>
+    </div>
+</div>

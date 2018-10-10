@@ -1,0 +1,217 @@
+<!-- crud asignar url de la api URL="url de la api" titulo="un titulo para la pestaña de la pagina" [dato]="variable que contiene el formulario]-->
+<listar #ctrl URL="entrada-articulo?tipo_movimiento_id=11&fecha_desde={{fecha_desde}}&fecha_hasta={{fecha_hasta}}&programa_id={{programa_id}}&proveedor_id={{proveedor_id}}&donacion={{donacion}}&donante={{donante}}" titulo="Entrada"></listar>
+
+<!-- Menu principal "-->
+<menu-almacen-articulos></menu-almacen-articulos>
+<div style="height:50px;"></div>
+<div class="contenedor columns " style="height:90%; padding-top: 1em;">
+    <div class="column" style="padding: 0em 2em 0em 1.5em">
+        <div style="background: #FFF; border-radius: 1em; ">
+
+            <!-- Opciones y busqueda -->
+              <section class="hero" [ngClass]=" {'is-dark': ctrl.busquedaActivada, 'is-primary': !ctrl.busquedaActivada } ">
+                <div class="hero-body" style="position:relative;">
+
+                  <div class="columns" style="padding-left:2em; padding-right: 2em; position:relative;">
+                    <div class="column">
+                      <h1 class="title" *ngIf="!ctrl.busquedaActivada">
+                        <span class="icon is-medium"><i class="fa fa-list"></i></span>&nbsp; Entradas
+                      </h1>
+                    </div>
+                    <div class="column">
+                        <div class="control is-grouped" style="position:absolute; top:0.5em; right:0em;">
+
+                            <p class="control" *ngIf="!ctrl.busquedaActivada">
+                                <a class="button is-primary tooltip"  (click)="ctrl.listar(1)">
+                                    <span class="icon ">
+                                        <i class="fa fa-refresh"></i>
+                                    </span>
+                                    <span class="tooltiptext">Actualizar</span>
+                                </a>
+                            </p>
+
+                            <a (click)="ctrl.cargarCatalogo('proveedores', 'proveedor'); ctrl.cargarCatalogo('programas', 'programa');" id="catalogos"></a>
+
+                            <p class="control">
+                                <a  class="button is-{{ctrl.busquedaActivada ? 'dark' : 'primary'}} tooltip"  routerLink="/almacen-articulos/entradas/nuevo">
+                                    <span class="icon ">
+                                        <i class="fa fa-file"></i>
+                                    </span>
+                                    <span class="tooltiptext">Nuevo</span>
+                                </a>
+                            </p>
+
+                            <p class="control">
+                                <a class="button is-{{ctrl.busquedaActivada ? 'dark' : 'primary'}} tooltip"  >
+                                    <span class="icon ">
+                                        <i class="fa fa-file-excel-o"></i>
+                                    </span>
+                                    <span class="tooltiptext">Exportar Excel</span>
+                                </a>
+                            </p>
+
+                            <p class="control">
+                                <a class="button is-{{ctrl.busquedaActivada ? 'dark' : 'primary'}} tooltip" (click)="imprimir()">
+                                    <span class="icon ">
+                                        <i class="fa fa-print"></i>
+                                    </span>
+                                    <span class="tooltiptext">Imprimir</span>
+                                </a>
+                            </p>
+                            <p class="control">
+                                <a class="button  is-dark tooltip" *ngIf="ctrl.busquedaActivada" (click)="ctrl.cerrar_busqueda(searchBox)">
+                                    <span class="icon ">
+                                        <i class="fa fa-close"></i>
+                                    </span>
+                                    <span class="tooltiptext">Cerrar Busqueda</span>
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+                  </div>
+
+
+                  <div class="container is-fluid">
+
+                      <div class="columns">
+                        <div class="column">
+                            <label for="fecha_desde" class="label">Desde:</label>
+                            <input  style="width: 150px; z-index: 1000;" class="input is-medium" [(ngModel)]='fecha_desde' ngui-datetime-picker date-only="true" placeholder="YYYY-MM-DD" />
+                        </div>
+                        <div class="column">
+                            <label for="fecha_hasta" class="label">Hasta:</label>
+                            <input readonly style="width: 150px; z-index: 1000;" class="input is-medium" [(ngModel)]='fecha_hasta' ngui-datetime-picker date-only="true" placeholder="YYYY-MM-DD" />
+                        </div>
+                        <div class="column">
+                            <label for="proveedor_id" class="label">Proveedor:</label>
+                            <select class="select" name="proveedor_id" [(ngModel)]="proveedor_id"
+                                [ngClass]="{'is-disabled': tieneid}">
+                                <option value="">Seleccione un proveedor</option>
+                                <option *ngFor="let item of ctrl.proveedores" value="{{item.id}}">{{ item.nombre }}</option>
+                            </select>
+                        </div>
+                        <div class="column">
+                            <label  for="programa_id" class="label">Programa:</label>
+                            <select class="select" name="programa_id"  [(ngModel)]="programa_id"
+                                [ngClass]="{'is-disabled': tieneid}">
+                                <option value="">Seleccione un programa</option>
+                                <option *ngFor="let item of ctrl.programas" value="{{item.id}}">{{ item.nombre }}</option>
+                            </select>
+                        </div>
+                        <div class="column">
+                          <label class="label" for="donacion">Donación</label>
+                          <input type="checkbox" name="donacion" class="styled" [(ngModel)]="donacion" (change)="donante=''" [checked]="donacion == 1 ? true : false">
+                        </div>
+                        <div class="column" *ngIf="donacion">
+                          <label for="donante" class="label">Donante:</label>
+                          <input class="input is-medium" type="text" placeholder="Persona que donó" [(ngModel)]="donante">
+                        </div>
+                        <div class="column">
+                          <div class="columns">
+                            <div class="column">
+                              <label class="label">&nbsp;</label>
+                              <button class="button is-default is-medium" type="button" [ngClass]="{'is-loading': ctrl.cargando}" (click)="donacion=''; donante=''; programa_id=''; proveedor_id=''; fecha_desde=''; fecha_hasta='';" >Limpiar</button>
+                            </div>
+                            <div class="column">
+                              <label class="label">&nbsp;</label>
+                              <button class="button is-info is-medium" type="button" [ngClass]="{'is-loading': ctrl.cargando}" (click)="ctrl.listar(1)" >Filtrar</button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                  </div>
+
+                </div>
+              </section>
+
+              <div class="is-fullwidth has-text-centered" *ngIf="ctrl.cargando">
+                  <br>
+                  <span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span> &nbsp;<span>Cargando...</span></span>
+                  <br>
+                  <br>
+              </div>
+
+
+
+
+
+
+            <span style="overflow:auto; display:block" [style.maxHeight.px]="tamano-285">
+                <div class="is-fullwidth has-text-centered" *ngIf="cargandoPdf">
+                    <br>
+                    <span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span> &nbsp;<span>Generando PDF...</span></span>
+                    <br>
+                    <br>
+                </div>
+
+                <!--Tabla -->
+                <table class="table" *ngIf="!ctrl.cargando && !cargandoPdf">
+                    <thead>
+                        <tr>
+                            <th>
+                                <abbr>ID</abbr>
+                            </th>
+                            <th>Fecha</th>
+                            <th>Almacen </th>
+                            <th>Programa</th>
+                            <th>Proveedor</th>
+                            <th>Donación</th>
+                            <th>Artículos </th>
+                            <th>Importe Total</th>
+                            <th>Status </th>
+                            <th>Cancelado</th>
+                            <!-- <th>Opciones</th> -->
+                        </tr>
+                    </thead>
+
+                    <tbody *ngIf="!ctrl.busquedaActivada">
+                        <tr *ngFor="let item of ctrl.dato; let i=index">
+                            <th style="vertical-align: middle;"><a routerLink="/almacen-articulos/entradas/editar/{{item.id}}">{{ item.id }}</a></th>
+                            <td style="vertical-align: middle;"><a routerLink="/almacen-articulos/entradas/editar/{{item.id}}">{{ item.fecha_movimiento }} </a></td>
+                            <td style="vertical-align: middle;"><a routerLink="/almacen-articulos/entradas/editar/{{item.id}}">{{ item.almacen ? item.almacen.nombre : 'NO TIENE' }} </a></td>
+                            <td style="vertical-align: middle;"><a routerLink="/almacen-articulos/entradas/editar/{{item.id}}">  {{ item.programa ?  item.programa.nombre : '--' }} </a></td>
+                            <td style="vertical-align: middle;"><a routerLink="/almacen-articulos/entradas/editar/{{item.id}}">  {{ item.movimiento_entrada_metadatos_a_g.proveedor ?  item.movimiento_entrada_metadatos_a_g.proveedor.nombre : '--' }} </a></td>
+                            <td style="vertical-align: middle;"><a routerLink="/almacen-articulos/entradas/editar/{{item.id}}">  {{ item.movimiento_entrada_metadatos_a_g.donacion==1 ?  item.movimiento_entrada_metadatos_a_g.donante : ' ' }} </a></td>
+                            <td style="vertical-align: middle;"><a routerLink="/almacen-articulos/entradas/editar/{{item.id}}"><span class="tag is-warning is-large ">{{ item.total_articulos | number:'1.2-2' }} </span> </a></td>
+                            <td style="vertical-align: middle;"><a routerLink="/almacen-articulos/entradas/editar/{{item.id}}"><span class="tag is-primary is-large ">$ {{ item.total_importe | number:'1.2-2' }} </span> </a></td>
+                            <td style="vertical-align: middle;"><a routerLink="/almacen-articulos/entradas/editar/{{item.id}}">{{ item.status }} </a></td>
+                            <td style="vertical-align: middle;"><a routerLink="/almacen-articulos/entradas/editar/{{item.id}}">{{ item.cancelado == 1 ? 'Si'  : 'No' }} </a></td>
+                            <!-- <td style="vertical-align: middle;" class="has-text-centered"><span class="icon " *ngIf="item.cargando"><i class="fa fa-circle-o-notch fa-spin"></i></span><a *ngIf="!item.cargando"
+                                    class="is-danger" (click)="ctrl.eliminar(item, i)"><span class="icon"><i class="fa fa-trash-o"></i></span></a></td> -->
+
+                        </tr>
+                        <tr *ngIf="!ctrl.dato">
+                            <td colspan="10" style="vertical-align: middle; color:#888;">Esta lista está vacía.</td>
+                        </tr>
+                    </tbody>
+                    <tbody *ngIf="ctrl.busquedaActivada">
+                        <tr *ngFor="let item of ctrl.resultadosBusqueda; let i=index">
+                            <th style="vertical-align: middle;"><a routerLink="/almacen-articulos/entradas/editar/{{item.id}}">{{ item.id }}</a></th>
+                            <td style="vertical-align: middle;"><a routerLink="/almacen-articulos/entradas/editar/{{item.id}}">{{ item.fecha_movimiento }} </a></td>
+                            <td style="vertical-align: middle;"><a routerLink="/almacen-articulos/entradas/editar/{{item.id}}">{{ item.almacen ? item.almacen.nombre : 'NO TIENE' }} </a></td>
+                            <td style="vertical-align: middle;"><a routerLink="/almacen-articulos/entradas/editar/{{item.id}}">  {{ item.programa ?  item.programa.nombre : '--' }} </a></td>
+                            <td style="vertical-align: middle;"><a routerLink="/almacen-articulos/entradas/editar/{{item.id}}">  {{ item.movimiento_entrada_metadatos_a_g.proveedor ?  item.movimiento_entrada_metadatos_a_g.proveedor.nombre : '--' }} </a></td>
+                            <td style="vertical-align: middle;"><a routerLink="/almacen-articulos/entradas/editar/{{item.id}}">  {{ item.movimiento_entrada_metadatos_a_g.donacion==1 ?  item.movimiento_entrada_metadatos_a_g.donante : ' ' }} </a></td>
+                            <td style="vertical-align: middle;"><a routerLink="/almacen-articulos/entradas/editar/{{item.id}}"><span class="tag is-warning is-large ">{{ item.total_articulos | number:'1.2-2' }} </span> </a></td>
+                            <td style="vertical-align: middle;"><a routerLink="/almacen-articulos/entradas/editar/{{item.id}}"><span class="tag is-primary is-large ">$ {{ item.total_importe | number:'1.2-2' }} </span> </a></td>
+                            <td style="vertical-align: middle;"><a routerLink="/almacen-articulos/entradas/editar/{{item.id}}">{{ item.status }} </a></td>
+                            <td style="vertical-align: middle;"><a routerLink="/almacen-articulos/entradas/editar/{{item.id}}">{{ item.cancelado == 1 ? 'Si'  : 'No' }} </a></td>
+                            <!-- <td style="vertical-align: middle;" class="has-text-centered"><span class="icon " *ngIf="item.cargando"><i class="fa fa-circle-o-notch fa-spin"></i></span><a *ngIf="!item.cargando"
+                                    class="is-danger" (click)="ctrl.eliminar(item, i)"><span class="icon"><i class="fa fa-trash-o"></i></span></a></td> -->
+
+                        </tr>
+
+                        <tr *ngIf="ctrl.resultadosBusqueda.length == 0 && ctrl.busquedaActivada">
+                            <td colspan="10" style="vertical-align: middle; color:#888;">No se encontraron resultados.</td>
+                        </tr>
+                    </tbody>
+
+                </table>
+            </span>
+            <!-- Paginación para la lista  -->
+            <paginacion [ctrl]="ctrl"></paginacion>
+        </div>
+
+    </div>
+</div>

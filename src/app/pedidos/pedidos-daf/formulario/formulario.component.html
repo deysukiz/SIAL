@@ -1,0 +1,528 @@
+<!-- crud asignar url de la api URL="url de la api" titulo="un titulo para la pestaña de la pagina" [dato]="variable que contiene el formulario]-->
+<!-- <formulario #ctrl URL="entrada-almacen" titulo="DAM / Apertura pedido" [dato]="dato"></formulario> -->
+
+<!-- Menu principal  menutitulo="titulo del modulo en el que estamos con el nombre como se encuentra en enviroment" menuactual="nombre del hub donde estamos como se especifico en el routing"-->
+<div style="height: 50px">
+    <app-menu-dam [modulo]="'Pedidos DAF'" [icono]="'assets/hub-estandar.svg'" [url]="'/pedidos/daf'" [urlAyuda]="'ayuda'"></app-menu-dam>
+</div>
+
+<div class="contenedor columns " style="padding: 1em;">
+    <div class="column is-one-quarter">
+        <section class="hero is-primary" style="border-top-left-radius: 1em; border-top-right-radius: 1em;">
+            <h1 class="title" style="margin:0.5em; ">
+                <span class="icon is-medium">
+                    <i class="fa fa-file-text"></i>
+                </span> Datos generales
+            </h1>
+        </section>
+        <div style="background: #FFF; padding: 1em; overflow: scroll; overflow-x: hidden;"> 
+                <!-- <i class="fa fa-file"></i>
+                    Datos del movimiento -->
+                    <div class="columns" style="font-size: 22px; text-align: right">
+                        <strong class="column">Presupuesto Total: </strong>
+                        <strong class="column">{{ ( this.form_dato.metadato_compra_consolidada.presupuesto_compra | currency:'' ) }}  &nbsp;  &nbsp;  </strong>
+                    </div>
+                    <span class="help is-danger" *ngIf="form_dato.metadato_compra_consolidada.presupuesto_compra == 0 && error_formulario">El presupuesto total no puede ser $0.00.</span>
+                    <div>
+                            <div class="field">
+                                <label class="label">Presupuesto Causes:</label>
+                                <p class="control is-expanded  has-icon has-icon-right">
+                                    <input class="input"  currencyMask [(ngModel)]='form_dato.metadato_compra_consolidada.presupuesto_causes' 
+                                        [options]="{ prefix: '$ ', thousands: ',', decimal: '.' }"
+                                        [ngClass]="{'is-disabled': form_dato.estatus === 'CONCENTRADO' || form_dato.estatus === 'AJUSTADO'}"
+                                        (keypress)="validar_input_currency('presupuesto_causes'); calcular_presupuesto_asignado()"
+                                        (blur)="validar_input_currency('presupuesto_causes'); calcular_presupuesto_asignado()"/>
+                                </p>
+                            </div>
+                            <div class="field">
+                                <label class="label">Presupuesto No Causes:</label>
+                                <p class="control is-expanded  has-icon has-icon-right">
+                                    <input class="input"  currencyMask [(ngModel)]='form_dato.metadato_compra_consolidada.presupuesto_no_causes' 
+                                        [options]="{ prefix: '$ ', thousands: ',', decimal: '.' }"
+                                        [ngClass]="{'is-disabled': form_dato.estatus === 'CONCENTRADO' || form_dato.estatus === 'AJUSTADO'}"
+                                        (keypress)="validar_input_currency('presupuesto_no_causes'); calcular_presupuesto_asignado()"
+                                        (blur)="validar_input_currency('presupuesto_no_causes'); calcular_presupuesto_asignado()"/>
+                                </p>
+                            </div>
+                    </div>
+        </div>
+        <div style="background: #FFF; padding: 1em; overflow: scroll; overflow-x: hidden;" [style.height.px]="tamano-420"> 
+            <div>
+                <div class="field">
+                    <label class="label" >Entregar en:</label>
+                    <div class="control">
+                        <label class="radio" [ngClass]="{'is-disabled': form_dato.estatus === 'CONCENTRADO' || form_dato.estatus === 'AJUSTADO'}">
+                            <input type="radio" value="ESTATAL" [(ngModel)]='form_dato.metadato_compra_consolidada.lugar_entrega' name="lugar_entrega"
+                                [ngClass]="{'is-disabled': form_dato.estatus === 'CONCENTRADO' || form_dato.estatus === 'AJUSTADO'}">
+                            Almacén Estatal
+                        </label>
+                        <label class="radio" [ngClass]="{'is-disabled': form_dato.estatus === 'CONCENTRADO' || form_dato.estatus === 'AJUSTADO'}">
+                            <input type="radio" value="UM" [(ngModel)]='form_dato.metadato_compra_consolidada.lugar_entrega' name="lugar_entrega"
+                                [ngClass]="{'is-disabled': form_dato.estatus === 'CONCENTRADO' || form_dato.estatus === 'AJUSTADO'}">
+                            Almacén Unidad Médica
+                        </label>
+                    </div>
+                </div>
+                <br>
+                    <div class="field">
+                        <label class="label">Fecha límite de captura:</label>
+                        <p class="control is-expanded  has-icon has-icon-right">
+                            <input class="input"  [(ngModel)]='form_dato.metadato_compra_consolidada.fecha_limite_captura' ngui-datetime-picker 
+                                [min-date]="capturaDate" date-only="true"
+                                [ngClass]="{'is-disabled': form_dato.estatus === 'CONCENTRADO' || form_dato.estatus === 'AJUSTADO', 'is-danger': form_dato.fecha_inicio == ''}" name="fecha_inicio"
+                                placeholder="YYYY-MM-DD" readonly/>
+    
+                            <span class="icon is-small">
+                                <i class="fa fa-warning" *ngIf="form_dato.metadato_compra_consolidada.fecha_limite_captura == ''"></i>
+                            </span>
+                            <span class="help is-danger" *ngIf="form_dato.metadato_compra_consolidada.fecha_limite_captura == ''">Este campo es requerido.</span>
+                        </p>
+                    </div>
+                    <div class="control" >
+                            <div class="field">
+                                <label class="label">Programa:</label>
+                            </div><!-- SI carga los programas -->
+                            <div class="control is-grouped">
+                                <span *ngIf="cargando || cargandoCatalogo" class="tag is-primary is-medium">Cargando programas. 
+                                    <i class="fa fa-refresh fa-spin" aria-hidden="true"></i>
+                                </span>
+                                <div  *ngIf="!cargando && !cargandoCatalogo" class="select control is-expanded  has-icon has-icon-right">
+                                    <select class="select is-medium" name="seleccionar_programa" id="seleccionar_programa" required
+                                        [(ngModel)]='form_dato.metadato_compra_consolidada.programa_id'
+                                        [ngClass]="{'is-disabled': tieneid && (form_dato.estatus == 'CONCENTRADO' || form_dato.estatus === 'AJUSTADO')}">
+                                        <option value="">Seleccione un programa</option>
+                                        <option *ngFor="let item of lista_programas" value="{{item.id}}">{{ item.nombre }}</option>
+                                    </select>
+                                    <span class="icon is-small" *ngIf="form_dato.metadato_compra_consolidada.programa_id == 0 && error_formulario">
+                                        <i class="fa fa-warning"></i>
+                                    </span>
+                                    <span class="help is-danger" *ngIf="form_dato.metadato_compra_consolidada.programa_id == 0 && error_formulario">Este campo es requerido.</span>
+                                    <span class="help is-danger" *ngIf="lista_programas.length == 0"> No se cargaron programas, contacte al administrador.</span>
+                                </div>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="field">
+                            <label class="label">Observaciones:</label>
+                            <p class="control is-expanded  has-icon has-icon-right">
+                                <textarea class="textarea" type="text"
+                                    [ngClass]="{'is-disabled': form_dato.estatus === 'CONCENTRADO' || form_dato.estatus === 'AJUSTADO'}"
+                                    placeholder="Observaciones" [(ngModel)]='form_dato.observaciones' ></textarea>
+                            </p>
+                        </div>
+                
+            </div>
+        </div>
+    </div>
+    <div class="column" style="padding:1em;">
+            <!-- inicio formulario -->
+            <div style="background: #FFF; border-radius: 1em;">
+                <div style="border-radius: 1em;">
+                    <section class="hero is-primary" style="border-top-left-radius: 1em; border-top-right-radius: 1em;">
+                        <div class="title" style="margin:0.5em;">
+                            <!-- Opciones  -->
+                            <nav class="level" style="padding-left: 1em;">
+                                <!-- Left side -->
+                                <div class="level-left ">
+                                    <div class="level-item">
+                                        <p class="title">
+                                            <span *ngIf="!cargando || !cargando" class="icon is-medium">
+                                                <i class="fa fa-list-alt"></i>
+                                            </span>
+                                            <span *ngIf="cargando || cargando" class="icon is-medium">
+                                                <i class="fa fa-refresh fa-spin"></i>
+                                            </span>
+                                            Presupuestos
+                                        </p>
+                                    </div>
+                                </div>
+                            
+                                <div class="level-right">
+                                    <button class="button is-primary tooltip"  routerLink="/pedidos/daf">
+                                        <span class="icon fa-2x">
+                                            <i class="fa fa-arrow-left"> </i>
+                                        </span>
+                                        <span class="tooltiptext">Regresar</span>
+                                    </button>
+
+                                    <button class="button is-primary tooltip" (click)=" cargarCatalogo('programa', 'lista_programas', 'estatus'); cargarDatos(form_dato.id);" id='cargar_datos_actualizar'>
+                                        <span class="icon ">
+                                            <i class="fa fa-refresh fa-2x"></i>
+                                        </span>
+                                        <span class="tooltiptext">Actualizar</span>
+                                    </button>
+                                    <button class="button is-primary" type="button"
+                                            [ngClass]="{'is-loading': cargando, 'is-hidden': form_dato.estatus === 'AJUSTADO'}" (click)="enviar();">
+                                        <span class="icon">
+                                            <i class="fa fa-floppy-o" aria-hidden="true"></i>
+                                        </span> &nbsp; Guardar avance
+                                        <span id="borrador" (click)="enviar();"></span>
+                                    </button>
+                                    
+                                    <button class="button is-primary tooltip" (click)="finalizar();" title="Concentrar pedido Global" type="submit"
+                                            [ngClass]="{'is-loading': cargando, 'is-hidden': form_dato.estatus === 'AJUSTADO'}"
+                                            [disabled]="form_dato.estatus == 'AJUSTADO'">
+                                        <span class="icon" style="color: blue">
+                                            <i class="fa fa-play-circle fa-2x"></i>
+                                        </span>
+                                        <span class="tooltiptext" style="color: blue">Finalizar</span>
+                                    </button>
+                                    <!-- <button class="button is-primary tooltip" (click)="consultar_pedido();" title="Consultar pedido Global" type="submit"
+                                            [ngClass]="{'is-loading': cargando, 'is-hidden': form_dato.estatus === 'NOINICIALIZADO' || form_dato.estatus === 'CONCENTRADO'}"
+                                            [disabled]="form_dato.estatus == 'NOINICIALIZADO' || form_dato.estatus === 'CONCENTRADO'">
+                                        <span class="icon">
+                                            <i class="fa fa-eye fa-2x"></i>
+                                        </span>
+                                        <span class="tooltiptext">Consultar pedido global</span>
+                                    </button> -->
+                                    <button class="button is-primary tooltip" (click)="imprimir()" title="PDF" type="submit"
+                                        [ngClass]="{'is-loading': cargando, 'is-hidden': form_dato.estatus === 'CONCENTRADO'}" [disabled]="form_dato.invalid">
+                                        <!-- , 'is-hidden': form_dato.estatus === 'NOINICIALIZADO' -->
+                                        <span class="icon">
+                                            <i class="fa fa-file-pdf-o fa-2x"></i>
+                                        </span>
+                                        <span class="tooltiptext">Imprimir</span>
+                                    </button>
+                                </div>
+                            </nav>
+                        </div>
+                    </section>
+                    <div>
+                            <div style="padding: 1em;padding-right: 3.5em;padding-left: 2em;">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Presupuesto de UM</th>
+                                            <th style="text-align: right; width: 33%">Autorizado</th>
+                                            <th style="text-align: right; width: 33%">Asignado</th>
+                                            <th style="text-align: right; width: 33%">Disponible</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr >
+                                            <th>
+                                                CAUSES
+                                            </th>
+                                            <th style="text-align: right; width: 33%"> {{(form_dato.metadato_compra_consolidada.presupuesto_causes | currency:'' ) }} </th>
+                                            <td style="text-align: right; width: 33%">
+                                                <span [ngStyle]="{'color': form_dato.metadato_compra_consolidada.presupuesto_causes_asignado > form_dato.metadato_compra_consolidada.presupuesto_causes ? 'red' : ''}">
+                                                    {{(form_dato.metadato_compra_consolidada.presupuesto_causes_asignado | currency:'' )}}
+                                                </span>
+                                            </td>
+                                            <td style="text-align: right; width: 33%"> <span [ngStyle]="{'color': form_dato.metadato_compra_consolidada.presupuesto_causes_disponible < 0 ? 'red' : ''}">{{(form_dato.metadato_compra_consolidada.presupuesto_causes_disponible | currency:'' )}} </span></td>
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                NO CAUSES
+                                            </th>
+                                            <th style="text-align: right; width: 33%"> {{(form_dato.metadato_compra_consolidada.presupuesto_no_causes | currency:'' )}}</th>
+                                            <td style="text-align: right; width: 33%"> 
+                                                <span [ngStyle]="{'color': form_dato.metadato_compra_consolidada.presupuesto_no_causes_asignado > form_dato.metadato_compra_consolidada.presupuesto_no_causes ? 'red' : ''}">
+                                                    {{(form_dato.metadato_compra_consolidada.presupuesto_no_causes_asignado | currency:'' )}}
+                                                </span>
+                                            </td>
+                                            <td style="text-align: right; width: 33%">
+                                                <span [ngStyle]="{'color': form_dato.metadato_compra_consolidada.presupuesto_no_causes_disponible < 0 ? 'red' : ''}">
+                                                    {{(form_dato.metadato_compra_consolidada.presupuesto_no_causes_disponible | currency:'' )}}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                TOTAL
+                                            </th>
+                                            <th style="text-align: right; width: 33%"> {{((form_dato.metadato_compra_consolidada.presupuesto_causes + form_dato.metadato_compra_consolidada.presupuesto_no_causes) | currency:'' ) }} </th>
+                                            <td style="text-align: right; width: 33%">{{(( form_dato.metadato_compra_consolidada.presupuesto_causes_asignado + form_dato.metadato_compra_consolidada.presupuesto_no_causes_asignado) | currency:'' )}}</td>
+                                            <td style="text-align: right; width: 33%">{{(( form_dato.metadato_compra_consolidada.presupuesto_causes_disponible + form_dato.metadato_compra_consolidada.presupuesto_no_causes_disponible) | currency:'' )}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                                
+                            <!-- Botón para agregar programas  -->
+                            <article class="tile is-primary is-child notification has-text-centered" style="padding: 0; padding-left: 1em;">
+                                <nav class="level" style="padding-left: 1em;">
+                                    <div class="level-left" style="margin: 0.5em">
+                                        <div class="level-item">
+                                            <p class="title">
+                                                <span *ngIf="!cargando || !cargando" class="icon is-medium">
+                                                    <i class="fa fa-shopping-basket"></i>
+                                                </span>
+                                                <span *ngIf="cargando || cargando" class="icon is-medium">
+                                                    <i class="fa fa-refresh fa-spin"></i>
+                                                </span>
+                                                Insumos
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <!-- Right side -->
+                                    <div class="level-right" style="margin: 0.5em; padding-right: 25px;">
+                                        <div class="level-item">
+                                            <p class="title">
+                                                <span *ngIf="cargando || cargando" class="icon is-medium">
+                                                    <i class="fa fa-refresh fa-spin"></i>
+                                                </span>
+                                                <strong>{{ (form_dato.total_monto_solicitado ? form_dato.total_monto_solicitado : 0) | currency:''}}</strong>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </nav>
+                            </article>
+                            <div  style="padding: 1em; overflow: scroll; overflow-x: hidden;" [style.height.px]="tamano-400">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th style=" text-align: center;"><abbr title="#">NP</abbr></th>
+                                            <th style=" text-align: center;">Clave</th>
+                                            <th>Descripción</th>
+                                            <th style=" text-align: center;">Precio</th>
+                                            <th style=" text-align: center;">Cantidad solicitada</th>
+                                            <th style=" text-align: center;">Cantidad ajustada</th>
+                                            <th style=" text-align: center;">Importe</th>
+                                            <!-- <th style=" text-align: center;">Opciones</th> -->
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let insumo of form_dato.insumos; let i_insumos = index">
+                                            <th style=" text-align: center;">{{i_insumos + 1}} </th>
+                                            <th style=" text-align: center;"><span>{{insumo.insumo_medico_clave}}&nbsp;</span></th>
+                                            <th>
+                                                <span>{{insumo.info_insumo.descripcion}}&nbsp;</span>
+                                                <label class="tag is-success" *ngIf="insumo.info_insumo.es_causes == true"><strong>Causes </strong></label>
+                                                <label class="tag" *ngIf="insumo.info_insumo.es_causes == 0" style="background: #B8FB7E; border-color: #B8FB7E; color: rgba(0,0,0,0.7);" ><strong>No Causes </strong> </label>
+                                                <span *ngIf="insumo.info_insumo.tipo == 'MC'" class="tag is-warning" style="font-size: 0.7em !important;">MATERIAL CURACIÓN</span>
+                                            </th>
+                                            <th style="text-align: right;">
+                                                {{insumo.precio_unitario | currency:''}}
+                                            </th>
+                                            <th style="text-align: right;">
+                                                {{insumo.cantidad_enviada | number}}
+                                            </th>
+                                            <th style=" text-align: right;">
+                                                <input class="input is-small" [(ngModel)]="insumo.cantidad_solicitada" style="text-align: right" [ngModelOptions]="{standalone: true}"
+                                                    [textMask]="{mask:numberMask}"
+                                                    (keypress)="quitar_punto($event);"
+                                                    (keyup)="cambio_cantidad_stock_key($event, form_dato.insumos[i_insumos], i_insumos)"
+                                                    (blur)="cambio_cantidad_stock_key($event, form_dato.insumos[i_insumos], i_insumos)"
+                                                    (change)="cambio_cantidad_stock_key($event, form_dato.insumos[i_insumos], i_insumos)"                                                    
+                                                    [ngClass]="{'is-danger': form_dato.insumos[i_insumos].cantidad_solicitada == '' || form_dato.insumos[i_insumos].cantidad_solicitada == null, 'is-disabled': form_dato.estatus === 'AJUSTADO'}">
+                                                    <!-- 
+                                                        (keyup)="cambio_cantidad_stock_key($event, form_dato.insumos[i_insumos], i_insumos)"
+                                                    (blur)="cambio_cantidad_stock_key($event, form_dato.insumos[i_insumos], i_insumos)"
+                                                    (change)="cambio_cantidad_stock_key($event, form_dato.insumos[i_insumos], i_insumos)"
+                                                        -->
+                                            </th>
+                                            <th style=" text-align: right;">
+                                                {{insumo.monto_solicitado | currency:''}}
+                                            </th>
+                                            <!-- <th>
+                                                <p class="control" [ngClass]="{'is-hidden': form_dato.estatus === 'FI' }">    
+                                                    <span style="float:right;" >
+                                                        <a  class="button is-small" style="color: red; padding-left: 12px;" title="Quitar este elemento de la lista" (click)="abrirModal('borrarInsumo', i_insumos)">
+                                                            <span class="icon is-small"><i class="fa fa-trash-o"></i></span>
+                                                        </a>
+                                                    </span>
+                                                </p>
+                                            </th> -->
+                                        </tr>
+                                        <!-- <tr *ngIf="form_dato.insumos.length == 0">
+                                            <td colspan="6" style="vertical-align: middle; color:#888;">Esta lista está vacía.</td>
+                                        </tr> -->
+                                    </tbody>
+                                </table>
+                            </div>
+                    </div>                    
+                </div>
+            </div>
+            <simple-notifications [options]="options"></simple-notifications>
+    </div>
+</div>
+
+<!-- ***************************************** INICIO - MODALES ***************************************** -->
+
+
+<div [ngClass]="{'is-active': cargarPedido}" class="modal" id="cargandoInventario" >
+    <div class="modal-background"></div>
+    <div class="modal-content">
+        <p style="color: rgb(255, 255, 255); text-align: center;">
+            <span><i class="fa fa-spinner fa-pulse fa-10x"></i></span>
+            <br>
+            <span><h1>Cargando pedido. <strong style="color: #FFF">Espere un momento.</strong> </h1></span>
+        </p>
+    </div>
+</div>
+
+<div class="modal" id="confirmarReestablecer">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+        <header class="modal-card-head">
+        <p class="modal-card-title"><i class="fa fa-warning"></i> Alerta</p>
+        <button class="delete" (click)="cancelarModal('confirmarReestablecer')"></button>
+        </header>
+        <section class="modal-card-body">
+            <div class="content">
+                <h1>¿Esta seguro de resetear el inventario?</h1>
+                <p>esta acción cargaratodos los productos que tienen inventario para susutituirlo, es necesario llenar y guardar la inicialización de inventario para que se refleje en el stock</p>
+            </div>
+        </section>
+        <footer class="modal-card-foot">
+        <a class="button is-success" (click)="cargarArticulos('iniciar')" >Continuar</a>
+        <a class="button" (click)="cancelarModal('confirmarReestablecer')" id="cerra_restablecer">Cancelar</a>
+        </footer>
+    </div>
+</div>
+<div class="modal" id="borrarInsumo">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+        <header class="modal-card-head">
+            <p class="modal-card-title"><i class="fa fa-warning"></i> Alerta</p>
+            <button class="delete" (click)="cancelarModal('borrarInsumo')"></button>
+        </header>
+        <section class="modal-card-body">
+            <div class="content">
+                <h1>¿Esta seguro de eliminar el insumo?</h1>
+                <p>Se borrarán todos los lotes del insumo que se hayan agregado.</p>
+            </div>
+        </section>
+        <footer class="modal-card-foot">
+            <a class="button is-success" (click)="quitar_form_array(form_dato.programas[i_programa].insumos, index_insumo); cancelarModal('borrarInsumo');">Continuar</a>
+            <a class="button" (click)="cancelarModal('borrarInsumo')">Cancelar</a>
+        </footer>
+    </div>
+</div>
+
+<div class="modal" id="borrarCLUES">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+        <header class="modal-card-head">
+            <p class="modal-card-title"><i class="fa fa-warning"></i> Alerta</p>
+            <button class="delete" (click)="cancelarModal('borrarCLUES')"></button>
+        </header>
+        <section class="modal-card-body">
+            <div class="content">
+                <h1>¿Esta seguro de eliminar la CLUES seleleccionada?</h1>
+                <p>Se borrarán todos el lote seleccionado.</p>
+            </div>
+        </section>
+        <footer class="modal-card-foot">
+            <a class="button is-success" (click)="quitar_form_array(form_dato.unidades_medicas, index_borrar); cancelarModal('borrarCLUES');">Continuar</a>
+            <a class="button" (click)="cancelarModal('borrarCLUES')">Cancelar</a>
+        </footer>
+    </div>
+</div>
+
+<div class="modal" id="pedidoGlobal">
+    <div class="modal-background"></div>
+    <div class="modal-card" style="width: 80%">
+        <header class="modal-card-head">
+            <p class="modal-card-title"><i class="fa fa-file-text"></i>&nbsp; Listado total de medicamentos del pedido global</p>
+            <button class="delete" (click)="cancelarModal('pedidoGlobal')"></button>
+        </header>
+        <section class="modal-card-body">
+            <div class="content">
+                <div  style="padding: 1em; overflow: scroll; overflow-x: hidden;" [style.height.px]="tamano-400">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th style=" text-align: center;"><abbr title="#">NP</abbr></th>
+                                <th style=" text-align: center;">Clave</th>
+                                <th>Descripción</th>
+                                <th style=" text-align: center;">Precio</th>
+                                <th style=" text-align: center;">Cantidad</th>
+                                <th style=" text-align: center;">Importe</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let insumo of insumos_pedido; let i_insumos = index">
+                                <th style=" text-align: center;">{{i_insumos + 1}} </th>
+                                <th style=" text-align: center;"><span>{{insumo.insumo_medico_clave}}&nbsp;</span></th>
+                                <th>
+                                    <span>{{insumo.info_insumo.descripcion}}&nbsp;</span>
+                                    <label class="tag is-success" *ngIf="insumo.info_insumo.es_causes == true"><strong>Causes </strong></label>
+                                    <label class="tag" *ngIf="insumo.info_insumo.es_causes == false" style="background: #B8FB7E; border-color: #B8FB7E; color: rgba(0,0,0,0.7);" ><strong>No Causes </strong> </label>
+                                    <span *ngIf="insumo.info_insumo.tipo == 'MC'" class="tag is-warning" style="font-size: 0.7em !important;">MATERIAL CURACIÓN</span>
+                                </th>
+                                <th style="text-align: right;">
+                                    {{insumo.precio_unitario | currency:''}}
+                                </th>
+                                <th style=" text-align: right;">
+                                    {{insumo.cantidad_solicitada}}
+                                </th>
+                                <th style=" text-align: right;">
+                                    {{insumo.monto_solicitado | currency:''}}
+                                </th>
+                            </tr>
+                            <tr *ngIf="insumos_pedido.length == 0">
+                                <td colspan="6" style="vertical-align: middle; color:#888;">Esta lista está vacía.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+        <footer class="modal-card-foot">
+            <a class="button" (click)="cancelarModal('pedidoGlobal')">Cancelar</a>
+        </footer>
+    </div>
+</div>
+
+<!-- DETALLE DE LOS INSUMOS DE LA CLUES -->
+
+<div class="modal" id="detalleCLUES">
+    <div class="modal-background"></div>
+    <div *ngIf="detalle_CLUES !== []" class="modal-card" style="width: 80%">
+        <header class="modal-card-head">
+            <p class="modal-card-title">
+                <i class="fa fa-file-text"></i>&nbsp; Detalle pedido:  <strong>{{detalle_CLUES.unidad_medica?.clues}} - {{detalle_CLUES.unidad_medica?.nombre}}</strong>
+            </p>
+            <button class="delete" (click)="cancelarModal('detalleCLUES')"></button>
+        </header>
+        <section class="modal-card-body">
+            <div class="content">
+                <div  style="padding: 1em; overflow: scroll; overflow-x: hidden;" [style.height.px]="tamano-400">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th style=" text-align: center;"><abbr title="#">NP</abbr></th>
+                                <th style=" text-align: center;">Clave</th>
+                                <th>Descripción</th>
+                                <th style=" text-align: center;">Precio</th>
+                                <th style=" text-align: center;">Cantidad</th>
+                                <th style=" text-align: center;">Importe</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let insumo of detalle_CLUES.insumos; let i_insumos = index">
+                                <th style=" text-align: center;">{{i_insumos + 1}} </th>
+                                <th style=" text-align: center;"><span>{{insumo.insumo_medico_clave}}&nbsp;</span></th>
+                                <th>
+                                    <span>{{insumo.info_insumo.descripcion}}&nbsp;</span>
+                                    <label class="tag is-success" *ngIf="insumo.info_insumo.es_causes == true"><strong>Causes </strong></label>
+                                    <label class="tag" *ngIf="insumo.info_insumo.es_causes == false" style="background: #B8FB7E; border-color: #B8FB7E; color: rgba(0,0,0,0.7);" ><strong>No Causes </strong> </label>
+                                    <span *ngIf="insumo.info_insumo.tipo == 'MC'" class="tag is-warning" style="font-size: 0.7em !important;">MATERIAL CURACIÓN</span>
+                                </th>
+                                <th style="text-align: right;">
+                                    {{insumo.precio_unitario | currency:''}}
+                                </th>
+                                <th style=" text-align: right;">
+                                    {{insumo.cantidad_solicitada}}
+                                </th>
+                                <th style=" text-align: right;">
+                                    {{insumo.monto_solicitado | currency:''}}
+                                </th>
+                            </tr>
+                            <tr *ngIf="detalle_CLUES.insumos?.length == 0">
+                                <td colspan="6" style="vertical-align: middle; color:#888;">Esta lista está vacía.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+        <footer class="modal-card-foot">
+            <a class="button" (click)="cancelarModal('detalleCLUES')">Cancelar</a>
+        </footer>
+    </div>
+    <div *ngIf="detalle_CLUES == []" class="modal-card" style="width: 80%"> Error al cargar datos</div>
+</div>
+<!-- FINALIZA DETALLES DE LOS INSUMOS DE LA CLUES -->

@@ -1,0 +1,14 @@
+<aside class="menu" style="padding-left: 1em; margin-top: -3em; padding: 10px; overflow:auto; display:block" [style.maxHeight.px]="tamano-50">
+    <div *ngFor="let item of menuAutorizado">
+        <br>
+        <p class="menu-label">{{ item.titulo }}</p>
+        <ul class="menu-list">
+            <li *ngFor="let modulo of item.modulos">
+                <a routerLink="{{ modulo.url }}" routerLinkActive="is-active">
+                    <span class="icon" ><img src="{{ modulo.icono }}"></span>&nbsp;&nbsp;<span>{{ modulo.titulo }}</span>
+                </a>
+            </li>    
+        </ul>
+    </div>
+        
+</aside>

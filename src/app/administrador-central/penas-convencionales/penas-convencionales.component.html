@@ -1,0 +1,196 @@
+<administrador-central-menu></administrador-central-menu>
+
+<div class="contenedor columns " style="height:100%; ">
+    <div class="column is-narrow is-hidden-mobile">
+        <div style="height:50px;"></div>
+        <administrador-central-menu-lateral></administrador-central-menu-lateral>
+    </div>
+    <div class="column" style="padding:2em; overflow: scroll;">
+		<div style="height:50px;"></div>
+		<section class="hero is-primary"  style="  border-radius:  1em " >
+		
+			<div class="hero-body" style="position:relative;">                    
+				
+				<div class="container is-fluid">
+					
+					<h1 class="title">
+						<span class="icon is-medium"><i class="fa fa-legal"></i></span> Penas convencionales
+					</h1>
+					
+					
+					<div class="columns">
+							<div class="column">
+								<label>CLUES:</label>
+								<div class="control is-grouped">
+									<p class="control is-expanded">
+										<input class="input" type="text" [(ngModel)] = "clues">
+									</p>
+								</div>
+							</div>                   
+							<div class="column">
+								<label>Periodo:</label>
+									
+								<p class="control is-expanded" [ngClass]="{ 'is-loading': cargandoPeriodos}">
+									<span class="select is-fullwidth">
+									<select #periodoSelect (change)="seleccionarPeriodo(periodoSelect.value)">
+										<option value="-1">Todos</option>
+										<option *ngFor="let item of periodos" value="{{item.periodo}}">{{ item.periodo }}</option>
+									</select>
+									</span>
+								</p>         
+									 
+							
+							</div>
+							<div class="column">
+								<label for="">Mes</label>
+								<div class="control" [ngClass]="{ 'is-loading': cargandoMeses}">								
+									<div class="select is-fullwidth ">
+									<select #mesSelect (change)="seleccionarMes(mesSelect.value)" >
+										<option value="-1">Todos</option>
+										<option *ngFor="let item of meses" value="{{item.id}}">{{ item.descripcion }}</option>
+									</select>
+									</div>
+								</div>
+							</div>
+						</div>
+					<div class="columns">     
+						<div class="column">
+								<label>Tipo de unidad:</label>
+								
+								<p class="control is-expanded">
+									<span class="select is-fullwidth">
+									<select #tipoSelect id="tiposUnidad"  (change)="seleccionarTipo(tipoSelect.value)">
+										<option value="-1">Todas</option>
+										<option *ngFor="let item of tiposUnidad" value="{{item.tipo}}">{{ item.tipo }} {{ item.descripcion }} </option>
+									</select>
+									</span>
+								</p>
+														
+								
+							</div>                       
+						<div class="column">
+							<label>Proveedores:</label>
+					
+							<p class="control is-expanded" [ngClass]="{ 'is-loading': cargandoProveedores}">
+								<span class="select is-fullwidth">
+								<select #proveedorSelect (change)="seleccionarProveedor(proveedorSelect.value)">
+									<option value="-1">Todos</option>
+									<option *ngFor="let item of proveedores" value="{{item.id}}">{{ item.nombre }}</option>
+								</select>
+								</span>
+							</p>                   
+						
+						</div>
+						
+					</div>
+					
+					<nav class="level">
+						<div class="level-right">
+							<div class="block">
+							<button class="button " *ngIf="periodoSelect.value != -1 || mesSelect.value != -1 || proveedorSelect.value != -1  || tipoSelect.value != -1 || clues != ''" (click)="reset(); periodoSelect.value = '-1'; mesSelect.value = '-1'; proveedorSelect.value = '-1'; tipoSelect.value ='-1'"><span class="icon"><i class="fa fa-times"></i></span> <span>Limpiar filtro</span></button>
+							<button class="button is-primary is-inverted" (click)="cargarDatos()"><span class="icon"><i class="fa fa-check"></i></span> <span>Generar</span></button>
+							</div>
+						</div>
+					</nav>
+				
+					
+				</div>
+			</div>
+		</section>
+		<br>
+		<div class="is-fullwidth has-text-centered" *ngIf="cargandoResumen">
+			<br>
+			<span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span> &nbsp;<span>Cargando resumen...</span></span>
+			<br>
+			<br>
+		</div>
+		<div style="overflow-x: scroll;">
+		<table class="table" *ngIf="!cargandoResumen" style="font-size:0.8em;">
+			<thead>
+				<tr><th colspan="13"style="font-size:1.2em;">Resumen</th></tr>
+				<tr>
+					<th>Proveedor</th><th>Periodo</th><th>Tipo unidad</th><th>Pedidos</th><th>Pedidos incumplidos</th><th>$ Monto solicitado</th><th>$ Monto recibido</th><th>% No cumplido</th><th>$ Pena convencional</th><th>Descargar</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr *ngFor="let item of resumen; let i=index">
+					<td>{{ item.proveedor }}</td>
+					<td *ngIf="item.anio == 'TODOS' && item.mes == 'TODOS'">TODOS</td>
+					<td  *ngIf="item.anio != 'TODOS' || item.mes != 'TODOS'">{{item.mes_nombre}} {{item.anio}}</td>
+					<td>{{ item.tipo_unidad }}</td>
+					<td>{{ item.pedidos }}</td>
+					<td>{{ item.pedidos_incumplidos }}</td>
+					<td>${{ item.total_monto_solicitado | number:'1.2-2'}}</td>
+					<td>${{ item.total_monto_recibido | number:'1.2-2'}}</td>
+					<td>{{  100 - (item.total_monto_recibido * 100 / item.total_monto_solicitado) | number:'1.2-2'}}%</td>
+					<td>${{ item.monto_pena_convencional | number:'1.2-2' }}</td>
+					<td><a (click)="imprimirExcelResumen(item.anio, item.mes, item.proveedor_id, item.tipo_unidad)"><span class="icon"><i class="fa fa-file-excel-o"></i></span></a> </td>
+				</tr>
+				<tr *ngIf="resumen.length == 0">
+					<td colspan=13 style="vertical-align: middle; color:#888;">No hay resultados.</td>                    
+				</tr>
+			</tbody>
+		</table>
+		</div>
+		<br>
+		
+		<div class="is-fullwidth has-text-centered" *ngIf="cargando">
+			<br>
+			<span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span> &nbsp;<span>Cargando detalle...</span></span>
+			<br>
+			<br>
+		</div>
+		<div style="overflow-x: scroll;">
+		<table class="table" *ngIf="!cargando" style="min-width:100%; font-size:0.7em;">
+			<thead>
+				<tr><th colspan="111"style="font-size:1.2em;">Detalle</th></tr>
+				<tr>
+					<th>Proveedor</th>
+					<th>Periodo</th>
+					<th>Tipo unidad</th>
+					<th>Folio</th>
+					<th>Clues</th>
+					<th>Nombre</th>
+					<th>Monto pedido</th>
+					<th>Monto recibido</th>
+					<th>% surtido</th>
+					<th>$ Pena convencional</th>
+					<th>Descargar</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr *ngFor="let item of lista; let i=index">
+					<td>{{ item.proveedor }}</td>
+					<td>{{item.mes_nombre}} {{item.anio}}</td>
+					<td>{{ item.tipo_unidad }}</td>
+					<td><small>{{item.folio}}</small></td>
+					<td>{{ item.clues }}</td>
+					<td><small>{{ item.unidad_medica }}</small></td>
+					<td>${{ item.total_monto_solicitado | number:'1.2-2'}}</td>
+					<td>${{ item.total_monto_recibido | number:'1.2-2'}}</td>
+					<td>{{ (item.total_monto_recibido * 100 / item.total_monto_solicitado) | number:'1.2-2'}}%</td>
+					<td>${{ item.monto_pena_convencional | number:'1.2-2' }}</td>
+					<td><a (click)="imprimirExcelIndividual(item.id)"><span class="icon"><i class="fa fa-file-excel-o"></i></span></a> </td>
+				</tr>
+				<tr *ngIf="lista.length == 0">
+					<td colspan=11 style="vertical-align: middle; color:#888;">No hay resultados.</td>                    
+				</tr>
+			</tbody>
+		</table>
+		</div>
+
+		<div style="background: #FFF; border-radius: 0  0 1em  1em; width:100%;">
+        
+				<paginacion 
+					[total]="total" 
+					[paginasTotales]="paginasTotales" 
+					[resultadosPorPagina]="resultadosPorPagina" 
+					[paginaActual]="paginaActual" 
+					[indicePaginas]="indicePaginas"
+					(onSiguiente)="paginaSiguiente()" 
+					(onAnterior)="paginaAnterior()" 
+					(onListar)="listar($event)" 
+					*ngIf="total>0 && total > resultadosPorPagina"></paginacion>
+			</div>
+    </div>
+</div>

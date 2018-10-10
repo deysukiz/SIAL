@@ -1,0 +1,106 @@
+<formulario #ctrl URL="sincronizar-recetas" titulo="Sincronizar receta" [dato]="dato"></formulario>
+<menu-farmacia [modulo]="'Sincronizar recetas'" [icono]="'assets/hub-farmacia-sub.svg'" [url]="'/farmacia-subrrogada/sincronizar-recetas'"></menu-farmacia>
+<div style="height:50px;"></div>
+<form name="form" novalidate [formGroup]="dato" (ngSubmit)="ctrl.enviar()" #mainScreen>
+    <!-- apartado de insumos -->
+    <div class="column" style="padding:1em;" >
+        <div style="background: #FFF; border-radius: 1em; ">
+            <section class="hero is-primary" >
+                <div class="hero-body" >
+                    
+                    <div class="container is-fluid">
+                        <h1 class="title">
+                            <span *ngIf="!ctrl.cargando || !cargando" class="icon is-medium"><i class="fa fa-edit"></i></span>
+                            <span *ngIf="ctrl.cargando || cargando" class="icon is-medium"><i class="fa fa-refresh fa-spin"></i></span>                                Recetas JSON
+                        </h1>
+
+                    </div>
+                </div>
+            </section>
+            <div class="is-fullwidth has-text-centered" *ngIf="!ctrl.datosCargados">
+                <br>
+                <span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span>                    &nbsp;<span>Cargando...</span></span>
+            </div>
+            <section class="section" [style.height.px]="tamano">
+
+                <div class="is-half">
+                    <div class="field has-addons">
+                        <label class="label">Archivo JSON:</label>
+                        <p class="control is-expanded  has-icon has-icon-right" style="float:left; width: 95.1%;" >
+                            <input class="input" type="file" (change)="ctrl.convertirJson($event, ctrl.dato.controls.json)" accept=".json, .txt">
+                            <input type="hidden" formControlName="json">
+                        </p>
+                        <p class="control" style="float:left">
+                            <button class="button is-primary" type="submit" [ngClass]="{'is-loading': ctrl.cargando}" [disabled]="ctrl.error_json">Enviar</button>
+                        </p>
+                    </div>
+                    
+                </div>
+                <div>                            
+                    <figure class="highlight" style="width: 100%;">
+                        
+                        <pre [style.height.px]="tamano/1.8">
+                            <span class="help is-danger" *ngIf="ctrl.error_json">El archivo no es valido o no tiene el formato adecuado.</span>
+                            <code class="language-json" data-lang="json">{{ ctrl.dato.controls.json.value | json }}</code>
+                        </pre>                        
+                    </figure>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <div class="column" style="padding:1em;">
+        <div style="background: #FFF; border-radius: 1em; ">
+            <section class="hero is-primary" >
+                <div class="hero-body" >
+                    
+                    <div class="container is-fluid">
+                        <h1 class="title">
+                            <span *ngIf="!ctrl.cargando || !cargando" class="icon is-medium"><i class="fa fa-edit"></i></span>
+                            <span *ngIf="ctrl.cargando || cargando" class="icon is-medium"><i class="fa fa-refresh fa-spin"></i></span>                                Recetas Imagen
+                        </h1>
+
+                    </div>
+                </div>
+            </section>
+            <div class="is-fullwidth has-text-centered" *ngIf="!ctrl.datosCargados">
+                <br>
+                <span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span>                    &nbsp;<span>Cargando...</span></span>
+            </div>
+            <section class="section" >
+
+                <div class="is-half">
+                    <div class="field has-addons">
+                        <label class="label">Imagen Receta:</label>
+                        <p class="control is-expanded  has-icon has-icon-right" style="float:left; width: 95.1%;" >
+                            <input class="input" type="file" multiple (change)="ctrl.seleccionarImagenBase64($event, ctrl.dato.controls.archivos, true)" accept=".jpeg, .jpg, .gif, .bmp, .png">
+                            <input type="hidden" formControlName="archivos">
+                        </p>
+                        <p class="control" style="float:left">
+                            <button class="button is-primary" type="submit" [ngClass]="{'is-loading': ctrl.cargando}" [disabled]="ctrl.dato.controls.archivos.value == ''">Enviar</button>
+                        </p>
+                    </div>
+                    
+                </div>
+                <figure class="highlight" style="width: 100%;">
+                    <div *ngFor="let item of ctrl.dato.controls.archivos.value; let i=index">
+                        <img  [src]="'data:image/png;base64,' + item" 
+                        width="10%" style="float:left; border-style: dashed; border-radius: 5px;" (click)="abrirModal('verFoto', item)">
+                    </div>
+                </figure>
+                
+            </section>
+        </div>
+    </div>
+    
+</form>
+
+<div class="modal" id="verFoto">
+    <div class="modal-background"></div>
+    <div class="modal-content">
+        <p class="image is-4by3">
+            <img [src]="'data:image/jpg;base64,' + foto" alt="Receta" />
+        </p>
+    </div>
+    <button type="button" class="modal-close" (click)="cancelarModal('verFoto')"></button>
+</div>

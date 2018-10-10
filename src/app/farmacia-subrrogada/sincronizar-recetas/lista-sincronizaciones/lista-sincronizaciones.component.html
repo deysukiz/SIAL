@@ -1,0 +1,224 @@
+<listar #ctrl URL="listar-sincronizaciones-pedido?pedido_id={{pedido_id}}&fecha_desde={{fecha_desde}}&fecha_hasta={{fecha_hasta}}&folio={{folio}}" titulo="Sincronizaciones"></listar>
+<menu-farmacia [modulo]="'Sincronizaciones'" [icono]="'assets/hub-farmacia-sub.svg'" [url]="'.'"></menu-farmacia>
+<div style="height:50px;"></div>
+<div class="contenedor columns " style="height:85%; ">
+    
+    <div class="column" style="padding:2em;">
+        <div style="background: #FFF; border-radius: 1em; overflow: hidden;">
+            <section class="hero" [ngClass]=" {'is-dark': ctrl.busquedaActivada, 'is-primary': !ctrl.busquedaActivada } ">
+
+                <div class="hero-body" style="position:relative;">
+                    <nav class="level">
+                        <div class="level-left"></div>
+                        <!-- Right side -->
+                        <div class="level-right">
+                            <p class="level-item"><a class="button  is-dark" *ngIf="ctrl.busquedaActivada" title="Actualizar" (click)="ctrl.listarBusqueda(searchBox.value,1)"><span class="icon "><i class="fa fa-refresh"></i></span></a></p>
+                            <p class="level-item"><a class="button  is-primary" *ngIf="!ctrl.busquedaActivada" title="Actualizar" (click)="ctrl.listar(1)"><span class="icon "><i class="fa fa-refresh"></i></span></a></p>
+                            
+                            <p class="level-item"><a class="button  is-dark" *ngIf="ctrl.busquedaActivada" title="PDF" (click)="imprimir()"><span class="icon "><i class="fa fa-file-pdf-o"></i></span></a></p>
+                            <p class="level-item"><a class="button  is-primary" *ngIf="!ctrl.busquedaActivada" title="PDF" (click)="imprimir()"><span class="icon "><i class="fa fa-file-pdf-o"></i></span></a></p>
+                            <p class="level-item">&nbsp;</p>
+                        </div>
+                    </nav> 
+                    <div class="container is-fluid">
+
+                        <div class="is-hidden-desktop">
+                            <h1 class="title" *ngIf="!ctrl.busquedaActivada">
+                                <span class="icon is-medium"><i class="fa fa-user"></i></span> Sincronizar recetas
+                            </h1>
+                        </div>
+                        <div class="is-hidden-touch">
+                            <div style="height:30px;"></div>
+                        </div>
+                        <h1 class="title" *ngIf="ctrl.busquedaActivada">
+                            <span class="icon is-medium"><i class="fa fa-search"></i></span> Búsqueda
+                        </h1>
+                        <div class="control is-grouped">
+                            <div class="control">
+                                <div class="field">   
+                                    <label class="label">Desde:</label>                         
+                                    <input  style="width: 150px;" class="input is-medium" [(ngModel)]='fecha_desde' ngui-datetime-picker date-only="true" placeholder="YYYY-MM-DD" />
+                                </div>
+                            </div>
+                            <div class="control">
+                                <div class="field">   
+                                    <label class="label">Hasta:</label>                         
+                                    <input style="width: 150px;" class="input is-medium" [(ngModel)]='fecha_hasta' ngui-datetime-picker date-only="true" placeholder="YYYY-MM-DD" />
+                                </div>
+                            </div>
+                            <div class="control is-expanded">
+                                <span class="field">
+                                    <label class="label">FOLIO:</label>
+                                    <p class="control">
+                                        <input class="input is-medium" type="text" placeholder="Folio" [(ngModel)]='folio'>
+                                    </p> 
+                                </span>
+                            </div>
+                            <div class="control">
+                                    <label class="label">&nbsp;</label> 
+                                    <button class="button is-default is-medium" type="button" [ngClass]="{'is-loading': ctrl.cargando}" (click)="fecha_desde='';fecha_hasta=''; folio='';" >Limpiar</button>
+                            </div>
+                            <div class="control">
+                                    <label class="label">&nbsp;</label> 
+                                <button class="button is-medium" (click)="ctrl.listar(1)"><span class="icon"><i class="fa fa-filter"></i></span> <span>Filtrar</span></button>
+                            </div> 
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <div class="is-fullwidth has-text-centered" *ngIf="ctrl.cargando">
+                <br>
+                <span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span> &nbsp;<span>Cargando...</span></span>
+                <br>
+                <br>
+            </div>
+
+            <div style="overflow: scroll; overflow-x: hidden; height: 650px;">
+                <table class="table" *ngIf="!ctrl.cargando" style="min-width:100%; font-size:1em;">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th style="text-align:center;"></th>
+                            <th></th>
+                            <th colspan="2" style="text-align:center;">Aceptados</th>
+                            <th class="causes" colspan="2" style="text-align:center;">Ignorados</th>
+                            <th></th>
+                        </tr>
+                        <tr>  
+                            <th title="Folio de sincronización">FOLIO</th>                          
+                            <th>CLUES</th>
+                            <th>PEDIDO</th>
+                            <th>ALMACEN</th>
+                            <th>FECHA</th>
+                            
+                            <th class="aceptados" style="text-align:center;">Recetas</th>
+                            <th class="aceptados" style="text-align:center;">Colectivos</th>
+                            <th class="ignorados" style="text-align:center;">Recetas</th>
+                            <th class="ignorados" style="text-align:center;">Colectivos</th>
+
+                            <th style="text-align:center;" title="Archivo JSON">JSON</th>
+                        </tr>
+                    </thead>
+                    <tbody *ngIf="!ctrl.busquedaActivada">
+                        <tr *ngFor="let item of ctrl.dato; let i=index">
+                            <td style="vertical-align: middle;">
+                                {{item.id}}
+                            </td>
+                            <td style="vertical-align: middle;">
+                                <!-- {{item.fecha | date}}<br>-->
+                                {{item.clues}}
+                            </td>
+                            <td style="vertical-align: middle;">
+                                <!--<strong style="font-size: 14px">{{item.clues}}</strong>
+                                <p style="font-size: 12px">{{item.unidad_medica.nombre}}</p>-->
+                                {{item.pedido_id}}
+                            </td>
+                            <td style="vertical-align: middle;">
+                                <!--<strong style="font-size: 14px">{{item.folio}}</strong>
+                                <p style="font-size: 12px">{{item.descripcion}}</p>-->
+                                {{item.almacen_id}}
+                            </td>
+                            <td><!--{{item.proveedor.nombre}}-->
+                                {{item.fecha_surtimiento}}
+                            </td>
+                            
+                            <td class="aceptados" *ngIf="item.metadatos_sincronizaciones" style="text-align:center; vertical-align: middle;" title="Recetas aceptadas">{{item.metadatos_sincronizaciones.total_recetas}}<a routerLink="/almacen/sincronizar-recetas/editar/{{item.id}}"></a></td>
+                            <td *ngIf="!item.metadatos_sincronizaciones" style="text-align:center; vertical-align: middle;" title="No disponible">N/D<a routerLink="/almacen/sincronizar-recetas/editar/{{item.id}}"></a></td>
+                            
+                            <td class="aceptados" *ngIf="item.metadatos_sincronizaciones" style="text-align:center; vertical-align: middle;" title="Recetas ignoradas">{{item.metadatos_sincronizaciones.total_recetas_repetidas}}</td>
+                            <td *ngIf="!item.metadatos_sincronizaciones" style="text-align:center; vertical-align: middle;" title="No disponible">N/D<a routerLink="/almacen/sincronizar-recetas/editar/{{item.id}}"></a></td>
+                            
+                            <td class="ignorados" *ngIf="item.metadatos_sincronizaciones" style="text-align:center; vertical-align: middle;"  title="Colectivos aceptados">{{item.metadatos_sincronizaciones.total_colectivos}}</td>
+                            <td *ngIf="!item.metadatos_sincronizaciones" style="text-align:center; vertical-align: middle;" title="No disponible">N/D<a routerLink="/almacen/sincronizar-recetas/editar/{{item.id}}"></a></td>
+                            
+                            <td class="ignorados" *ngIf="item.metadatos_sincronizaciones" style="text-align:center; vertical-align: middle;"  title="Colectivos ignorados">{{item.metadatos_sincronizaciones.total_colectivos_repetidos}}</td>
+                            <td *ngIf="!item.metadatos_sincronizaciones" style="text-align:center; vertical-align: middle;" title="No disponible">N/D<a routerLink="/almacen/sincronizar-recetas/editar/{{item.id}}"></a></td>
+                            
+                            <!--
+                                <td *ngIf="!item.metadatos_sincronizaciones" style="text-align:center; vertical-align: middle;" title="No disponible">N/D<a routerLink="/almacen/sincronizar-recetas/editar/{{item.id}}"></a></td>
+                            -->
+                            <td *ngIf="item.metadatos_sincronizaciones" style="text-align:center; vertical-align: middle;" title="Número de sincronizaciones">
+                                <label *ngIf="item.metadatos_sincronizaciones.numero_sincronizaciones==0">{{item.metadatos_sincronizaciones.numero_sincronizaciones}}</label>
+                                <a *ngIf="item.metadatos_sincronizaciones.numero_sincronizaciones > 0" routerLink="/farmacia-subrrogada/sincronizar-recetas/lista-sincronizaciones">{{item.metadatos_sincronizaciones.numero_sincronizaciones}} </a>
+                            </td>
+                            <td style="text-align:center; vertical-align: middle;">
+                                <button type="button" class="button" (click)="abrirModal('verJSON', item.json)" >
+                                    <span class="icon"><i class="fa fa-eye" aria-hidden="true"></i></span>                                    
+                                </button>
+                            </td>
+                        </tr>
+                        <tr *ngIf="ctrl.dato.length == 0">
+                            <td colspan="12" style="vertical-align: middle; color:#888;">Esta lista está vacía.</td>                    
+                        </tr>
+                    </tbody>
+                    <tbody *ngIf="ctrl.busquedaActivada">
+                        <tr *ngFor="let item of ctrl.resultadosBusqueda; let i=index">
+                            <td style="vertical-align: middle;">
+                                <strong>{{item.folio}}</strong>
+                                <br>{{item.descripcion}}<br>
+                            </td>
+                            <td style="vertical-align: middle;">
+                                {{item.clues}}
+                            </td>
+                            <td style="text-align:center; vertical-align: middle;">
+                                {{item.fecha | date}}<br>
+                            </td>
+                            <td class="aceptados" style="text-align:center; vertical-align: middle;">3<a routerLink="/almacen/sincronizar-recetas/editar/{{item.id}}"></a></td>
+                            <td class="aceptados" style="text-align:center; vertical-align: middle;" >10</td>
+                            <td class="ignorados" style="text-align:center; vertical-align: middle;" >2</td>
+                            <td class="ignorados" style="text-align:center; vertical-align: middle;" >0</td>
+                            <!-- 
+                            <td style="text-align:center; vertical-align: middle;">
+                                <button type="button" class="button" (click)="abrirModal('sincronizarRecetasJson', item.id)" >
+                                    <span class="icon"><i class="fa fa-upload"></i></span>
+                                    <i class="fa fa-file-code-o" aria-hidden="true"></i>
+                                </button>
+                            </td> -->
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Paginación para la lista  -->
+            <paginacion [total]="ctrl.total" [paginasTotales]="ctrl.paginasTotales" [resultadosPorPagina]="ctrl.resultadosPorPagina"
+                [paginaActual]="ctrl.paginaActual" [indicePaginas]="ctrl.indicePaginas" (onSiguiente)="ctrl.paginaSiguiente()"
+                (onAnterior)="ctrl.paginaAnterior()" (onListar)="ctrl.listar($event)" *ngIf="ctrl.total>0 && ctrl.total > ctrl.resultadosPorPagina && !ctrl.busquedaActivada"></paginacion>
+            <!-- Paginación para la búsqueda  -->
+            <paginacion [total]="ctrl.totalBusqueda" [paginasTotales]="ctrl.paginasTotalesBusqueda" [resultadosPorPagina]="ctrl.resultadosPorPaginaBusqueda"
+                [paginaActual]="ctrl.paginaActualBusqueda" [indicePaginas]="ctrl.indicePaginasBusqueda" (onSiguiente)="ctrl.paginaSiguienteBusqueda(searchBox.value)"
+                (onAnterior)="ctrl.paginaAnteriorBusqueda(searchBox.value)" (onListar)="ctrl.listarBusqueda(searchBox.value,$event)"
+                *ngIf="ctrl.totalBusqueda > 0 && ctrl.totalBusqueda > ctrl.resultadosPorPaginaBusqueda && ctrl.busquedaActivada"></paginacion>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="verJSON">
+    <div class="modal-background"></div>
+    <div class="modal-card"  style="width:80%; height: 75%; overflow: hidden;">
+        <header class="modal-card-head" style="background: #00d1b2;">
+                <div class="container is-fluid"  style="width:100%;">
+                    <h1 class="title" style="color:#FFF;">
+                        <span class="icon is-medium"><i class="fa fa-file-code-o"></i></span> 
+                        JSON
+                    </h1>
+                </div>     
+            <button class="delete" (click)="cancelarModal('verJSON')"></button>
+        </header>
+        <section class="modal-card-body">
+            <div class="content">
+                <figure class="highlight" style="width: 100%; overflow: auto;">
+                    <pre>
+                        <span class="help is-danger" *ngIf="error_json">El archivo no es valido o no tiene el formato adecuado.</span>
+                        <code class="language-json" data-lang="json">{{json_vista | json}}</code>
+                    </pre>
+                </figure>
+            </div>            
+        </section>
+        <footer class="modal-card-foot">
+            <a class="button is-success" (click)="cancelarModal('verJSON');">Aceptar</a>
+            <a class="button" (click)="cancelarModal('verJSON');">Cancelar</a>
+        </footer>
+    </div>
+</div>

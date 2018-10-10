@@ -1,0 +1,28 @@
+<aside class="menu" style="padding: 1em;">
+   <!-- <p class="menu-label">Pedidos</p>-->
+    <ul class="menu-list">        
+        <li>
+            <a routerLink="/almacen/entregas/por-surtir" #nuevas routerLinkActive="is-active">
+                <span class="icon"><i class="fa fa-inbox"></i></span> Por surtir
+                <span class="icon is-pulled-right" *ngIf="cargando"><i class="fa fa-circle-o-notch fa-spin"></i></span>
+                <span *ngIf="stats.por_surtir>0" class="tag is-pulled-right" [ngClass]="{ 'is-white': nuevas.className == 'is-active', 'is-danger': nuevas.className != 'is-active' }" >{{  stats.por_surtir }}</span>
+            </a>            
+        </li>
+        <li>
+            <a routerLink="/almacen/entregas/finalizadas" routerLinkActive="is-active">
+                <span class="icon"><i class="fa fa-check-circle"></i></span> <span>Finalizadas</span>
+            </a>
+            <ul>
+                <li><a routerLink="/almacen/entregas/finalizadas/completas" routerLinkActive="is-active">Completas</a></li>
+                <li><a routerLink="/almacen/entregas/finalizadas/incompletas" routerLinkActive="is-active">Incompletas</a></li>
+                <li><a routerLink="/almacen/entregas/finalizadas/canceladas" routerLinkActive="is-active">Canceladas</a></li>
+            </ul>
+        </li>  
+    </ul>
+    <hr>
+    <ul class="menu-list"> 
+        <li>
+            <a routerLink="/almacen/entregas/historial" routerLinkActive="is-active"><span class="icon"><i class="fa fa-history"></i></span> <span>Historial</span></a>
+        </li>        
+    </ul>        
+</aside>

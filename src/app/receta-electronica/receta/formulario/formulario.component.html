@@ -1,0 +1,529 @@
+<app-menu-receta></app-menu-receta>
+<div style="position:relative; padding-top:70px; margin-left: 1.5%; display:block; width:97%; height:100% !important;">    
+  <div class="tile is-ancestor is-vertical" style="height:100% !important; max-height:100% !important;">
+    <div class="tile">
+      <div class="tile is-4 is-parent is-vertical ">
+        <div class="tile is-child">
+            <div style="background: #FFF; border-radius: 1em; overflow: hidden;">
+                <section class="hero is-primary" >
+                <h1 class="title" style="margin:0.5em;" >
+                    <span class="icon is-medium"><i class="fa fa-file-text"></i></span> {{formularioTitulo}} 
+                </h1>
+                <!--<a class="button is-success" title="Imprimir Excel" (click)="imprimirExcel(); " *ngIf="esEditar">
+                    <span class="icon"><i class="fa fa-file-excel-o"></i></span> &nbsp; Descargar receta en Excel
+                </a>-->
+                </section>
+
+                <div style="padding: 1em;">
+                <form name="form" [formGroup]="datos_receta">
+                    <!--<label class="label">Folio:  {{  folio }}</label>-->
+                    <label class="label">Fecha:</label>
+                    <p class="control is-expanded  has-icon has-icon-right">
+                        <input class="input" ngui-datetime-picker  date-only="true" formControlName="fecha" placeholder="aaaa-mm-dd"  readonly />    
+
+                        <span class="icon is-small" *ngIf="datos_receta.get('fecha').hasError('required') && datos_receta.get('fecha').touched">
+                            <i class="fa fa-warning"></i>
+                        </span>
+                        <span class="help is-danger" *ngIf="datos_receta.get('fecha').hasError('required') && datos_receta.get('fecha').touched">Este campo es requerido.</span>
+                    </p>
+                   <label class="label">Dr(a)</label>
+                    <p class="control is-expanded  has-icon has-icon-right">
+                        <input type="text" class="input is-fullwidth" formControlName="personal_name" #personal (keyup)='modal_personal(personal.value, 1);'/>
+                        <!--<button type="button" class="button  is-primary">Buscar</button>-->
+                        <span class="icon is-small" *ngIf="datos_receta.get('personal_name').hasError('required') && datos_receta.get('personal_name').touched">
+                            <i class="fa fa-warning"></i>
+                        </span>
+                        <span class="help is-danger" *ngIf="datos_receta.get('personal_name').hasError('required') && datos_receta.get('personal_name').touched">Este campo es requerido.</span>
+                    </p>
+                    <label class="label">Paciente</label>
+                    <p class="control is-expanded  has-icon has-icon-right">
+                        <input type="text" class="input is-fullwidth"  formControlName="paciente_name" #pacientes (keyup)='modal_personal(pacientes.value, 2);'/>
+                        <!--<button type="button" class="button  is-primary">Buscar</button>-->
+                       <span class="icon is-small" *ngIf="datos_receta.get('paciente_name').hasError('required') && datos_receta.get('paciente_name').touched">
+                            <i class="fa fa-warning"></i>
+                        </span>
+                        <span class="help is-danger" *ngIf="datos_receta.get('paciente_name').hasError('required') && datos_receta.get('paciente_name').touched">Este campo es requerido.</span>
+                    </p>
+                    
+
+                    <div class="control">
+                        <textarea name="observaciones" class="textarea" placeholder="Diagnostico" formControlName="diagnostico" ></textarea>
+                        <span class="help is-danger" *ngIf="datos_receta.get('diagnostico').hasError('required') && datos_receta.get('diagnostico').touched">Este campo es requerido.</span>
+                    </div>
+                    
+                </form>
+                <hr>
+
+                    <div class="control is-grouped" style="padding-top:10px;" *ngIf="!cargando">
+                        <p class="control">
+                            <a class="button is-primary " >Guardar</a>
+                        </p>
+                        <p class="control">
+                            <a class="button is-danger " ><span class="icon"><i class="fa fa-check"></i></span><span>Concluir</span></a>
+                        </p>
+                        <p class="control">
+                            <a class="button is-white">Ir a la lista</a>
+                        </p>                
+                    </div>
+                </div>
+                
+            </div>
+            <br>
+        </div>
+        
+        
+      </div>
+      <!-- -->
+      <div class="tile is-parent is-vertical">
+          <div class="tile is-child" >
+                      <div class="contenedor-receta" >
+                      <!--[ngClass]="{'is-primary':!pedido.filtro.activo,'is-dark': pedido.filtro.activo }"-->
+                        <div class="top-bar is-primary">
+                            <span>
+                                <span>
+                                    <small>
+                                    Insumos Médicos
+                                    </small>
+                                </span>
+
+                            </span>
+                            <!--  [ngClass]="{ 'is-inverted': receta.filtro.activo }".-->
+                            <a class="button is-primary  is-pulled-right" style="margin-top:-0.25em;" title="Ctrl + espacio" (click)="toggleModalInsumos(); ">
+                                <span class="icon"><i class="fa fa-plus"></i></span><span>Agregar Clave</span>
+                            </a>
+                        </div> 
+
+                        <div class="is-fullwidth has-text-centered" *ngIf="guardando">
+                            <br>
+                            <span class="tag is-primary is-large "><span class="icon"><i class="fa fa-spinner fa-spin"></i></span> &nbsp;<span>Guardando...</span></span>
+                            <br>
+                            <br>
+                        </div>
+
+                        <div class="is-fullwidth has-text-centered" *ngIf="cargando">
+                            <br>
+                            <span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span> &nbsp;<span>Cargando...</span></span>
+                            <br>
+                            <br>
+                        </div>
+
+                        <table class="table is-unselectable" *ngIf="!cargando && !guardando" style="font-size: 0.8em;">
+                            <thead>
+                                <tr>
+                                    <th style="width:41px;vertical-align: middle;" class="has-text-centered" >Clave</th>
+                                    <th style="vertical-align: middle;" class="is-hidden-mobile " >Descripcion</th>                  
+                                    <th style="width:78px !important;text-align: center; vertical-align: middle;"><abbr title="Medicacion">Medicación</abbr></th>
+                                    <th style="width:78px !important;text-align: center; vertical-align: middle;"><abbr title="Cantidad">Cant.</abbr></th>
+                                    
+                                    <th  style="width:21px !important;"></th>
+                                </tr>
+                            </thead>
+                            <tbody >
+
+                                <tr   *ngFor="let item of insumos; let i = index;">
+                                    <td class="has-text-centered">{{ item.lote }}</td>
+                                    <!--<td class="has-text-centered is-hidden-mobile"><a (click)="mostrarFichaInformativa($event, item.clave)" style="cursor:help;">{{ item.clave }}</a></td>-->            
+                                    
+                                    <td>
+                                        <small class="is-hidden-tablet">{{ item.clave }} <br></small>
+                                        <div style="line-height:1em;">
+                                        <small>{{ item.descripcion }}</small>
+                                        </div>
+                                        <div style="padding: 0.5em 0 0.5em 0; ">
+                                        <span *ngIf="(item.es_causes && item.tipo == 'ME')" class="tag is-success" [ngClass]="{'is-dark': item == insumoSeleccionado}" style="font-size: 0.7em !important;">CAUSES</span>
+                                        <span *ngIf="(!item.es_causes && item.tipo == 'ME')" class="tag is-danger" style="font-size: 0.7em !important;">NO CAUSES</span>
+                                        <span *ngIf="item.tipo == 'MC'" class="tag is-warning" style="font-size: 0.7em !important;">MATERIAL CURACIÓN</span>
+                                        <span *ngIf="item.es_cuadro_basico" class="tag is-light" [ngClass]="{'is-dark': item == insumoSeleccionado}" style="font-size: 0.7em !important;">Cuadro básico</span>
+                                        <span *ngIf="(item.tipo == 'ME' && item.informacion)">
+                                            <span *ngIf="item.informacion.es_controlado" class="tag is-info" style="font-size: 0.7em">Controlado</span>
+                                            <span *ngIf="item.informacion.es_surfactante" class="tag is-info" style="font-size: 0.7em">Surfactante</span>  
+                                        </span>
+                                        </div>
+                                    </td>  
+                                    <!--<td style="width:78px !important;">
+                                        <b>
+                                            <abbr>${{item.monto | number:'1.2-2'}}</abbr>
+                                        </b>
+                                    </td>-->
+
+                                    
+                                </tr> 
+                                <tr *ngIf="insumos.length == 0">
+                                    <td colspan="5" style="vertical-align: middle; color:#888;">Esta lista está vacía.</td>                    
+                                </tr>     
+                            </tbody>
+                                          
+                        </table>
+                        
+                        <!--<paginacion 
+                                [total]="receta.lista.length" 
+                                [paginasTotales]="receta.paginacion.totalPaginas" 
+                                [resultadosPorPagina]="receta.paginacion.resultadosPorPagina" 
+                                [paginaActual]="receta.paginacion.paginaActual" 
+                                [indicePaginas]="receta.paginacion.indice"
+                                (onSiguiente)="receta.paginaSiguiente()" 
+                                (onAnterior)="receta.paginaAnterior()" 
+                                (onListar)="receta.listar($event)" 
+                                *ngIf="receta.lista.length > 0 && receta.lista.length > receta.paginacion.resultadosPorPagina && !receta.filtro.activo"></paginacion>
+                        
+                        <paginacion 
+                                [total]="receta.filtro.lista.length" 
+                                [paginasTotales]="receta.filtro.paginacion.totalPaginas" 
+                                [resultadosPorPagina]="receta.filtro.paginacion.resultadosPorPagina" 
+                                [paginaActual]="receta.filtro.paginacion.paginaActual" 
+                                [indicePaginas]="receta.filtro.paginacion.indice"
+                                (onSiguiente)="receta.filtro.paginaSiguiente()" 
+                                (onAnterior)="receta.filtro.paginaAnterior()" 
+                                (onListar)="receta.filtro.listar($event)" 
+                                *ngIf="receta.filtro.lista.length > 0 && receta.filtro.lista.length > receta.filtro.paginacion.resultadosPorPagina && receta.filtro.activo"></paginacion>-->
+                        
+                        <br>
+                    </div>    
+          </div>
+        </div>
+    
+    </div>
+  </div>
+</div>
+
+<div id="modal-temas" class="modal is-active" [ngClass]="{'is-active': mostrarBuscadorPersonas}">
+  <div class="modal-background"  (click)="showDialog = !mostrarBuscadorPersonas"></div>
+  <div class="modal-card" style="width:60%; height: auto;">
+    <header class="modal-card-head" style="background-color: #00d1b2" >
+      <div class="container is-fluid"  style="width:100%;">
+          <h1 class="title" style="color:#FFF;">
+            <span class="icon is-medium"><i class="fa fa-user"></i></span> Buscar {{ NombreBuscador }}
+          </h1>
+      </div>            
+      <a class="button  is-primary" style="position:absolute; top:1em; right:1em;" (click)="mostrarBuscadorPersonas = !mostrarBuscadorPersonas"><span class="icon "><i class="fa fa-close"></i></span></a>
+    </header>
+    <section class="section" style="padding: 0rem 1.5rem;">
+        <div>
+            <div class="columns">
+              <div class="column is-10"  >
+                <label class="label" style="color: #FFF">Nombre</label>
+                <input class="input is-medium" type="text" [(ngModel)]="buscarPersonal" placeholder="Buscar" #searchBoxPersonal (keyup)="buscar_personal(searchBoxPersonal.value)">
+              </div>
+              <div class="column is-2">
+                <button type="button" class="button is-info" [ngClass]="{'is-loading': agregando_personal}" style="margin-top: 35px" [disabled]="agregando_personal" (click)='AgregarPersonal(searchBoxPersonal.value)'>Agregar Nuevo</button>
+              </div>
+            </div>
+            <table class="table">
+                <thead>
+                    <tr>
+                      <th>NOMBRE</th>
+                      <th>CLUES</th>
+                      <th>UNIDAD</th>
+                    </tr>
+                </thead>
+                <!--  (click) = 'seleccionarPersonal(item)' -->
+                <tbody>
+                    <tr *ngFor="let item of personal_medico; let i=index" style="cursor:pointer" (click)='obtener_personal(item)'>
+                    <td>{{ item.nombre }}</td>
+                    <td>{{ item.clues }}</td>
+                    <td *ngIf="item.unidad">{{ item.unidad.nombre }}</td>
+                    <td  *ngIf="!item.unidad">SIN UNIDAD</td>
+                    </tr>
+                   <tr *ngIf="personal_medico.length == 0">
+                    <td colspan="5" style="vertical-align: middle; color:#888;">Esta lista está vacía.</td>                    
+                </tr>
+                </tbody>
+                
+            </table>
+           
+            <div class="is-fullwidth has-text-centered" *ngIf="cargando_personal">
+              <br>
+              <span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span> &nbsp;<span>Cargando...</span></span>
+              <br>
+              <br>
+          </div>
+        </div>
+
+        
+    
+    </section>
+    <footer class="" style="position:relative; padding:1em;background: #FFF; border-top:1px solid #EEE; border-radius:0 0 0.8em 0.8em " >
+    </footer>
+  </div>
+</div>
+
+
+<div id="modal-pacientes" class="modal is-active" [ngClass]="{'is-active': mostrarBuscadorPacientes}">
+  <div class="modal-background"  (click)="showDialog = !mostrarBuscadorPacientes"></div>
+  <div class="modal-card" style="width:60%; height: auto;">
+    <header class="modal-card-head" style="background-color: #00d1b2" >
+      <div class="container is-fluid"  style="width:100%;">
+          <h1 class="title" style="color:#FFF;">
+            <span class="icon is-medium"><i class="fa fa-user"></i></span> Buscar {{ NombreBuscador }}
+          </h1>
+      </div>            
+      <a class="button  is-primary" style="position:absolute; top:1em; right:1em;" (click)="mostrarBuscadorPacientes = !mostrarBuscadorPacientes"><span class="icon "><i class="fa fa-close"></i></span></a>
+    </header>
+    <section class="section" style="padding: 0rem 1.5rem;">
+        
+        <!-- Pacientes -->
+        
+            <div class="columns"  *ngIf='!form_paciente'>
+              <div class="column is-10"  >
+                <label class="label" style="color: #FFF">Nombre</label>
+                <input class="input is-medium" type="text" [(ngModel)]="buscarPaciente" placeholder="Buscar" [disabled]="form_paciente" #searchBoxPaciente (keyup)="buscar_paciente(searchBoxPaciente.value)">
+              </div>
+              <div class="column is-2">
+                <button type="button" class="button is-info" [ngClass]="{'is-loading': agregando_personal}" style="margin-top: 35px" [disabled]="form_paciente" (click)='AgregarPacientes(searchBoxPersonal.value)'>Agregar Nuevo</button>
+              </div>
+            </div>
+            <table class="table" *ngIf='!cargando_personal_pacientes && !form_paciente ' >
+                <thead>
+                    <tr>
+                      <th>NOMBRE</th>
+                      <th>FECHA NACIMIENTO</th>
+                      <th>UNIDAD</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let item of personal_paciente; let i=index" style="cursor:pointer"  (click)='obtener_pacientes(item)'>
+                    <td>{{ item.nombre }}</td>
+                    <td>{{ item.fecha_nacimiento }}</td>
+                   
+                    </tr>
+                   <tr *ngIf="personal_paciente.length == 0">
+                        <td colspan="5" style="vertical-align: middle; color:#888;">Esta lista está vacía.</td>                    
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div *ngIf='form_paciente'>
+                <section class="section" style="padding: 1rem 1.5rem; background-color: #EFEFEF">
+                <div class="container">
+                  <div class="heading">
+                    <h1 class="title">Agregar Personal</h1>
+                  </div>
+                </div>
+            </section> 
+            <form name="form" [formGroup]="datos_paciente"   (ngSubmit)="agregar_paciente()" >    
+              <div class="control is-grouped">
+                    <p class="control is-expanded  has-icon has-icon-right">
+                        <label class="label">Nombre</label>
+                      <input class="input" autofocus type="text"  placeholder="Nombre" formControlName="nombre">
+                      <span class="icon is-small" *ngIf="datos_paciente.get('nombre').hasError('required') && datos_paciente.get('nombre').touched">
+                        <i class="fa fa-warning"></i>
+                      </span>
+                      <span class="help is-danger" *ngIf="datos_paciente.get('nombre').hasError('required') && datos_paciente.get('nombre').touched">Este campo es requerido.</span>
+                    </p>
+                    
+                  </div>
+                  <div class="control is-grouped">
+                    <p class="control is-expanded  has-icon has-icon-right">
+                        <label class="label">Sexo</label>
+                        <span class="select is-fullwidth">
+                            <select  formControlName="sexo"  name="sexo">
+                                <option value="1" selected="selected">MASCULINO</option>
+                                <option value="2">FAMENINO</option>
+                            </select>
+
+                        </span> 
+                        <span class="icon is-small" *ngIf="datos_paciente.get('sexo').hasError('required') && datos_paciente.get('sexo').touched">
+                                <i class="fa fa-warning"></i>
+                            </span>
+                            <span class="help is-danger" *ngIf="datos_paciente.get('sexo').hasError('required') && datos_paciente.get('sexo').touched">Este campo es requerido.</span>
+                    </p>
+                    <p class="control is-expanded has-icon has-icon-right">
+                    <label class="label">Fecha Nacimiento</label>
+                      <input class="input" type="text" placeholder="aaaa-mm-dd" formControlName="fecha_nacimiento">
+                      <span class="icon is-small" *ngIf="datos_paciente.get('fecha_nacimiento').hasError('required') && datos_paciente.get('fecha_nacimiento').touched">
+                        <i class="fa fa-warning"></i>
+                      </span>
+                      <span class="help is-danger" *ngIf="datos_paciente.get('fecha_nacimiento').hasError('required') && datos_paciente.get('fecha_nacimiento').touched">Este campo es requerido.</span>
+                    </p>
+                  </div>
+                  
+                 <div class="control is-grouped">  
+                    
+                    <p class="control is-expanded has-icon has-icon-right">
+                        <label class="label">No Expediente</label>
+                        <input class="input" type="text" placeholder="No Expediente" formControlName="no_expediente">
+                        <span class="icon is-small" *ngIf="datos_paciente.get('no_expediente').hasError('required') && datos_paciente.get('no_expediente').touched">
+                            <i class="fa fa-warning"></i>
+                        </span>
+                        <span class="help is-danger" *ngIf="datos_paciente.get('no_expediente').hasError('required') && datos_paciente.get('no_expediente').touched">Este campo es requerido.</span>
+                        
+                    </p>
+                    <p class="control is-expanded has-icon has-icon-right">
+                        <label class="label">No Afililación</label>
+                        <input class="input" type="text" placeholder="No Afiliación" formControlName="no_afiliacion">
+                        <span class="icon is-small" *ngIf="datos_paciente.get('no_afiliacion').hasError('required') && datos_paciente.get('no_afiliacion').touched">
+                            <i class="fa fa-warning"></i>
+                        </span>
+                        <span class="help is-danger" *ngIf="datos_paciente.get('no_afiliacion').hasError('required') && datos_paciente.get('no_afiliacion').touched">Este campo es requerido.</span>
+                        
+                    </p>
+                    
+                </div>
+                <hr>
+                <div class="control is-grouped">
+                    <p class="control">
+                        <button class="button is-primary" type="submit" [ngClass]="{'is-loading': cargando}" [disabled]="datos_paciente.invalid">Guardar</button>
+                    </p>
+                
+                    <p class="control">
+                        <a class="button is-white" (click)="regresar()" >Cancelar </a>
+                    </p>
+                </div>  
+              
+              
+            </form>  
+            </div>
+            <div class="is-fullwidth has-text-centered" *ngIf="cargando_personal_pacientes">
+              <br>
+              <span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span> &nbsp;<span>Cargando...</span></span>
+              <br>
+              <br>
+          </div>
+        
+        <!-- Fin pacientes -->  
+
+       
+    
+    </section>
+    <footer class="" style="position:relative; padding:1em;background: #FFF; border-top:1px solid #EEE; border-radius:0 0 0.8em 0.8em " >
+    </footer>
+  </div>
+</div>
+
+
+<div id="modal-temas" class="modal is-active" [ngClass]="{'is-active': mostrarModalInsumos}">
+  <div class="modal-background"  (click)="showDialog = !mostrarModalInsumos"></div>
+  <div class="modal-card" style="width:60%; height: auto;">
+    <header class="modal-card-head" style="background-color: #00d1b2" >
+      <div class="container is-fluid"  style="width:100%;">
+          <h1 class="title" style="color:#FFF;">
+            <span class="icon is-medium"><i class="fa fa-user"></i></span> Buscar {{ NombreBuscador }}
+          </h1>
+      </div>            
+      <a class="button  is-primary" style="position:absolute; top:1em; right:1em;" (click)="mostrarModalInsumos = !mostrarModalInsumos"><span class="icon "><i class="fa fa-close"></i></span></a>
+    </header>
+    <section class="section" style="padding: 0rem 1.5rem;">
+        <div>
+            <div class="columns">
+              <div class="column is-12"  >
+                <label class="label" style="color: #FFF">Nombre</label>
+                <input class="input is-medium" type="text" placeholder="Buscar" #searchBoxInsumos (keyup)="buscar_insumos(searchBoxInsumos.value)">
+              </div>
+              
+            </div>
+            
+            <table class="table"  *ngIf="!cargando_insumos">
+                <thead>
+                    <tr>
+                      <th>CLAVE</th>
+                      <th>DESCRIPCIÓN</th>
+                      <th>EXISTENCIA</th>
+                    </tr>
+                </thead>
+                    <tbody>
+                        <tr *ngFor="let item of insumos_busqueda; let i=index" style="cursor:pointer" (click)='seleccionar_insumo(item)'>
+                         <td class="has-text-centered">{{ item.clave }}</td>
+                            <!--<td class="has-text-centered is-hidden-mobile"><a (click)="mostrarFichaInformativa($event, item.clave)" style="cursor:help;">{{ item.clave }}</a></td>-->            
+                            
+                            <td>
+                                
+                                <div style="line-height:1em;">
+                                <small>{{ item.descripcion }}</small>
+                                </div>
+                                <div style="padding: 0.5em 0 0.5em 0; ">
+                                <span *ngIf="(item.es_causes && item.tipo == 'ME')" class="tag is-success" [ngClass]="{'is-dark': item == insumoSeleccionado}" style="font-size: 0.7em !important;">CAUSES</span>
+                                <span *ngIf="(!item.es_causes && item.tipo == 'ME')" class="tag is-danger" style="font-size: 0.7em !important;">NO CAUSES</span>
+                                <span *ngIf="item.tipo == 'MC'" class="tag is-warning" style="font-size: 0.7em !important;">MATERIAL CURACIÓN</span>
+                                <span *ngIf="item.es_cuadro_basico" class="tag is-light" [ngClass]="{'is-dark': item == insumoSeleccionado}" style="font-size: 0.7em !important;">Cuadro básico</span>
+                                <span *ngIf="(item.tipo == 'ME' && item.informacion)">
+                                    <span *ngIf="item.informacion.es_controlado" class="tag is-info" style="font-size: 0.7em">Controlado</span>
+                                    <span *ngIf="item.informacion.es_surfactante" class="tag is-info" style="font-size: 0.7em">Surfactante</span>  
+                                </span>
+                                <br>
+                                
+                                </div>
+                            </td>
+                            <td>
+                                {{ item.stockExistencia.existencia }}
+                            </td>
+                        </tr>
+                        
+                       <tr *ngIf="insumos_busqueda.length == 0">
+                            <td colspan="5" style="vertical-align: middle; color:#888;">Esta lista está vacía.</td>                    
+                        </tr>
+                        
+                    </tbody>
+                    
+                </table>
+                <paginacion 
+                    [total]="totalBusqueda"
+                    [paginasTotales]="paginasTotalesBusqueda" 
+                    [resultadosPorPagina]="resultadosPorPaginaBusqueda"
+                    [paginaActual]="paginaActual"
+                    [indicePaginas]="indicePaginasBusqueda"
+                    (onSiguiente)="paginaSiguiente(searchBoxInsumos.value)" 
+                    (onAnterior)="paginaAnterior(searchBoxInsumos.value)" 
+                    (onListar)="listar(searchBoxInsumos.value, $event)" 
+                    *ngIf="totalBusqueda > 0 && totalBusqueda > resultadosPorPaginaBusqueda && lista_insumos"> 
+
+                </paginacion>
+            <form name="form" [formGroup]="insumo_receta"   (ngSubmit)="agregar_insumos()" >      
+                <table class="table" *ngIf="!lista_insumos" >
+                    <thead>
+                        <th>Cantidad</th>
+                        <th>Dosis</th>
+                        <th>Frecuencia</th>
+                        <th>Duración</th>
+                        <th>Cantidad Recetada</th>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <input class="input" type="text" placeholder="Dosis"  formControlName="dosis">
+                            </td>
+                            <td>
+                                <input class="input" type="text" placeholder="Frecuencia" formControlName="frecuencia">
+                            </td>
+                            <td>
+                                <input class="input" type="text" placeholder="Duracion" formControlName="duracion">
+                            </td>
+                            <td>
+                                <input class="input" type="text" placeholder="Cantidad Sugerido" formControlName="sugerido" readonly="readonly">
+                            </td>
+                            <td>
+                                <input class="input" type="text" placeholder="Cantidad Recetada" formControlName="cantidad">
+                            </td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <div class="control is-grouped" style="padding-top:10px;">
+                            <p class="control">
+                                <a class="button is-primary " >Guardar</a>
+                            </p>
+                            <p class="control">
+                                <a class="button is-danger " ><span class="icon"><i class="fa fa-close"></i></span><span>Cancelar</span></a>
+                            </p>
+                                            
+                        </div>
+                    </tfoot>
+                </table>
+                
+            
+           
+
+                <div class="is-fullwidth has-text-centered" *ngIf="cargando_insumos">
+                  <br>
+                  <span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span> &nbsp;<span>Cargando...</span></span>
+                  <br>
+                  <br>
+                </div>
+            
+            </form>
+
+        </div>
+    
+    </section>
+    <footer class="" style="position:relative; padding:1em;background: #FFF; border-top:1px solid #EEE; border-radius:0 0 0.8em 0.8em " >
+    </footer>
+  </div>
+</div>

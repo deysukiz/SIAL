@@ -1,0 +1,46 @@
+<aside class="menu" style="padding: 1em;">
+  <!--  <p class="menu-label">
+        Pedidos
+    </p>-->
+    <a routerLink="/farmacia/pedidos/nuevo" routerLinkActive="is-active" class="button is-primary is-inverted is-medium is-fullwidth" ><span class="icon"  ><i class="fa fa-plus"></i></span> <span>Nuevo</span></a>
+    <br>
+    <ul class="menu-list">
+        <li>
+            <a routerLink="/farmacia/pedidos/abiertos" #abiertos  routerLinkActive="is-active">
+                <span class="icon"  ><i class="fa fa-pencil-square-o"></i></span> Abiertos
+                <span class="icon is-pulled-right" *ngIf="cargando"><i class="fa fa-circle-o-notch fa-spin"></i></span>
+                <span *ngIf="stats.abiertos>0" class="tag is-pulled-right" [ngClass]="{ 'is-white': abiertos.className == 'is-active', 'is-danger': abiertos.className != 'is-active' }" >{{  stats.abiertos }}</span>
+            </a>
+        </li>
+        <li>
+            <a routerLink="/farmacia/pedidos/en-espera" #enEspera routerLinkActive="is-active">
+                <span class="icon"  ><i class="fa fa-clock-o"></i></span> En espera 
+                <span class="icon is-pulled-right" *ngIf="cargando"><i class="fa fa-circle-o-notch fa-spin"></i></span>
+                <span *ngIf="stats.en_espera>0" class="tag is-pulled-right" [ngClass]="{ 'is-white': enEspera.className == 'is-active', 'is-primary': enEspera.className != 'is-active' }" >{{  stats.en_espera }}</span>
+            </a>
+        </li>
+        <li>
+            <a routerLink="/farmacia/pedidos/pendientes" #pendientes routerLinkActive="is-active">
+                <span class="icon"  ><i class="fa fa-minus-circle"></i></span> Pendientes
+                <span class="icon is-pulled-right" *ngIf="cargando"><i class="fa fa-circle-o-notch fa-spin"></i></span>
+                <span *ngIf="stats.pendientes>0" class="tag is-pulled-right" [ngClass]="{ 'is-white': pendientes.className == 'is-active', 'is-warning': pendientes.className != 'is-active' }" >{{  stats.pendientes }}</span>
+            </a>             
+        </li>
+        <li>
+            <a routerLink="/farmacia/pedidos/en-camino" #enCamino routerLinkActive="is-active">
+                <span class="icon"  ><i class="fa fa-truck"></i></span> En camino
+                <span class="icon is-pulled-right" *ngIf="cargando"><i class="fa fa-circle-o-notch fa-spin"></i></span>
+                <span *ngIf="stats.en_camino>0" class="tag is-pulled-right" [ngClass]="{ 'is-white': enCamino.className == 'is-active', 'is-danger': enCamino.className != 'is-active' }" >{{  stats.en_camino }}</span>
+            </a>             
+        </li>
+        <li>
+            <a routerLink="/farmacia/pedidos/finalizados" routerLinkActive="is-active"><span class="icon"><i class="fa fa-check-circle"></i></span> <span>Finalizados</span></a>
+            <ul>
+                <li><a routerLink="/farmacia/pedidos/finalizados/completos" routerLinkActive="is-active">Completos</a></li>
+                <li><a routerLink="/farmacia/pedidos/finalizados/incompletos" routerLinkActive="is-active">Incompletos</a></li>
+            </ul>
+        </li>
+       
+    </ul>
+        
+</aside>

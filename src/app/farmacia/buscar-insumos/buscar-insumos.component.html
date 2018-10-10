@@ -1,0 +1,224 @@
+<div class="modal is-active" >
+  <div class="modal-background" (click)="cerrar()"></div>
+  <div class="modal-card" style="width:95%; height: 100%;">
+    <header class="modal-card-head" style="background: #00d1b2;">
+      <div class="container is-fluid"  style="width:100%;">
+          <h1 class="title" style="color:#FFF;">
+            <span class="icon is-medium"><i class="fa fa-search"></i></span> Insumos médicos 
+          </h1>
+          <p class="control is-expanded">
+              <input class="input "  type="text" placeholder="Buscar insumo" #searchBox id="search-box" (keyup)="buscar(searchBox.value)">
+          </p>
+      </div>            
+      <a class="button  is-primary" style="position:absolute; top:1em; right:1em;" (click)="cerrar()"><span class="icon "><i class="fa fa-close"></i></span></a>
+    </header>
+    <section class="modal-card-body" style="padding:0px;" >
+      <div class="is-fullwidth has-text-centered" *ngIf="cargando">
+          <br>
+          <span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span> &nbsp;<span>Cargando...</span></span>
+          <br>
+          <br>
+      </div>
+      <table class="table" *ngIf="!cargando" style="font-size: 0.8em;" >
+        <thead>
+            <tr>
+            <th></th>
+            <th class="is-hidden-mobile">Clave</th>
+            <th>Descripción</th>
+            <th style="text-align:center" class="is-hidden-mobile">Grupo(s)</th>
+            <th style="text-align:center"><abbr title="Tipo de insumo">Tipo</abbr></th>
+            <th style="text-align:left" *ngIf="conPrecios">Precio</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let item of insumos" class="is-unselectable" [ngClass]="{'item-seleccionado': item == insumoSeleccionado, 'is-disabled': (!conClues && !conStock && listaAgregados.indexOf(item.clave) >= 0)}" style="cursor: pointer" (click)="seleccionar(item)">
+              <td valign="middle">
+                <span *ngIf="item != insumoSeleccionado" class="icon is-small" style="color:#999"><i class="fa fa-circle-thin"></i></span>
+                <span *ngIf="item == insumoSeleccionado" class="icon is-small" style="color:#00d1b2"><i class="fa fa-check-circle"></i></span>
+              </td>                      
+              <td class="is-hidden-mobile">{{ item.clave }}</td>
+              <td>
+                <small class="is-hidden-tablet">{{ item.clave }} <br></small>
+                <!--div *ngIf="item.tipo != 'ME'" style="line-height:1em;"-->
+                <div style="line-height:1em;">
+                  <small>{{ item.descripcion }}</small>
+                </div>
+                <div style="padding: 0.5em 0 0.5em 0; ">
+                  <span *ngIf="(item.es_causes && item.tipo == 'ME')" class="tag is-success" [ngClass]="{'is-dark': item == insumoSeleccionado}" style="font-size: 0.7em !important;">CAUSES</span>
+                  <span *ngIf="(!item.es_causes && item.tipo == 'ME')" class="tag is-danger" style="font-size: 0.7em !important;">NO CAUSES</span>
+                  <span *ngIf="item.tipo == 'MC'" class="tag is-warning" style="font-size: 0.7em !important;">MATERIAL CURACIÓN</span>
+                  <span *ngIf="item.es_cuadro_basico" class="tag is-light" [ngClass]="{'is-dark': item == insumoSeleccionado}" style="font-size: 0.7em !important;">Cuadro básico</span>
+                  <span *ngIf="(item.tipo == 'ME' && item.informacion)">
+                    <span *ngIf="item.informacion.es_controlado" class="tag is-info" style="font-size: 0.7em">Controlado</span>
+                    <span *ngIf="item.informacion.es_surfactante" class="tag is-info" style="font-size: 0.7em">Surfactante</span>  
+                  </span>
+                </div>
+              </td>
+
+              <!--td >
+                <small class="is-hidden-tablet">{{ item.clave }} <br></small>
+                <b>{{ item.generico_nombre }}</b> <br  class="is-hidden-mobile"><small *ngIf="(item.tipo == 'ME' && item.informacion)"><b>{{ item.informacion.concentracion }}</b></small><br>
+                
+                <div class="is-hidden-tablet" *ngIf="(item.tipo == 'ME' && item.informacion)" style="line-height:1em;">
+                  <small><i>{{ item.informacion.presentacion_nombre }}</i></small><br>
+                  <small><i>{{ item.informacion.contenido }} </i></small>
+                </div>
+                <div class="is-hidden-tablet" *ngIf="item.tipo != 'ME'" style="line-height:1em;">
+                  <small>{{ item.descripcion }}</small>
+                </div>
+                <div class="is-hidden-tablet" style="padding: 0.5em 0 0.5em 0; ">
+                  <span *ngIf="(item.es_causes && item.tipo == 'ME')" class="tag is-success" [ngClass]="{'is-dark': item == insumoSeleccionado}" style="font-size: 0.7em !important;">CAUSES</span>
+                  <span *ngIf="(!item.es_causes && item.tipo == 'ME')" class="tag is-danger" style="font-size: 0.7em !important;">NO CAUSES</span>
+                  <span *ngIf="item.tipo == 'MC'" class="tag is-warning" style="font-size: 0.7em !important;">MATERIAL CURACIÓN</span>
+                  <span *ngIf="item.es_cuadro_basico" class="tag is-light" [ngClass]="{'is-dark': item == insumoSeleccionado}" style="font-size: 0.7em !important;">Cuadro básico</span>
+                  
+                  <span *ngIf="(item.tipo == 'ME' && item.informacion)">
+                    <span *ngIf="item.informacion.es_controlado" class="tag is-info" style="font-size: 0.7em">Controlado</span>
+                    <span *ngIf="item.informacion.es_surfactante" class="tag is-info" style="font-size: 0.7em">Surfactante</span>  
+                  </span>
+                  
+                </div>
+              </td> 
+
+              <td class="is-hidden-mobile">
+                <div *ngIf="(item.tipo == 'ME' && item.informacion)" style="line-height:1em;">
+                  <small><i>{{ item.informacion.presentacion_nombre }}</i></small><br>
+                  <small><i>{{ item.informacion.contenido }} </i></small>
+                </div>
+                <div *ngIf="item.tipo != 'ME'" style="line-height:1em;">
+                  <small>{{ item.descripcion }}</small>
+                </div>
+                <div style="padding: 0.5em 0 0.5em 0; ">
+                  <span *ngIf="(item.es_causes && item.tipo == 'ME')" class="tag is-success" [ngClass]="{'is-dark': item == insumoSeleccionado}" style="font-size: 0.7em !important;">CAUSES</span>
+                  <span *ngIf="(!item.es_causes && item.tipo == 'ME')" class="tag is-danger" style="font-size: 0.7em !important;">NO CAUSES</span>
+                  <span *ngIf="item.tipo == 'MC'" class="tag is-warning" style="font-size: 0.7em !important;">MATERIAL CURACIÓN</span>
+                  <span *ngIf="item.es_cuadro_basico" class="tag is-light" [ngClass]="{'is-dark': item == insumoSeleccionado}" style="font-size: 0.7em !important;">Cuadro básico</span>
+                  <span *ngIf="(item.tipo == 'ME' && item.informacion)">
+                    <span *ngIf="item.informacion.es_controlado" class="tag is-info" style="font-size: 0.7em">Controlado</span>
+                    <span *ngIf="item.informacion.es_surfactante" class="tag is-info" style="font-size: 0.7em">Surfactante</span>  
+                  </span>
+                </div>
+              </td-->
+
+              <td style="text-align:center;" class="is-hidden-mobile">
+                <div *ngIf="item.generico">
+                  <span *ngFor="let grupo of item.generico.grupos">{{grupo.nombre}}<br></span>
+                </div>
+              </td>
+              <td style="text-align:center;">
+                <b>
+                  <abbr *ngIf="item.tipo == 'ME'" title="Medicamento">ME</abbr>
+                  <abbr *ngIf="item.tipo == 'MC'" title="Material de curación">MC</abbr>
+                  <abbr *ngIf="item.tipo == 'AD'" title="Auxiliar de diagnóstico">AD</abbr>
+                </b>
+              </td>
+              <td style="text-align:left;" *ngIf="conPrecios">
+                <b>
+                  <abbr>$ {{item.precio | number:'1.2-2'}}</abbr>
+                </b>
+              </td>
+              <!--td style="text-align:center">
+                <a (click)="mostrarFichaInformativa($event,item.clave)"><span class="icon"><i class="fa fa-info-circle"></i></span></a>
+              </td-->
+            </tr>  
+            <tr *ngIf="insumos.length == 0 && searchBox.value != ''">
+                <td colspan="7" style="vertical-align: middle; color:#888;">No se encontraron resultados.</td>                    
+            </tr>
+            <tr *ngIf="insumos.length == 0 && searchBox.value == '' ">
+                <td colspan="7" style="vertical-align: middle; color:#888;">Por favor escriba en el campo de búsqueda para encontrar insumos.</td>                    
+            </tr>      
+        </tbody>  
+      </table>
+      <br>
+    </section>
+    <footer class="" style="position:relative; padding:1em;background: #FFF; border-top:1px solid #EEE; border-radius:0 0 0.8em 0.8em " >
+      
+      <paginacion 
+                [total]="total" 
+                [paginasTotales]="paginasTotales" 
+                [resultadosPorPagina]="resultadosPorPagina" 
+                [paginaActual]="paginaActual" 
+                [indicePaginas]="indicePaginas"
+                (onSiguiente)="paginaSiguiente(searchBox.value)" 
+                (onAnterior)="paginaAnterior(searchBox.value)" 
+                (onListar)="listar(searchBox.value,$event)" 
+                *ngIf="total > 0 && total > resultadosPorPagina "></paginacion>
+      <div class="notification is-dark is-unselectable mensaje-agregar" [ngClass]="{ 'mostrar': mensajeAgregado.mostrar}"    *ngIf="mensajeAgregado.mostrar" (click)="mensajeAgregado.mostrar=false">
+        <span class="icon"><i class="fa fa-check-circle"></i></span> <span>Agregado</span>
+      </div>
+  
+      <form (submit)="enviar($event)" >
+        <div class="columns">
+          <div class="column" *ngIf="conClues">
+               <div class="field">
+                <label>Unidad médica:</label>
+                <p class="control is-expanded">                  
+                  <span class="select is-fullwidth">              
+                    <select (change)="seleccionarClues($event.target.value)" #cluesSelect [disabled]="listaCluesUtilizadasConInsumo.length == listaClues.length">
+                      <option value="-1">Seleccione una clues</option>
+                      <option value="TODAS" *ngIf="listaClues.length > 0" [disabled]="listaCluesUtilizadasConInsumo.length > 0">Todas las unidades médicas</option>
+                      <option *ngFor="let um of listaClues" value="{{ um.clues }}" [disabled]="listaCluesUtilizadasConInsumo.indexOf(um.clues)>= 0">{{ um.clues }} - {{ um.nombre }}</option>
+                    </select>
+                  </span>
+                </p>
+              </div>                   
+          </div>
+          <div class="column" *ngIf="conStock">
+            <div class="field">
+              <label>Stock:</label>
+              <p class="control is-expanded">                  
+                <span class="select is-fullwidth" *ngIf="!cargandoStock">              
+                  <select (change)="seleccionarStock($event.target.value)" #stockSelect>
+                    <option value="-1">Seleccione un elemento</option>
+                    <option *ngFor="let stock of listaStock" value="{{ stock.id }}" [disabled]="listaAgregadosConStock[stock.id]">L: {{ stock.lote }} - Cad: {{ stock.fecha_caducidad }} - E: {{ stock.existencia }} {{ (listaAgregadosConStock[stock.id])?'( -'+listaAgregadosConStock[stock.id]+' )':'' }}</option>
+                  </select>
+                </span>
+                <span class="is-fullwidth" *ngIf="cargandoStock">
+                  <span class="icon"><i class="fa fa-refresh fa-spin"></i></span> Cargando lotes...
+                </span>
+              </p>
+            </div>                   
+          </div>
+
+          <div class="column" *ngIf="conTipoInsumo">
+              <div class="field">
+               <label>Tipo Insumo:</label>
+               <p class="control is-expanded">                  
+                 <span class="select is-fullwidth">              
+                   <select (change)="seleccionarTipoInsumo($event.target.value)" #tipoInsumoSelect>
+                     <option value="-1">Seleccione el tipo de insumo</option>                   
+                     <option *ngFor="let item of listaTipoInsumos" value="{{ item.id }}">{{ item.clave }} - {{ item.nombre }}</option>
+                   </select>
+                 </span>
+               </p>
+             </div>                   
+         </div>
+          <div class="column">
+           
+              <div class="control is-grouped is-pulled-right" >            
+                <p class="control is-expanded" [ngClass]=" {'is-hidden': !conCantidad }" >
+                    <label>Consumo promedio mensual: 0</label>
+                    <input class="input is-medium" [disabled]="insumoSeleccionado == null" type="number" placeholder="Cantidad" #cantidadBox id="cantidad" (keyup)="comprobarCantidad(cantidadBox.value)" autocomplete="off">
+                </p>
+
+                <p class="control is-expanded" [ngClass]=" {'is-hidden': !establecerPrecio }" >
+                    <label>$ Precio</label>
+                    <input class="input is-medium" [disabled]="insumoSeleccionado == null" type="number" step=".01" placeholder="0.00" #precioBox id="precio" (keyup)="comprobarCantidadDecimales(precioBox.value)" autocomplete="off">
+                </p>
+                <p class="control">
+                    <label>&nbsp;</label>
+                    <button [disabled]="(!cantidadValida && conCantidad )|| insumoSeleccionado == null || (conClues && clues == -1) || (!cantidadValida && establecerPrecio ) " class="button is-medium is-primary " >
+                    <span class="icon"><i class="fa fa-plus"></i></span><span>Agregar</span>
+                    </button>
+                </p>
+              </div>
+          </div>
+        </div>
+      </form>
+    </footer>
+    <div class="notification is-danger" style="position:fixed; left:1em;  bottom:1em;" *ngIf="mensajeError.mostrar">
+        <button class="delete" (click)="mensajeError.mostrar = false"></button>        
+        <b>Error:</b> {{ mensajeError.texto }}
+    </div>
+  </div>
+</div>

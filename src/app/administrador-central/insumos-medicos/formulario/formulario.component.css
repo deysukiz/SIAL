@@ -1,0 +1,34 @@
+.top-bar {
+    padding: 1em ; 
+    font-size: 1.2em; 
+    background: #FFF;    
+    color: #333;
+	position: relative;
+	border-radius: 0.75em 0.75em 0 0;
+}
+.top-bar.is-primary {
+    background: #00d1b2;
+    color:#FFF;
+}
+.top-bar.is-primary h1 { color: #FFF; }
+.top-bar.is-danger {
+    background: #ff3860;
+    color:#FFF;
+}
+.top-bar.is-dark {
+    background: #333;
+    color:#FFF
+}
+.top-bar.is-dark h1 { color: #FFF;}
+
+.text-overflow {
+	display: block;
+  	overflow: hidden;
+  	white-space: nowrap;
+  	text-overflow: ellipsis;
+}
+
+select.is-danger {
+	border:1px solid #D84315;
+	border-radius: 0.25em;
+}

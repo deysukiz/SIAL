@@ -1,0 +1,165 @@
+<panel-control-menu></panel-control-menu>
+<div style="height:50px;"></div>
+<div class="contenedor columns " style="height:85%">
+  <div class="column is-one-quarter is-hidden-mobile">
+    <panel-control-menu-aside></panel-control-menu-aside>
+  </div>
+  <div class="column" style="padding:2em;">
+    <div style="background: #FFF; border-radius: 1em; overflow: hidden;">
+      <section class="hero is-primary" >
+          <h1 class="title" style="margin:0.5em;">
+            <span class="icon is-medium"><i class="fa fa-pencil"></i></span> Firmantes Asignados
+          </h1>
+      </section>
+      
+      <div class="is-fullwidth has-text-centered" *ngIf="cargando">
+          <br>
+          <span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span> &nbsp;<span>Cargando...</span></span>
+          <br>
+          <br>
+      </div>
+      <section class="section">
+        <!--<button type="button" (click)='obtener_firmantes()'>Cargar</button>-->
+        <form name="form" [formGroup]="firmantes" (submit)='asignar_firmantes()' *ngIf="!cargando"> 
+
+            <div class="control is-grouped">
+              <p class="control is-expanded  has-icon has-icon-right">
+                  <label class="label">Firma Director</label>
+                <input class="input" autofocus type="text" placeholder="Firma Director" #director formControlName="firma_director" [readonly]="true">
+                <button type="button" class="button is-info" (click)='buscar_firmante(1, director.value)'>Buscar</button>
+                <button type="button" class="button is-danger" (click)='eliminar_firmante(1)'>Eliminar</button>
+                <span class="icon is-small" *ngIf="firmantes.get('firma_director').hasError('required') && firmantes.get('firma_director').touched">
+                  <i class="fa fa-warning"></i>
+                </span>
+                <span class="help is-danger" *ngIf="firmantes.get('firma_director').hasError('required') && firmantes.get('firma_director').touched">Este campo es requerido.</span>
+              </p>
+              
+            </div>
+            <div class="control is-grouped">
+              <p class="control is-expanded  has-icon has-icon-right">
+                  <label class="label">Firma Almacén</label>
+                <input class="input"  type="text"  placeholder="Firma Almacén" #almacenista formControlName="firma_almacen"  [readonly]="true">
+                <button type="button" class="button is-info" (click)='buscar_firmante(2, almacenista.value)'>Buscar</button>
+
+                <button type="button" class="button is-danger" (click)='eliminar_firmante(2)'>Eliminar</button>
+                <span class="icon is-small" *ngIf="firmantes.get('firma_almacen').hasError('required') && firmantes.get('firma_almacen').touched">
+                  <i class="fa fa-warning"></i>
+                </span>
+                <span class="help is-danger" *ngIf="firmantes.get('firma_almacen').hasError('required') && firmantes.get('firma_almacen').touched">Este campo es requerido.</span>
+              </p>
+              
+            </div> 
+            
+            <div class="control">
+              <button type="submit" class="button is-primary is-pulled-right">Actualizar</button>              
+            </div>       
+             
+            <table class="table">
+            <thead>
+                <tr>
+                  <th>FOLIO</th>
+                  <th>FIRMANTES</th>
+                  <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let item of pedidos; let i=index" [ngClass]="{'proyecto-estatus-normal':(item.status == 'BR' || item.status == 'PS'),'proyecto-estatus-azul':item.status == 'EF','proyecto-estatus-rojo':item.status == 'EX-CA','proyecto-estatus-amarillo':item.status == 'EX','proyecto-estatus-verde':item.status == 'FI'}">
+                        <th style="vertical-align: middle;">
+                            <span class="icon" *ngIf="item.tipo_pedido_id=='PA'"><i class="fa fa-hospital-o"></i></span>
+                            <span class="icon" *ngIf="item.tipo_pedido_id=='PFS'"><i class="fa fa-building"></i></span>
+                            <span class="icon" *ngIf="item.tipo_pedido_id=='PALT'"><i class="fa fa-building-o"></i></span>
+                            {{ item.folio?item.folio:'S/F' }}<br>
+                            Nombre: {{ item.descripcion }}
+                        </th>
+                        <td>Director: <span *ngIf="item.director">{{ item.director.nombre }}</span><br>
+                        Almacén: <span *ngIf="item.encargado_almacen">{{ item.encargado_almacen.nombre }}</span></td>
+                        <td style="vertical-align: middle;"><input type="checkbox" name="pedidos" (change)='updateCheckedOptions(item.id, $event)'></td>
+                       
+                    </tr>
+               <tr *ngIf="pedidos.length == 0">
+                <td colspan="5" style="vertical-align: middle; color:#888;">Esta lista está vacía.</td>                    
+            </tr>
+            </tbody>
+            
+        </table>
+       </form>
+      </section>
+      
+    </div>
+  </div>
+</div>
+
+<div id="modal-temas" class="modal is-active" [ngClass]="{'is-active': showFirmante}">
+  <div class="modal-background"  (click)="showDialog = !showFirmante"></div>
+  <div class="modal-card" style="width:60%; height: auto;">
+    <header class="modal-card-head" style="background-color: #00d1b2" >
+      <div class="container is-fluid"  style="width:100%;">
+          <h1 class="title" style="color:#FFF;">
+            <span class="icon is-medium"><i class="fa fa-user"></i></span> Buscar Firmante
+          </h1>
+      </div>            
+      <a class="button  is-primary" style="position:absolute; top:1em; right:1em;" (click)="showFirmante = !showFirmante"><span class="icon "><i class="fa fa-close"></i></span></a>
+    </header>
+    <section class="section" style="padding-top: 1rem ">
+        <div class="columns">
+          <div class="column"  [ngClass]="{'is-three-quarters': filter }">
+            <label class="label" style="color: #FFF">Nombre</label>
+            <input class="input is-medium" type="text" [(ngModel)]="buscarPersonal" placeholder="Buscar" #searchBoxFirmante  (keyup)="buscar_personal(searchBoxFirmante.value)">
+            <button type="button" class="button is-info" [ngClass]="{'is-loading': agregando_personal}" [disabled]="agregando_personal" (click)='AgregarPersonal(searchBoxFirmante.value)'>Agregar Nuevo</button>
+          </div>
+        </div>
+
+        <table class="table" *ngIf='!cargando_personal'>
+            <thead>
+                <tr>
+                  <th>NOMBRE</th>
+                  <th>CLUES</th>
+                  <th>UNIDAD</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let item of personal; let i=index"  (click) = 'seleccionarPersonal(item)' style="cursor:pointer">
+                <td>{{ item.nombre }}</td>
+                <td>{{ item.clues }}</td>
+                <td *ngIf="item.unidad">{{ item.unidad.nombre }}</td>
+                <td  *ngIf="!item.unidad">SIN UNIDAD</td>
+                </tr>
+               <tr *ngIf="personal.length == 0">
+                <td colspan="5" style="vertical-align: middle; color:#888;">Esta lista está vacía.</td>                    
+            </tr>
+            </tbody>
+            
+        </table>
+        <div class="is-fullwidth has-text-centered" *ngIf="cargando_personal">
+          <br>
+          <span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span> &nbsp;<span>Cargando...</span></span>
+          <br>
+          <br>
+      </div>
+
+        <paginacion 
+            [total]="totalBusqueda" 
+            [paginasTotales]="paginasTotalesBusqueda" 
+            [resultadosPorPagina]="resultadosPorPaginaBusqueda" 
+            [paginaActual]="paginaActualBusqueda" 
+            [indicePaginas]="indicePaginasBusqueda"
+            (onSiguiente)="paginaSiguienteBusqueda(searchBoxFirmante.value)" 
+            (onAnterior)="paginaAnteriorBusqueda(searchBoxFirmante.value)" 
+            (onListar)="listarBusqueda(searchBoxFirmante.value,$event)" 
+            *ngIf="totalBusqueda > 0 && totalBusqueda > resultadosPorPaginaBusqueda"></paginacion>
+    </section>
+  </div>
+</div>
+
+<div class="notification is-danger" style="position:fixed; left:1em;  bottom:1em;" *ngIf="mensajeError.mostrar">
+    <button class="delete" (click)="mensajeError.mostrar = false"></button>        
+    <b>Error:</b> {{ mensajeError.texto }}<br><br>
+    <p style="text-align:center" ><a  class="button is-danger is-inverted" (click)="ultimaPeticion(); mensajeError.mostrar = false"> <span class="icon"><i class="fa fa-refresh"></i></span> <span>Volver a intentar</span></a></p>        
+</div>
+
+<div class="notification is-success" style="position:fixed; left:1em;  bottom:1em; width: auto" *ngIf="mensajeExito.mostrar">       
+    <button class="delete" (click)="mensajeExito.mostrar = false"></button>
+    <p><span class="icon" style="margin-right: 0.5em;"><i class="fa fa-check-circle"></i></span> <span>{{ mensajeExito.texto }}</span></p>
+    <br>
+    <p style="text-align: center;"><small >Este mensaje desaparecerá en {{ mensajeExito.cuentaAtras }} segundos.</small></p>       
+</div>

@@ -1,0 +1,460 @@
+<administrador-proveedores-menu></administrador-proveedores-menu>
+
+<div class="contenedor" style="height:100%; padding:0.75rem; padding-top:0rem; overflow: auto;">
+    <!--div class="column" style="position:relative; overflow-x:hidden;"-->
+        <div style="height:60px;"></div>
+        <div style="background: #FFF; overflow:hidden; border-radius:1em; width:100%;margin-bottom:1em;">
+            <table class="table" style="min-width:100%; font-size:0.8em; margin-bottom:0.2em;margin-top:0.2em;">
+                <thead>
+                    <tr>
+                        <th>Presupuesto</th>
+                        <th style="text-align:center">Causes</th>
+                        <th style="text-align:center">No causes</th>
+                        <th style="text-align:center">Material de curación</th>
+                        <th style="text-align:center">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngIf="cargandoPresupuestos">
+                        <th colspan="5" style="text-align:center"><span class="icon"><i class="fa fa-refresh fa-spin"></i></span>&nbsp;Cargando Presupuesto...</th>
+                    </tr>
+                    <tr *ngIf="!cargandoPresupuestos">
+                        <td>Comprometido</td>
+                        <td style="text-align:center"><span class="tag is-warning"> $ {{ presupuesto.causes_comprometido | number:'1.2-2' }}</span></td>
+                        <td style="text-align:center"><span class="tag is-warning"> $ {{ presupuesto.no_causes_comprometido | number:'1.2-2' }}</span></td>
+                        <td style="text-align:center"><span class="tag is-warning"> $ {{ presupuesto.material_curacion_comprometido | number:'1.2-2' }}</span></td>
+                        <td style="text-align:center"><span class="tag is-warning"> $ {{ presupuesto.total_comprometido | number:'1.2-2' }}</span></td>
+                    </tr>
+                    <tr *ngIf="!cargandoPresupuestos">
+                        <td>Devengado</td>
+                        <td style="text-align:center"><span class="tag is-danger">$ {{ presupuesto.causes_devengado | number:'1.2-2' }}</span></td>
+                        <td style="text-align:center"><span class="tag is-danger">$ {{ presupuesto.no_causes_devengado | number:'1.2-2' }}</span></td>
+                        <td style="text-align:center"><span class="tag is-danger">$ {{ presupuesto.material_curacion_devengado | number:'1.2-2' }}</span></td>
+                        <td style="text-align:center"><span class="tag is-danger">$ {{ presupuesto.total_devengado | number:'1.2-2' }}</span></td>
+                    </tr>
+                    <tr *ngIf="!cargandoPresupuestos">
+                        <td>Total Pedido</td>
+                        <td style="text-align:center"><span class="tag is-info">$ {{ presupuesto.total_causes | number:'1.2-2' }}</span></td>
+                        <td style="text-align:center"><span class="tag is-info">$ {{ presupuesto.total_no_causes | number:'1.2-2' }}</span></td>
+                        <td style="text-align:center"><span class="tag is-info">$ {{ presupuesto.total_material_curacion | number:'1.2-2' }}</span></td>
+                        <td style="text-align:center"><span class="tag is-info">$ {{ presupuesto.total_pedido | number:'1.2-2' }}</span></td>
+                    </tr>
+                </tbody>
+            </table>
+            <!--table class="table" *ngIf="!cargando" style="min-width:100%; font-size:0.8em; margin-bottom:0.2em;margin-top:0.2em;">
+                <thead>
+                    <tr>
+                        <th>Presupuesto</th>
+                        <th style="text-align:center">Autorizado</th>
+                        <th style="text-align:center">Comprometido</th>
+                        <th style="text-align:center">Devengado</th>
+                        <th style="text-align:center">Disponible</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th>Causes</th>
+                        <td style="text-align:center"><span class="tag is-primary">$ {{ presupuesto.causes_modificado | number:'1.2-2' }}</span></td>
+                        <td style="text-align:center"><span class="tag is-warning"> $ {{ presupuesto.causes_comprometido | number:'1.2-2' }}</span></td>
+                        <td style="text-align:center"><span class="tag is-danger">$ {{ presupuesto.causes_devengado | number:'1.2-2' }}</span></td>
+                        <td style="text-align:center"><span class="tag is-success">$ {{ presupuesto.causes_disponible | number:'1.2-2' }}</span></td>
+                    </tr>
+                    <tr>
+                        <th>No causes</th>
+                        <td style="text-align:center"><span class="tag is-primary">$ {{ presupuesto.no_causes_modificado | number:'1.2-2' }}</span></td>
+                        <td style="text-align:center"><span class="tag is-warning"> $ {{ presupuesto.no_causes_comprometido | number:'1.2-2' }}</span></td>
+                        <td style="text-align:center"><span class="tag is-danger">$ {{ presupuesto.no_causes_devengado | number:'1.2-2' }}</span></td>
+                        <td style="text-align:center"><span class="tag is-success">$ {{ presupuesto.no_causes_disponible | number:'1.2-2' }}</span></td>
+                    </tr>
+                    <tr>
+                        <th>Material de curación</th>
+                        <td style="text-align:center"><span class="tag is-primary">$ {{ presupuesto.material_curacion_modificado | number:'1.2-2' }}</span></td>
+                        <td style="text-align:center"><span class="tag is-warning"> $ {{ presupuesto.material_curacion_comprometido | number:'1.2-2' }}</span></td>
+                        <td style="text-align:center"><span class="tag is-danger">$ {{ presupuesto.material_curacion_devengado | number:'1.2-2' }}</span></td>
+                        <td style="text-align:center"><span class="tag is-success">$ {{ presupuesto.material_curacion_disponible | number:'1.2-2' }}</span></td>
+                    </tr>
+                    <tr>
+                        <th>Total</th>
+                        <td style="text-align:center"><span class="tag is-primary">$ {{ presupuesto.total_modificado | number:'1.2-2' }}</span></td>
+                        <td style="text-align:center"><span class="tag is-warning"> $ {{ presupuesto.total_comprometido | number:'1.2-2' }}</span></td>
+                        <td style="text-align:center"><span class="tag is-danger">$ {{ presupuesto.total_devengado | number:'1.2-2' }}</span></td>
+                        <td style="text-align:center"><span class="tag is-success">$ {{ presupuesto.total_disponible | number:'1.2-2' }}</span></td>
+                    </tr>
+                </tbody>
+            </table-->
+         </div>
+            
+        <section class="hero is-primary"  style="  border-radius:  1em  1em 0  0;" >
+            
+            <div class="hero-body" style="position:relative;">                    
+                
+                <a class="button  is-primary" *ngIf="!cargando" style="position:absolute; top:1em; right:1em;" (click)="exportar()"><span class="icon "><i class="fa fa-file-excel-o"></i></span> <span>Exportar</span></a>
+                <div class="container is-fluid">
+                    
+                    <h1 class="title">
+                        <span class="icon is-medium"><i class="fa fa-file-text"></i></span> Pedidos
+                    </h1>
+                    
+                    <div class="control is-grouped">
+                        <p class="control is-expanded">
+                            <input class="input is-medium" type="text" placeholder="Buscar por CLUES ó Folio ó Nombre del pedido" [(ngModel)] = "q" (keyup)="filtrarQuery($event)">
+                        </p>
+                        <!--div class="control">
+                            <button class="button is-primary" (click)="sin_pedidos = !sin_pedidos"><span class="icon"><i class="fa" [ngClass]="{'fa-check-square-o': sin_pedidos, 'fa-square-o':!sin_pedidos }"></i></span> &nbsp;&nbsp;Sin pedidos</button>
+                        </div-->
+                    </div>
+                    <div class="columns">
+                        <div class="column">
+                            <label>Status:</label>
+                            <p class="control is-expanded">
+                                <span class="select is-fullwidth">
+                                <select #statusSelect (change)="cambioSeleccionStatus(statusSelect.value)">
+                                    <option value="-1">Todos</option>
+                                    <option *ngFor="let item of status" value="{{item.id}}">{{ item.descripcion }}</option>
+                                </select>
+                                </span>
+                            </p>                   
+                        </div>
+                        <div class="column">
+                            <label>Jurisdicciones:</label>
+                            <p class="control is-expanded">
+                                <span class="select is-fullwidth">
+                                <select #js id="jurisdicciones"  (change)="cambioSeleccionJurisdiccion(js.value)">
+                                    <option value="-1">Todas</option>
+                                    <option *ngFor="let item of jurisdicciones" value="{{item.id}}">JS {{ item.numero }} - {{ item.nombre }}</option>
+                                </select>
+                                </span>
+                            </p>
+                        </div>
+                        <div class="column">
+                            <label for="mes">Mes:</label>
+                            <p class="control is-expanded">
+                                <span class="select is-fullwidth">
+                                    <select [(ngModel)]="mes" name="mes">
+                                        <option *ngFor="let item of meses" [value]="item.id">{{ item.nombre }}</option>
+                                    </select>
+                                </span>
+                            </p>
+                        </div>
+                        <div class="column">
+                            <label for="mes">Año:</label>
+                            <p class="control is-expanded">
+                                <input class="input" type="number" placeholder="2017" [(ngModel)] = "anio" (keyup)="filtrarQuery($event)">
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div *ngIf="jurisdiccionesSeleccionadas.length>0 || statusSeleccionados.length>0">
+                        <h1 class="title is-6">Filtro aplicado:</h1>
+                        <span class="tag is-white is-medium" style="margin-bottom:0.5em; margin-right:0.2em;" *ngFor="let item of jurisdiccionesSeleccionadas;  let i = index">JS {{ item.numero }}<button class="delete is-small" (click)="quitarJurisdiccion(i)"></button></span>
+                        <span class="tag is-warning is-medium" style="margin-bottom:0.5em; margin-right:0.2em;" *ngFor="let item of statusSeleccionados;  let i = index">{{ item.descripcion }}<button class="delete is-small" (click)="quitarStatus(i)"></button></span>
+                    </div>
+                    <nav class="level">
+                        <div class="level-left">
+                            <h1 class="title is-5">Resultados: <b>{{ total }}</b></h1>
+                        </div>
+                        <div class="level-right">
+                            <div class="block">
+                            <button class="button " *ngIf="jurisdiccionesSeleccionadas.length>0 || statusSeleccionados.length>0 || q != '' " (click)="q = ''; jurisdiccionesSeleccionadas = []; proveedoresSeleccionados = []; statusSeleccionados =[]; js.value = -1; statusSelect.value = -1;"><span class="icon"><i class="fa fa-times"></i></span> <span>Limpiar filtro</span></button>
+                            <button class="button is-primary is-inverted" (click)="listar(1)"><span class="icon"><i class="fa fa-filter"></i></span> <span>Filtrar</span></button>
+                            </div>
+                        </div>
+                    </nav>
+                
+                    
+                </div>
+            </div>
+        </section>
+        
+        <div  style="background: #FFF; overflow-x:auto; ">
+            <div class="is-fullwidth has-text-centered" *ngIf="cargando">
+                <br>
+                <span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span> &nbsp;<span>Cargando...</span></span>
+                <br>
+                <br>
+            </div>
+            <table class="table" *ngIf="!cargando" style="min-width:100%; font-size:0.8em;">
+                <thead>
+                    <tr>
+                        <th colspan="12">
+                            Status: 
+                            <span class="icon sin-surtir"><i class="fa fa-circle"></i></span> Sin Surtir | 
+                            <span class="icon surtiendo"><i class="fa fa-minus-circle"></i></span> Surtiendo | 
+                            <span class="icon surtido"><i class="fa fa-check-circle"></i></span> Surtido | 
+                            <span class="icon farmacia"><i class="fa fa-cubes"></i></span> Farmacia |
+                            <span class="icon expirado"><i class="fa fa-exclamation-circle"></i></span> Expirado |
+                            <span class="icon cancelado"><i class="fa fa-times-circle"></i></span> Cancelado
+                        </th>
+                    </tr>
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        <th style="text-align:center;">Fecha</th>
+                        <th colspan="2" style="text-align:center;">Total</th>
+                        <th class="causes" colspan="2" style="text-align:center;">Causes</th>
+                        <th class="no-causes" colspan="2" style="text-align:center;">No causes</th>
+                        <th class="material-curacion" colspan="2" style="text-align:center;">Mat. de curación</th>
+                        <th></th>
+                    </tr>
+                    <tr>
+                        <th style="text-align:center;">Status</th>
+                        <th>Folio/Nombre del Pedido/Unidad Medica</th>
+                        <!--th>Nombre</th>
+                        <th>Unidad médica</th-->
+                        <th style="text-align:center;">Pedido [Expiración]</th>
+                        
+                        <th style="text-align:center;">Claves</th>
+                        <th style="text-align:center;">Monto</th>
+
+                        <th class="causes" style="text-align:center;">Claves</th>
+                        <th class="causes" style="text-align:center;">Monto</th>
+
+                        <th class="no-causes" style="text-align:center;">Claves</th>
+                        <th class="no-causes" style="text-align:center;">Monto</th>
+
+                        <th class="material-curacion" style="text-align:center;">Claves</th>
+                        <th class="material-curacion" style="text-align:center;">Monto</th>
+
+                        <th style="text-align:center;">Archivos</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let item of lista; let i=index"> 
+                        <td [ngClass]="{'surtido':item.status=='FI','expirado':item.status=='EX', 'cancelado':item.status=='EX-CA','sin-surtir':(item.total_cantidad_recibida==0 && item.status=='PS'),'surtiendo':(item.total_cantidad_recibida>0 && item.status=='PS'),'farmacia':item.status=='EF'}" style="text-align:center; vertical-align: middle;"><span class="icon is-medium"><i class="fa" [ngClass]="{'fa-check-circle':item.status=='FI','fa-times-circle':item.status=='EX-CA','fa-exclamation-circle':item.status=='EX','fa-circle':(item.total_cantidad_recibida==0 && item.status == 'PS'),'fa-minus-circle':(item.total_cantidad_recibida>0 && item.status == 'PS'),'fa-cubes':item.status=='EF'}"></i></span></td>
+                        <td style="vertical-align: middle;"><strong>{{ item.folio }}</strong><br>{{item.unidad_medica}}<br>{{item.descripcion}}</td>
+                        <!--td style="vertical-align: middle;">{{ item.descripcion }}</td>
+                        <td style="vertical-align: middle;">{{ item.unidad_medica }}</td-->
+                        <td style="text-align:center; vertical-align: middle;" [ngClass]="{'estatus-rojo':(item.status != 'EF' && item.expira_en_dias <= 0),'estatus-amarillo':(item.status == 'PS' && (item.expira_en_dias > 0 && item.expira_en_dias <= 5))}">
+                            {{ item.fecha_concluido | date:'y-MM-dd' }}<br>
+                            <span *ngIf="item.status != 'EF'">
+                                [{{ item.fecha_expiracion | date:'y-MM-dd' }}]<br>
+                            </span>
+                            <strong *ngIf="item.status == 'PS' && item.expira_en_dias >= 0">
+                                Expira <span *ngIf="item.expira_en_dias == 0">Hoy</span><span *ngIf="item.expira_en_dias > 0">en {{item.expira_en_dias}} día(s)</span>
+                            </strong>
+                            <strong *ngIf="item.status == 'EX' && item.expira_en_dias < 0">
+                                <span *ngIf="item.status != 'EX-CA'">Expirado  hace {{item.expira_en_dias*(-1)}} día(s)</span>
+                            </strong>
+                        </td>
+                        
+                        <td style="text-align:center; vertical-align: middle; white-space: nowrap;">{{ item.total_claves_recibidas }} / {{ item.total_claves_solicitadas }} <br> <strong>({{(item.total_claves_recibidas/item.total_claves_solicitadas)*100 | number:'1.0-2'}} %)</strong></td>
+                        <td style="text-align:center; vertical-align: middle;">$ {{ item.total_monto_recibido | number:'1.2-2' }} / $ {{ item.total_monto_solicitado | number:'1.2-2' }} <br> <strong>({{((item.total_monto_recibido/item.total_monto_solicitado)*100) | number:'1.0-2'}} %)</strong></td>
+
+                        <td class="causes"  style="text-align:center; vertical-align: middle; white-space: nowrap;">
+                            <span *ngIf="item.total_claves_causes">{{ item.total_claves_causes_recibidas }} / {{ item.total_claves_causes }} <br> <strong>({{((item.total_claves_causes_recibidas/item.total_claves_causes)*100) | number:'1.0-2'}} %)</strong></span>
+                            <span *ngIf="!item.total_claves_causes"> --- </span>
+                        </td>
+                        <td class="causes"  style="text-align:center; vertical-align: middle;">
+                            <span *ngIf="(+item.total_monto_causes*1)">${{ item.total_monto_causes_recibido  | number:'1.2-2'}} / ${{ item.total_monto_causes  | number:'1.2-2'}} <br> <strong>({{((item.total_monto_causes_recibido/item.total_monto_causes)*100) | number:'1.0-2'}} %)</strong></span>
+                            <span *ngIf="!(+item.total_monto_causes*1)"> --- </span>
+                        </td>
+
+                        <td class="no-causes" style="text-align:center; vertical-align: middle; white-space: nowrap;">
+                            <span *ngIf="item.total_claves_no_causes">{{ item.total_claves_no_causes_recibidas }} / {{ item.total_claves_no_causes }} <br> <strong>({{((item.total_claves_no_causes_recibidas/item.total_claves_no_causes)*100) | number:'1.0-2'}} %)</strong></span>
+                            <span *ngIf="!item.total_claves_no_causes"> --- </span>
+                        </td>
+                        <td class="no-causes" style="text-align:center; vertical-align: middle;">
+                            <span *ngIf="(+item.total_monto_no_causes*1)">${{ item.total_monto_no_causes_recibido  | number:'1.2-2'}} / ${{ item.total_monto_no_causes  | number:'1.2-2'}} <br> <strong>({{((item.total_monto_no_causes_recibido/item.total_monto_no_causes)*100) | number:'1.0-2'}} %)</strong></span>
+                            <span *ngIf="!(+item.total_monto_no_causes*1)"> --- </span>
+                        </td>
+
+                        <td class="material-curacion" style="text-align:center; vertical-align: middle; white-space: nowrap;">
+                            <span *ngIf="item.total_claves_material_curacion">{{ item.total_claves_material_curacion_recibidas }} / {{ item.total_claves_material_curacion }} <br> <strong>({{((item.total_claves_material_curacion_recibidas/item.total_claves_material_curacion)*100) | number:'1.0-2'}} %)</strong></span>
+                            <span *ngIf="!item.total_claves_material_curacion"> --- </span>
+                        </td>
+                        <td class="material-curacion" style="text-align:center; vertical-align: middle;">
+                            <span *ngIf="(+item.total_monto_material_curacion*1)">${{ item.total_monto_material_curacion_recibido | number:'1.2-2' }} / ${{ item.total_monto_material_curacion | number:'1.2-2' }} <br> <strong>({{((item.total_monto_material_curacion_recibido/item.total_monto_material_curacion)*100) | number:'1.0-2'}} %)</strong></span>
+                            <span *ngIf="!(+item.total_monto_material_curacion*1)"> --- </span>
+                        </td>
+
+                        <td style="text-align:center; vertical-align: middle; width: 130px">
+                            
+                            <button type="button" class="button"  (click)="mostrarDialogoPedidos(item.pedido_id)" >
+                                <span class="icon is-small"><i class="fa fa-archive"></i></span>
+                            </button>
+                            
+                            <button type="button" class="button" [ngClass]="{'descargado':item.repositorio>0 }" (click)="mostrarDialogoArchivos(item.pedido_id, item.folio)" >
+                                <span class="icon is-small"><i class="fa fa-upload"></i></span><span class="tag" [ngClass]="{'color_tag_descargas':item.repositorio>0 }"><b>{{ item.repositorio }}</b></span>
+                            </button>
+                            <!--a (click)="imprimirExcelItem(item.pedido_id)"><span class="icon"><i class="fa fa-file-excel-o"></i></span></a> <a><span class="icon"><i class="fa fa-file-pdf-o"></i></span></a-->
+                        </td>
+                    </tr>
+                    <tr *ngIf="lista.length == 0">
+                        <td colspan="12" style="vertical-align: middle; color:#888;">Esta lista está vacía.</td>                    
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div style="background: #FFF; border-radius: 0  0 1em  1em; width:100%;">
+        
+            <paginacion 
+                [total]="total" 
+                [paginasTotales]="paginasTotales" 
+                [resultadosPorPagina]="resultadosPorPagina" 
+                [paginaActual]="paginaActual" 
+                [indicePaginas]="indicePaginas"
+                (onSiguiente)="paginaSiguiente()" 
+                (onAnterior)="paginaAnterior()" 
+                (onListar)="listar($event)" 
+                *ngIf="total>0 && total > resultadosPorPagina"></paginacion>
+        </div>
+    <!--/div-->
+</div>
+
+<div class="notification is-danger" style="position:fixed; left:1em;  bottom:1em;" *ngIf="mensajeError.mostrar">
+    <button class="delete" (click)="mensajeError.mostrar = false"></button>        
+    <b>Error:</b> {{ mensajeError.texto }}<br><br>
+    <p style="text-align: center;"><small >Este mensaje desaparecerá en {{ mensajeExito.cuentaAtras }} segundos.</small></p>
+</div>
+
+<div class="notification is-success" style="position:fixed; left:1em;  bottom:1em; width: auto" *ngIf="mensajeExito.mostrar">       
+    <button class="delete" (click)="mensajeExito.mostrar = false"></button>
+    <p><span class="icon" style="margin-right: 0.5em;"><i class="fa fa-check-circle"></i></span> <span>{{ mensajeExito.texto }}</span></p>
+    <br>
+    <p style="text-align: center;"><small >Este mensaje desaparecerá en {{ mensajeExito.cuentaAtras }} segundos.</small></p>
+</div>
+
+<div class="modal is-active" [ngClass]="{'is-active': verDialogoPedido}">
+  <div class="modal-background" (click)="cerrarDialogoPedidos()"></div>
+  <div class="modal-card" style="width:95%; height: auto;">
+    <header class="modal-card-head" style="background: #00d1b2;">
+      <div class="container is-fluid"  style="width:100%;">
+          <h1 class="title" style="color:#FFF;">
+            <span class="icon is-medium"><i class="fa fa-file"></i></span> {{datosPedido.folio}} 
+          </h1>
+      </div>            
+      <a class="button  is-primary" style="position:absolute; top:1em; right:1em;" (click)="cerrarDialogoPedidos()"><span class="icon "><i class="fa fa-close"></i></span></a>
+    </header>
+    <section class="modal-card-body" style="padding:0px;" >
+      <div style="padding: 1em;">
+        <div class="is-fullwidth has-text-centered" *ngIf="cargandoDatosPedido">
+            <br>
+            <span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span> &nbsp;<span>Cargando datos del pedido...</span></span>
+            <br>
+            <br>
+        </div>
+        <div class="columns is-multiline" *ngIf="!cargandoDatosPedido">
+          <div class="column is-one-quarter" *ngFor="let tipo of tiposSubPedidos">
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title">
+                  {{subPedidos[tipo].titulo}}
+                </p>
+              </header>
+              <div class="card-content">
+                <div class="content">
+                  <strong>Total claves</strong>: {{subPedidos[tipo].claves | number}} <br>
+                  <strong>Total unidades</strong>: {{subPedidos[tipo].cantidad | number}} <br>
+                  <strong>Total monto</strong>: $ {{subPedidos[tipo].monto + ((subPedidos[tipo].tiene_iva)?+subPedidos[tipo].monto*16/100:0) | number:'1.2-2'}}
+                </div>
+              </div>
+              <footer class="card-footer">
+                <!--a class="card-footer-item" (click)="imprimirPedido(tipo)" [ngClass]="{ 'is-loading': cargandoPdf, 'is-inverted': !cargandoPdf }">
+                  <span class="icon is-medium"><i class="fa fa-file-pdf-o"></i></span>&nbsp;<span>Descargar/Imprimir</span>
+                </a-->
+                <a class="button is-primary is-fullwidth"  [ngClass]="{ 'is-loading': cargandoPdf[tipo], 'is-inverted': !cargandoPdf[tipo] }" title="Imprimir Pedido" (click)="imprimirPedido(tipo)">
+                    <span class="icon"><i class="fa fa-file-pdf-o"></i></span> &nbsp; Descargar/Imprimir
+                </a>
+              </footer>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <footer class="" style="position:relative; padding:1em;background: #FFF; border-top:1px solid #EEE; border-radius:0 0 0.8em 0.8em " >
+        <p class="control" *ngIf="!cargandoDatosPedido">
+            <button class="button is-medium is-primary " (click)="imprimirExcelPedido()" >
+            <span class="icon"><i class="fa fa-file-excel-o"></i></span><span>Excel del Pedido</span>
+            </button>
+        </p>
+        <div class="notification is-danger is-small" *ngIf="errorEnPDF">
+            <button class="delete" (click)="errorEnPDF = false"></button>        
+            <b>Error:</b> Ocurrio un error al generar el PDF<br><br>
+        </div>
+    </footer>
+  </div>
+</div>
+
+
+<div class="modal is-active" [ngClass]="{'is-active': verDialogoArchivo}">
+  <div class="modal-background" (click)="cerrarDialogoArchivos()"></div>
+  <div class="modal-card" style="width:70%; height: auto;">
+    <header class="modal-card-head" style="background: #00d1b2;">
+      <div class="container is-fluid"  style="width:100%;">
+          <h1 class="title" style="color:#FFF;">
+            <span class="icon is-medium"><i class="fa fa-file"></i></span> {{nombre_pedido}} 
+          </h1>
+      </div>            
+      <a class="button  is-primary" style="position:absolute; top:1em; right:1em;" (click)="cerrarDialogoArchivos()"><span class="icon "><i class="fa fa-close"></i></span></a>
+    </header>
+    <section class="modal-card-body" style="padding:0px;" >
+      <div style="padding: 1em;">
+        <div class="is-fullwidth has-text-centered" *ngIf="cargandoDatosArchivo">
+            <br>
+            <span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span> &nbsp;<span>Cargando repositorio...</span></span>
+            <br>
+            <br>
+        </div>
+        <div class="columns" *ngIf="!cargandoDatosArchivo">
+          <table class="table" *ngIf="!cargandoDatosArchivo" style="min-width:100%; font-size:0.8em;">
+                <thead>
+                    <tr>
+                        <th style="text-align:center;">Fecha Subido</th>
+                        <th style="text-align:center;">Nombre</th>
+                        <th style="text-align:center;">Peso</th>                        
+                        <th style="text-align:center;">Usuario</th>                        
+                        <th style="text-align:center;">Descargas</th>                        
+                        <th></th>
+                    </tr>
+                    
+                </thead>
+                <tbody>
+                    <tr *ngFor="let item of lista_repositorio; let i=index"> 
+                        <td style="text-align: center;"><strong>{{ item.created_at }}</strong></td>  
+                        <td style="text-align: center;"><strong>{{ item.nombre_archivo }}</strong></td>   
+                        <td style="text-align: center;"><strong>{{ (item.peso/1024) | number : '1.2-2' }} Kb ({{(item.peso/1048576) | number : '1.2-2' }} Mb)</strong></td>   
+                        <td style="text-align: center;"><strong>{{ item.usuario_id }}</strong></td>   
+                         
+                        <td style="text-align: center;"><strong>{{ item.descargas }}</strong></td>   
+                        <td style="text-align: center;" *ngIf="!item.deleted_at">
+                        <button type="button" class="button is-primary"  (click)='descargar(item.id)'><i class="fa fa-download"></i></button>
+                        <button type="button" class="button is-danger" (click)='eliminar_archivo(item.id)'><i class="fa fa-close"></i></button></td>
+                        <td style="text-align: center;" *ngIf="item.deleted_at">
+                            <div class="block">
+                              <span class="tag is-danger">
+                                {{ item.usuario_deleted_id}} {{ item.deleted_at }}
+                                <!--button class="delete is-small"></button-->
+                              </span>
+                            </div>
+                        <!--<span class="tag is-danger"><button type="button" class="delete is-small"></button>{{ item.usuario_deleted_id}} {{ item.deleted_at }}</span>
+                        --></td>   
+                    </tr>
+                    <tr *ngIf="lista_repositorio.length == 0">
+                        <td colspan="12" style="vertical-align: middle; color:#888;">Esta lista está vacía.</td>                    
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="6" style="text-align: center;"  *ngIf="!subir_archivo">
+                            <progress class="progress is-success" value="{{cargando_archivo}}" max="5"></progress>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="6"  style="text-align: center;" *ngIf="subir_archivo"> 
+                            Subir Archivo <input type="file" (change)="fileChanged($event)" name="file" accept="application/pdf"><br><br>
+                            <button type="button" class="button is-primary" name="enviar" (click)="upload()">Subir Archivo</button>
+                        </td>
+
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+      </div>
+    </section>
+    <footer class="" style="position:relative; padding:1em;background: #FFF; border-top:1px solid #EEE; border-radius:0 0 0.8em 0.8em " >
+        
+    </footer>
+  </div>
+</div>
+
+

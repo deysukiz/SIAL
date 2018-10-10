@@ -1,0 +1,153 @@
+<menu-medicos [modulo]="'Recetas'" [icono]="'assets/hub-medicos.svg'" [url]="'/medicos/recetas'" class="web"></menu-medicos>
+<div style="overflow-y:auto; overflow-x: hidden; width:100%; height:100%;" class="web">
+<div class="is-fullwidth has-text-centered" *ngIf="cargando" style="height:75%;"> <!-- 75/100% height -->
+  <br><br><br><br><br><br><br>
+  <span class="tag is-primary is-large">
+      <span class="icon"><i class="fa fa-refresh fa-spin"></i></span> &nbsp;<span>Cargando...</span>
+  </span>
+</div>
+  <div class="columns" *ngIf="!cargando && receta != null">
+      <div class="column is-one-third">
+          <div style="height:60px;"></div>
+          <div style="background: #FFF; border-radius: 1em; overflow:hidden; margin:0.75rem" >
+              <section class="hero is-primary">                
+                  <h1  class="title" style="margin:0.5em; ">
+                      <span class="icon is-medium">
+                          <i class="fa fa-file-text"></i>
+                      </span> Folio {{receta.id}}
+                  </h1>               
+              </section>               
+              <div  style="margin:1rem">
+                  <table class="table">
+                    <tbody>
+                      <tr>
+                        <th><small>Tipo de receta</small></th>
+                        <td>{{ receta.tipo_receta_id == '1'  ? "Normal" : "Controlado" }}</td>
+                      </tr>
+                      <tr>
+                        <th><small>Fecha</small></th>
+                        <td>{{ receta.fecha_receta | date: 'mediumDate' }}</td>
+                      </tr>
+                      <tr>
+                          <th><small>Paciente</small></th>
+                          <td>
+                            {{ receta.paciente.nombre }}<br>
+                            <small>{{ receta.paciente.sexo == '1'? 'Hombre': 'Mujer'}} {{ receta.paciente.edad}} años</small>
+                          </td>
+                      </tr>
+                      
+                      <tr>
+                          <th><small>Médico</small></th>
+                          <td>{{ receta.personal_medico.nombre }}</td>
+                      </tr>
+                      <tr>
+                        <td colspan="2">
+                          <strong><small>Diagnóstico</small></strong><br>
+                          {{receta.diagnostico}}
+                        </td>
+                      </tr>
+                      <tr>
+                          <th><small>Creada el</small></th>
+                          <td><small>{{ receta.updated_at | date: 'medium' }}</small></td>
+                        </tr>
+                    </tbody>
+                  </table>  
+              </div>
+          </div>
+      </div>
+      <div class="column" >
+          <div style="height:60px;"></div>
+          <div style="background: #FFF; border-radius: 1em; overflow:hidden; margin:0.75rem" >
+              <section class="hero is-primary" >           
+                  <nav class="level" style="margin:1em; ">
+                      <div class="level-left">
+                          <h1 class="title" >
+                              <span class="icon is-medium"><i class="fa fa-file-text"></i></span> Detalles
+                          </h1>
+                      </div>
+                      <!-- Right side -->
+                      <div class="level-right">
+                          <p class="level-item"><a class="button is-primary" routerLink="/medicos/recetas">Regresar</a></p>
+                          <p class="level-item"><a class="button is-primary" routerLink="/medicos/recetas/nuevo"><i class="fa fa-plus" aria-hidden="true"></i>&nbsp;<span>Nueva receta</span></a></p>
+                          <p class="level-item"><a class="button is-primary" (click)="imprimir()"><span class="icon"><i class="fa fa-print"></i></span></a></p>                                                       
+                          <p class="level-item">&nbsp;</p>
+                      </div>
+                  </nav>     
+              </section>               
+            
+              <table class="table" style="font-size:0.8em;">
+                <thead>
+                  <tr>
+                    <th>Clave</th>
+                    <th>Descripcion</th>
+                    <th style="text-align:center">Dosis</th>
+                    <th style="text-align:center">Cantidad (envase)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let item of receta.receta_digital_detalles">
+                    <td>{{ item.clave_insumo_medico}}</td>
+                    <td>
+                      {{ item.insumo.descripcion}}                        
+                    </td>
+                    <td>{{ item.dosis}} cada {{ item.frecuencia }} hrs durante {{ item.duracion}} dias</td>
+                    <td style="text-align:center">{{ item.cantidad}}</td>
+                  </tr>
+                </tbody>
+              </table>  
+          </div>
+      </div>
+  </div>
+</div>
+
+<div class="printable" *ngIf="!cargando && receta != null">
+    
+  <p style="text-align:center">
+    Secretaría de Salud<br>
+    Instituto de Salud<br>
+    {{ receta.unidad_medica.nombre }}<br>
+    {{ receta.personal_medico.nombre }}
+  </p>
+  <br>
+  <table  style="width:100%; border: 1px solid black; ">
+      <tr >
+        <td style="text-align:left;padding:0.5em;" > 
+          Paciente: {{ receta.paciente.nombre }}<br>
+          Edad: {{receta.paciente.edad}} Sexo: {{ receta.paciente.sexo == 1 ? "Hombre" : "Mujer"}}
+        </td>
+        <td style="padding:0.5em;">Folio: {{ receta.id}}<br>Fecha: {{ receta.fecha_receta}}</td>
+      </tr>
+  </table>
+  <br>
+  <p>
+    Diagnóstico: <br>
+    {{ receta.diagnostico}}
+  </p> 
+  <br> 
+  <table  style="width:100%">
+      <tr style="border-bottom:1px solid black">
+        <td></td>
+        <td>Medicamento(s)</td>
+        <td style="text-align:center">Cant. (envase)</td>
+      </tr>
+      <tr *ngFor="let item of receta.receta_digital_detalles; let i = index">
+        <td>{{ i + 1}}</td>
+        <td>
+          {{ item.insumo.descripcion}}    <br>                    
+          Clave: {{ item.clave_insumo_medico}}<br>
+          Indicaciones: <br>
+          {{ item.dosis}} cada {{ item.frecuencia }} hrs durante {{ item.duracion}} dias
+
+        </td>
+        <td style="text-align:center">{{ item.cantidad}}</td>
+      </tr>
+  </table>
+  <br><br><br><br>
+  <table style="width:100%;">
+      <tr >
+          <td></td>
+          <td style=" width:50%; text-align:center;border-top:1px solid black">Firma</td>
+          <td></td>
+      </tr>
+  </table>
+</div>

@@ -1,0 +1,72 @@
+<aside class="menu" style="padding: 1em;">
+    <!--  <p class="menu-label">
+        Pedidos
+    </p>-->
+    <a routerLink="/almacen-estandar/pedidos/nuevo" routerLinkActive="is-active" class="button is-primary is-inverted is-medium is-fullwidth"><span class="icon"  ><i class="fa fa-plus"></i></span> <span>Nuevo Pedido</span></a>
+    <br>
+    <ul class="menu-list">
+        <li>
+            <a routerLink="/almacen-estandar/pedidos/todos" #todos routerLinkActive="is-active">
+                <span class="icon"><i class="fa fa-file"></i></span> Pedidos
+                <span class="icon is-pulled-right" *ngIf="cargando"><i class="fa fa-circle-o-notch fa-spin"></i></span>
+                <span *ngIf="stats.todos>0" class="tag is-pulled-right" [ngClass]="{ 'is-white': todos.className == 'is-active', 'is-primary': todos.className != 'is-active' }">{{  stats.todos }}</span>
+            </a>
+        </li>
+        <li>
+            <a routerLink="/almacen-estandar/pedidos/borradores" #borradores routerLinkActive="is-active">
+                <span class="icon"><i class="fa fa-pencil-square-o"></i></span> Borradores
+                <span class="icon is-pulled-right" *ngIf="cargando"><i class="fa fa-circle-o-notch fa-spin"></i></span>
+                <span *ngIf="stats.borradores>0" class="tag is-pulled-right" [ngClass]="{ 'is-white': borradores.className == 'is-active', 'is-primary': borradores.className != 'is-active' }">{{  stats.borradores }}</span>
+            </a>
+        </li>
+        <li>
+            <a routerLink="/almacen-estandar/pedidos/solicitados" #solicitados routerLinkActive="is-active">
+                <span class="icon"  ><i class="fa fa-minus-circle"></i></span> Solicitudes de transferencia
+                <span class="icon is-pulled-right" *ngIf="cargando"><i class="fa fa-circle-o-notch fa-spin"></i></span>
+                <span *ngIf="stats.solicitados>0" class="tag is-pulled-right" [ngClass]="{ 'is-white': solicitados.className == 'is-active', 'is-primary': solicitados.className != 'is-active' }" >{{  stats.solicitados }}</span>
+            </a>             
+        </li>
+        <li>
+            <a routerLink="/almacen-estandar/pedidos/en-transito" #enTransito routerLinkActive="is-active">
+                <span class="icon"><i class="fa fa-clock-o"></i></span> En transito
+                <span class="icon is-pulled-right" *ngIf="cargando"><i class="fa fa-circle-o-notch fa-spin"></i></span>
+                <span *ngIf="stats.en_transito>0" class="tag is-pulled-right" [ngClass]="{ 'is-white': enTransito.className == 'is-active', 'is-primary': enTransito.className != 'is-active' }">{{  stats.en_transito }}</span>
+            </a>
+        </li>
+        <li>
+            <a routerLink="/almacen-estandar/pedidos/por-surtir" #porSurtir routerLinkActive="is-active">
+                <span class="icon"><i class="fa fa-truck"></i></span> Por surtir
+                <span class="icon is-pulled-right" *ngIf="cargando"><i class="fa fa-circle-o-notch fa-spin"></i></span>
+                <span *ngIf="stats.por_surtir>0" class="tag is-pulled-right" [ngClass]="{ 'is-white': porSurtir.className == 'is-active', 'is-primary': porSurtir.className != 'is-active' }">{{  stats.por_surtir }}</span>
+            </a>
+        </li>
+        <hr>
+        <li>
+            <a routerLink="/almacen-estandar/pedidos/finalizados" #finalizados routerLinkActive="is-active">
+                <span class="icon"><i class="fa fa-check-circle"></i></span> Finalizados
+                <span class="icon is-pulled-right" *ngIf="cargando"><i class="fa fa-circle-o-notch fa-spin"></i></span>
+                <span *ngIf="stats.finalizados>0" class="tag is-pulled-right" [ngClass]="{ 'is-white': finalizados.className == 'is-active', 'is-success': finalizados.className != 'is-active' }">{{  stats.finalizados }}</span>
+            </a>
+            <!--ul>
+                <li><a routerLink="/almacen-estandar/pedidos/finalizados/completos" routerLinkActive="is-active">Completos</a></li>
+                <li><a routerLink="/almacen-estandar/pedidos/finalizados/incompletos" routerLinkActive="is-active">Incompletos</a></li>
+                <li><a routerLink="/almacen-estandar/pedidos/finalizados/cancelados" routerLinkActive="is-active">Cancelados</a></li>
+            </ul-->
+        </li>
+        <li>
+            <a routerLink="/almacen-estandar/pedidos/expirados" #expirados routerLinkActive="is-active">
+                <span class="icon"><i class="fa fa-exclamation-circle"></i></span> Expirados
+                <span class="icon is-pulled-right" *ngIf="cargando"><i class="fa fa-circle-o-notch fa-spin"></i></span>
+                <span *ngIf="stats.expirados>0" class="tag is-pulled-right" [ngClass]="{ 'is-white': expirados.className == 'is-active', 'is-warning': expirados.className != 'is-active' }">{{  stats.expirados }}</span>
+            </a>
+        </li>
+        <li>
+            <a routerLink="/almacen-estandar/pedidos/expirados-cancelados" #expiradosCancelados routerLinkActive="is-active">
+                <span class="icon"><i class="fa fa-times-circle"></i></span> Expirados - Cancelados
+                <span class="icon is-pulled-right" *ngIf="cargando"><i class="fa fa-circle-o-notch fa-spin"></i></span>
+                <span *ngIf="stats.expirados_cancelados>0" class="tag is-pulled-right" [ngClass]="{ 'is-white': expiradosCancelados.className == 'is-active', 'is-danger': expiradosCancelados.className != 'is-active' }">{{  stats.expirados_cancelados }}</span>
+            </a>
+        </li>
+    </ul>
+
+</aside>

@@ -1,0 +1,135 @@
+<panel-control-menu></panel-control-menu>
+<div style="height:50px;"></div>
+<div class="contenedor columns " style="height:100%">
+    <div class="column is-one-quarter is-hidden-mobile">
+        <panel-control-menu-aside></panel-control-menu-aside>
+    </div>
+    <div class="column" style="padding:2em;">
+        <div style="background: #FFF; border-radius: 1em; overflow: hidden;">
+            <section class="hero is-primary">
+                <div class="hero-body">
+                    <div class="container is-fluid">
+                        <h1 class="title">
+                            <span class="icon is-medium"><i class="fa fa-database"></i></span>
+                            Base de datos
+                        </h1>
+                        
+                    </div>
+                </div>
+            </section>
+            <br>
+            <div class="tabs is-centered is-boxed is-medium">
+                <ul>
+                    <li [ngClass]="{ 'is-active': tabRestaurar}">
+                        <a (click)="tabRestaurar=true;tabCargar=false;tabDescargar=false;">
+                            <span class="icon is-small"><i class="fa fa-hdd-o"></i></span>
+                            <span>Respaldar/Restaurar</span>
+                        </a>
+                    </li>
+                    <li [ngClass]="{ 'is-active': tabCargar}" *ngIf="servidor.id != '0001'">
+                        <a (click)="tabRestaurar=false;tabCargar=true;tabDescargar=false;">
+                        <span class="icon is-small"><i class="fa fa-database"></i></span>
+                        <span>Cargar Datos al Servidor Local</span>
+                        </a>
+                    </li>
+                    <li [ngClass]="{ 'is-active': tabDescargar}" *ngIf="servidor.id == '0001'">
+                        <a (click)="tabRestaurar=false;tabCargar=false;tabDescargar=true;">
+                        <span class="icon is-small"><i class="fa fa-database"></i></span>
+                        <span>Descargar Datos del Servidor Central</span>
+                        </a>
+                    </li>  
+                </ul>
+            </div>
+            <br>
+            <section class="section" *ngIf="tabRestaurar">            
+                <div style="text-align:center;"><a class="button is-primary is-medium" [ngClass]="{ 'is-loading': exportando}" (click)="exportar()"><span class="icon"><i class="fa fa-download"></i></span> <span>Respaldar base de datos</span></a></div>
+                <br>
+                <hr>
+                <br>
+                <div style="text-align:center;"><a class="button is-warning is-medium" [ngClass]="{ 'is-loading': enviandoDatoss}" (click)="mostrarModalSubirArchivoSQL = true; archivoSubido = false;" ><span class="icon"><i class="fa fa-upload"></i></span> <span>Restaurar base de datos</span></a></div>
+                <br>
+                <p><strong>Importante:</strong> esta acción reemplazará toda la información de la base de datos; realice este procedimiento solo si sabe lo que está haciendo, por favor asegúrese de <a (click)="exportar()">realizar un respaldo</a> antes de realizar esta acción para evitar cualquier perdida de información.</p>
+            </section>
+            <section class="section" *ngIf="tabCargar">            
+                <div style="text-align:center;"><a class="button is-warning is-medium" [ngClass]="{ 'is-loading': enviandoDatoss}" (click)="mostrarModalSubirDatosServidor = true; archivoSubido = false;" ><span class="icon"><i class="fa fa-upload"></i></span> <span>Cargar Datos</span></a></div>
+                <br>
+                <p><strong>Importante:</strong> esta acción reemplazará toda la información de la base de datos; realice este procedimiento solo si sabe lo que está haciendo, por favor asegúrese de <a (click)="exportar()">realizar un respaldo</a> antes de realizar esta acción para evitar cualquier perdida de información.</p>
+            </section>
+            <section class="section" *ngIf="tabDescargar">            
+                <div style="text-align:center;"><a class="button is-primary is-medium" [ngClass]="{ 'is-loading': exportando}" (click)="descargarDatos()"><span class="icon"><i class="fa fa-download"></i></span> <span>Descargar Datos</span></a></div>
+                <br>
+            </section>
+        </div>
+        
+       
+       
+    </div>
+</div>
+
+
+<div class="modal"  [ngClass]="{ 'is-active': mostrarModalSubirArchivoSQL }">
+    <div class="modal-background" (click)="mostrarModalSubirArchivoSQL =!mostrarModalSubirArchivoSQL"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title"><span class="icon"><i class="fa fa-cloud-upload"></i></span> Subir respaldo de la base datos</p>
+        <button class="delete" (click)="mostrarModalSubirArchivoSQL = !mostrarModalSubirArchivoSQL; progreso = 0"></button>
+      </header>
+      <section class="modal-card-body">    
+            <div class="notification is-danger" *ngIf="mensajeErrorSync!=''"><span class="icon"><i class="fa fa-exclamation-circle"></i></span> {{ mensajeErrorSync }}</div>
+
+            <div class="field" [ngClass]="{ 'is-hidden' : enviandoDatos || archivoSubido }">
+                    <label for="sql" class="label" [ngClass]="{ 'is-danger': errores.archivo != null }">Elige el archivo .sql</label>                         
+                    <input type="file"  class="input-file" #archivoInput style="width:100%" name="sql" is="sql" (change)="fileChange($event)"  accept=".sql">
+            </div>
+
+            <div *ngIf="enviandoDatos || archivoSubido">
+                    <h1 class="subtitle" *ngIf="enviandoDatos">Subiendo respaldo...</h1>
+                    <h1 class="subtitle" *ngIf="archivoSubido "><span class="icon"><i class="fa fa-check-circle"></i></span> ¡El respaldo se ha subido exitosamente!</h1>
+                    <progress class="progress is-primary" value="{{ progreso }}" max="100">{{ progreso}}%</progress>
+                </div>
+                  
+          <!--
+         
+          <div class="field" [ngClass]="{ 'is-hidden' : enviandoDatos || archivoSubido }">
+              <label for="sync" class="label" [ngClass]="{ 'is-danger': errores.archivo != null }">Elige el archivo .sql</label>            
+              <input class="input-file" type="file" #archivoInput  name="sql" id="sql" style="width:100%" [disabled]="archivoSubido" (change)="fileChange($event)" accept=".sql">            
+              <p class="help is-danger" *ngIf="errores.archivo == 'required'">Debe elegir un archivo.</p>
+              <p class="help is-danger" *ngIf="errores.archivo == 'mimetypes'">El tipo de archivo no es valido, verifique que tenga las siguientes extensiones: .zip</p>
+          </div>
+          -->
+      </section>
+      <footer class="modal-card-foot">
+            <a class="button is-primary" [ngClass]="{ 'is-disabled' : enviandoDatos || !archivo  }" *ngIf="!archivoSubido" (click)="adjuntar()">Importar</a>  
+        <!--<a class="button is-primary" [ngClass]="{ 'is-disabled' : !archivo || enviandoDatos  }" *ngIf="!archivoSubido" (click)="importar()">Importar</a>          -->
+          <a class="button" [ngClass]="{ 'is-disabled' : enviandoDatos  }" (click)="mostrarModalSubirArchivoSQL = !mostrarModalSubirArchivoSQL">Cerrar</a>      
+      </footer>
+    </div>
+  </div>
+
+  <div class="modal"  [ngClass]="{ 'is-active': mostrarModalSubirDatosServidor }">
+    <div class="modal-background" (click)="mostrarModalSubirDatosServidor =!mostrarModalSubirDatosServidor"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title"><span class="icon"><i class="fa fa-cloud-upload"></i></span> Cargar Registros a la Base de Datos</p>
+        <button class="delete" (click)="mostrarModalSubirDatosServidor = !mostrarModalSubirDatosServidor; progreso = 0"></button>
+      </header>
+      <section class="modal-card-body">    
+            <div class="notification is-danger" *ngIf="mensajeErrorSync!=''"><span class="icon"><i class="fa fa-exclamation-circle"></i></span> {{ mensajeErrorSync }}</div>
+            
+            <div class="field" [ngClass]="{ 'is-hidden' : enviandoDatos || archivoSubido }">
+                <label for="sql" class="label" [ngClass]="{ 'is-danger': errores.archivo != null }">Elige el archivo .sql</label>                         
+                <input type="file"  class="input-file" #archivoInput style="width:100%" name="sql" is="sql" (change)="fileChange($event)"  accept=".sql">
+            </div>
+
+            <div *ngIf="enviandoDatos || archivoSubido">
+                <h1 class="subtitle" *ngIf="enviandoDatos">Subiendo datos...</h1>
+                <h1 class="subtitle" *ngIf="archivoSubido "><span class="icon"><i class="fa fa-check-circle"></i></span> ¡Los datos se han subido exitosamente!</h1>
+                <progress class="progress is-primary" value="{{ progreso }}" max="100">{{ progreso}}%</progress>
+            </div>
+      </section>
+      <footer class="modal-card-foot">
+            <a class="button is-primary" [ngClass]="{ 'is-disabled' : enviandoDatos || !archivo  }" *ngIf="!archivoSubido" (click)="cargarDatos()">Importar</a>  
+          <a class="button" [ngClass]="{ 'is-disabled' : enviandoDatos  }" (click)="mostrarModalSubirDatosServidor = !mostrarModalSubirDatosServidor">Cerrar</a>      
+      </footer>
+    </div>
+  </div>

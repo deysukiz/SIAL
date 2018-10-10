@@ -1,0 +1,414 @@
+<admision-menu></admision-menu>
+<div style="height:50px;"></div>
+<div class="contenedor columns " style="height:100%; ">
+    <div class="column is-one-quarter is-hidden-mobile">
+        <admision-menu-lateral></admision-menu-lateral>
+    </div>
+    <div class="column" style="padding:2em;">
+        <div style="background: #FFF; border-radius: 1em; overflow: hidden;">
+            <section class="hero" [ngClass] = " {'is-dark': busquedaActivada, 'is-primary': !busquedaActivada } " >
+                
+                <div class="hero-body" style="position:relative;">
+                    <a class="button  is-dark" *ngIf="busquedaActivada" style="position:absolute; top:1em; right:1em;" (click)="busquedaActivada=false;searchBox.value='';resultadosBusqueda=[]"><span class="icon "><i class="fa fa-close"></i></span></a>
+                    <a class="button  is-dark" *ngIf="busquedaActivada" style="position:absolute; top:1em; right:3.5em;" (click)="listarBusqueda(searchBox.value,1)"><span class="icon "><i class="fa fa-refresh"></i></span></a>
+                    <a class="button  is-primary" *ngIf="!busquedaActivada" style="position:absolute; top:1em; right:1em;" (click)="listar(1)"><span class="icon "><i class="fa fa-refresh"></i></span></a>
+                    <div class="container is-fluid">
+                        
+                        <h1 class="title" *ngIf="!busquedaActivada">
+                            <span class="icon is-medium"><i class="fa fa-user"></i></span> Lista de Pacientes
+                        </h1>
+                        <h1 class="title" *ngIf="busquedaActivada">
+                            <span class="icon is-medium"><i class="fa fa-search"></i></span> Búsqueda 
+                        </h1>
+                        <div class="control is-grouped">
+                        <p class="control is-expanded">
+                            <input class="input is-medium" type="text" placeholder="Buscar" #searchBox id="search-box" (keyup)="buscar(searchBox.value)">
+                        </p>
+                        <p class="control">
+                            <a class="button is-medium is-primary is-inverted "  (click)="showDialog = !showDialog">
+                            <span class="icon" ><i class="fa fa-plus"></i></span><span>Nuevo Paciente</span>
+                            </a>
+                        </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <div class="is-fullwidth has-text-centered" *ngIf="cargando">
+                <br>
+                <span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span> &nbsp;<span>Cargando...</span></span>
+                <br>
+                <br>
+            </div>
+        
+            <table class="table" *ngIf="!cargando">
+                <thead>
+                    <tr>
+                    <th></th>
+                    <th><abbr title="Paciente ID">ID</abbr></th>
+                    <th>Nombre</th>
+                    <th>Fecha Nacimiento</th>
+                    <th>Localidad (Municipio)</th>
+                    <th>Fecha Ingreso</th>
+                    <th>Ingresado</th>
+                    <th>Unidad</th>
+                    <th style="text-align:center;">Opciones</th>
+                    </tr>
+                </thead>
+                <tbody  *ngIf="!busquedaActivada">
+                    <tr *ngFor="let item of pacientes; let i=index">
+                        <th><a routerLink="/pacientes/modulo/ingreso/{{item.id}}"><img style="min-width: 1.5em; width:2em;" src="assets/{{ item.avatar || 'avatar-unknow' }}.svg" alt="avatar"></a></th>
+                        <th style="vertical-align: middle;"><a routerLink="/pacientes/modulo/ingreso/{{item.id}}">{{ item.id }}</a></th>
+                        <td style="vertical-align: middle;"><a routerLink="/pacientes/modulo/ingreso/{{item.id}}">{{ item.nombre }}</a></td>
+                        <td style="vertical-align: middle;"><a routerLink="/pacientes/modulo/ingreso/{{item.id}}">{{ item.fecha_nacimiento }}</a></td>
+                        <td style="vertical-align: middle;" *ngIf="item.localidad"><a routerLink="/pacientes/modulo/ingreso/{{item.id}}">{{item.localidad.nombre }} ( {{item.localidad.municipio.nombre }} ) </a></td>
+                        <td style="vertical-align: middle;" *ngIf="!item.localidad"><a routerLink="/pacientes/modulo/ingreso/{{item.id}}">DESCONOCIDO</a></td>
+                        
+                        <td style="vertical-align: middle;" *ngIf="item.ingresoactivos.length == 1"><a routerLink="/pacientes/modulo/ingreso/{{item.id}}">{{item.ingresoactivos[0].fecha_hora_ingreso}} </a></td>
+                         <td style="vertical-align: middle;" *ngIf="item.ingresoactivos.length == 0"><a routerLink="/pacientes/modulo/ingreso/{{item.id}}"></a></td>
+
+                        <td style="vertical-align: middle;" *ngIf="item.ingresoactivos.length == 1"><a routerLink="/pacientes/modulo/ingreso/{{item.id}}">SI </a></td>
+                        <td style="vertical-align: middle;" *ngIf="item.ingresoactivos.length == 0"><a routerLink="/pacientes/modulo/ingreso/{{item.id}}">NO </a></td>
+                        <td style="vertical-align: middle;" *ngIf="item.ingresoactivos.length == 1"><a routerLink="/pacientes/modulo/ingreso/{{item.id}}">{{ item.ingresoactivos[0].unidad.nombre}} </a></td>
+                       
+                        
+                        <td style="vertical-align: middle;" *ngIf="item.ingresoactivos.length == 0"><a routerLink="/pacientes/modulo/ingreso/{{item.id}}"> </a></td>
+                        <td style="vertical-align: middle;" class="has-text-centered"><span class="icon " *ngIf="item.cargando"><i class="fa fa-circle-o-notch fa-spin"></i></span><a *ngIf="!item.cargando" class="is-primary" routerLink="/pacientes/modulo/ingreso/{{item.id}}"><span class="icon"><i class="fa fa-hospital-o"></i></span></a></td>
+                        
+                    </tr>
+                    <tr *ngIf="pacientes.length == 0">
+                        <td colspan="5" style="vertical-align: middle; color:#888;">Esta lista está vacía.</td>                    
+                    </tr>
+                </tbody>
+                <tbody *ngIf="busquedaActivada">
+                    <tr *ngFor="let item of resultadosBusqueda; let i=index">
+                    <th><a routerLink="/pacientes/modulo/ingreso/{{item.id}}"><img style="min-width: 1.5em; width:2em;" src="assets/{{ item.avatar || 'avatar-unknow' }}.svg" alt="avatar"></a></th>
+                        <th style="vertical-align: middle;"><a routerLink="/pacientes/modulo/ingreso/{{item.id}}">{{ item.id }}</a></th>
+                        <td style="vertical-align: middle;"><a routerLink="/pacientes/modulo/ingreso/{{item.id}}">{{ item.nombre }}</a></td>
+                        <td style="vertical-align: middle;"><a routerLink="/pacientes/modulo/ingreso/{{item.id}}">{{ item.fecha_nacimiento }}</a></td>
+                        <td style="vertical-align: middle;" *ngIf="item.localidad"><a routerLink="/pacientes/modulo/ingreso/{{item.id}}">{{item.localidad.nombre }} ( {{item.localidad.municipio.nombre }} ) </a></td>
+                        <td style="vertical-align: middle;" *ngIf="!item.localidad"><a routerLink="/pacientes/modulo/ingreso/{{item.id}}">DESCONOCIDO</a></td>
+                        
+                        <td style="vertical-align: middle;" *ngIf="item.ingresoactivos.length == 1"><a routerLink="/pacientes/modulo/ingreso/{{item.id}}">{{item.ingresoactivos[0].fecha_hora_ingreso}} </a></td>
+                         <td style="vertical-align: middle;" *ngIf="item.ingresoactivos.length == 0"><a routerLink="/pacientes/modulo/ingreso/{{item.id}}"></a></td>
+
+                        <td style="vertical-align: middle;" *ngIf="item.ingresoactivos.length == 1"><a routerLink="/pacientes/modulo/ingreso/{{item.id}}">SI </a></td>
+                        <td style="vertical-align: middle;" *ngIf="item.ingresoactivos.length == 0"><a routerLink="/pacientes/modulo/ingreso/{{item.id}}">NO </a></td>
+                        <td style="vertical-align: middle;" *ngIf="item.ingresoactivos.length == 1"><a routerLink="/pacientes/modulo/ingreso/{{item.id}}">{{ item.ingresoactivos[0].unidad.nombre}} </a></td>
+                       
+                        
+                        <td style="vertical-align: middle;" *ngIf="item.ingresoactivos.length == 0"><a routerLink="/pacientes/modulo/ingreso/{{item.id}}"> </a></td>
+                        <td style="vertical-align: middle;" class="has-text-centered"><span class="icon " *ngIf="item.cargando"><i class="fa fa-circle-o-notch fa-spin"></i></span><a *ngIf="!item.cargando" class="is-primary" routerLink="/pacientes/modulo/ingreso/{{item.id}}"><span class="icon"><i class="fa fa-hospital-o"></i></span></a></td>
+                    
+                    </tr>
+
+                    <tr *ngIf="resultadosBusqueda.length == 0 && busquedaActivada">
+                        <td colspan="5" style="vertical-align: middle; color:#888;">No se encontraron resultados.</td>                    
+                    </tr>
+                </tbody>
+            </table>
+            
+            <paginacion 
+                [total]="total" 
+                [paginasTotales]="paginasTotales" 
+                [resultadosPorPagina]="resultadosPorPagina" 
+                [paginaActual]="paginaActual" 
+                [indicePaginas]="indicePaginas"
+                (onSiguiente)="paginaSiguiente()" 
+                (onAnterior)="paginaAnterior()" 
+                (onListar)="listar($event)" 
+                *ngIf="total>0 && total > resultadosPorPagina && !busquedaActivada"></paginacion>
+            <paginacion 
+                [total]="totalBusqueda" 
+                [paginasTotales]="paginasTotalesBusqueda" 
+                [resultadosPorPagina]="resultadosPorPaginaBusqueda" 
+                [paginaActual]="paginaActualBusqueda" 
+                [indicePaginas]="indicePaginasBusqueda"
+                (onSiguiente)="paginaSiguienteBusqueda(searchBox.value)" 
+                (onAnterior)="paginaAnteriorBusqueda(searchBox.value)" 
+                (onListar)="listarBusqueda(searchBox.value,$event)" 
+                *ngIf="totalBusqueda > 0 && totalBusqueda > resultadosPorPaginaBusqueda && busquedaActivada"></paginacion>
+           
+           
+            
+        </div>
+    </div>        
+   
+</div>
+
+<div id="modal-paciente" class="modal is-active" [ngClass]="{'is-active': showDialog}">
+  <div class="modal-background"  (click)="showDialog = !showDialog"></div>
+  <div class="modal-card" style="width:60%; height: auto;">
+    <header class="modal-card-head" style="background-color: #00d1b2" >
+      <div class="container is-fluid"  style="width:100%;">
+          <h1 class="title" style="color:#FFF;">
+            <span class="icon is-medium"><i class="fa fa-user"></i></span> Agregar Paciente
+          </h1>
+      </div>            
+      <a class="button  is-primary" style="position:absolute; top:1em; right:1em;" (click)="showDialog = !showDialog"><span class="icon "><i class="fa fa-close"></i></span></a>
+    </header>
+    <section class="section">
+                <form name="form" [formGroup]="paciente"   (ngSubmit)="enviar()" >     
+                  
+                  <div class="control is-grouped">
+                    <p class="control is-expanded  has-icon has-icon-right">
+                        <label class="label">Paciente Conocido</label>
+                        <span class="select is-fullwidth">
+                            <select formControlName="conocido" name="conocido" (change)="paciente_conocido()">
+                                <option value="1">SI</option>
+                                <option value="2">NO</option>
+                            </select>
+
+                        </span> 
+                    </p>
+
+                    <p class="control is-expanded  has-icon has-icon-right">
+                        <label class="label">Resposable Conocido</label>
+                        <span class="select is-fullwidth">
+                            <select formControlName="responsableconocido" name="responsableconocido" (change)="responsable()">
+                                <option value="1">SI</option>
+                                <option value="2">NO</option>
+                            </select>
+
+                        </span> 
+                    </p>
+                    
+                  </div>
+
+                  
+                   <div [hidden]="verForm">
+                        
+                    <section class="section" style="padding: 1rem 1.5rem; background-color: #EFEFEF">
+                        <div class="container">
+                          <div class="heading">
+                            <h1 class="title">Datos del Paciente</h1>
+                          </div>
+                        </div>
+                    </section> 
+                      <div class="control is-grouped">
+                        <p class="control is-expanded  has-icon has-icon-right">
+                            <label class="label">Nombre</label>
+                          <input class="input" autofocus type="text"  placeholder="Nombre" formControlName="nombre">
+                          <span class="icon is-small" *ngIf="paciente.get('nombre').hasError('required') && paciente.get('nombre').touched">
+                            <i class="fa fa-warning"></i>
+                          </span>
+                          <span class="help is-danger" *ngIf="paciente.get('nombre').hasError('required') && paciente.get('nombre').touched">Este campo es requerido.</span>
+                        </p>
+                        
+                      </div>
+                      <div class="control is-grouped">
+                        <p class="control is-expanded  has-icon has-icon-right">
+                            <label class="label">Sexo</label>
+                            <span class="select is-fullwidth">
+                                <select formControlName="sexo" name="sexo">
+                                    <option value="1">MASCULINO</option>
+                                    <option value="2">FAMENINO</option>
+                                </select>
+
+                            </span> 
+                            <span class="icon is-small" *ngIf="paciente.get('sexo').hasError('required') && paciente.get('sexo').touched">
+                                    <i class="fa fa-warning"></i>
+                                </span>
+                                <span class="help is-danger" *ngIf="paciente.get('sexo').hasError('required') && paciente.get('sexo').touched">Este campo es requerido.</span>
+                        </p>
+                        <p class="control is-expanded has-icon has-icon-right">
+                            <label class="label">Teléfono</label>
+                          <input class="input" type="text" placeholder="Telefono" formControlName="telefono">
+                          <span class="icon is-small" *ngIf="paciente.get('telefono').hasError('required') && paciente.get('telefono').touched">
+                            <i class="fa fa-warning"></i>
+                          </span>
+                          <span class="help is-danger" *ngIf="paciente.get('telefono').hasError('required') && paciente.get('telefono').touched">Este campo es requerido.</span>
+                        </p>
+                        <p class="control is-expanded has-icon has-icon-right">
+                        <label class="label">Fecha Nacimiento</label>
+                          <input class="input" type="text" placeholder="aaaa-mm-dd" formControlName="fecha_nacimiento">
+                          <span class="icon is-small" *ngIf="paciente.get('fecha_nacimiento').hasError('required') && paciente.get('fecha_nacimiento').touched">
+                            <i class="fa fa-warning"></i>
+                          </span>
+                          <span class="help is-danger" *ngIf="paciente.get('fecha_nacimiento').hasError('required') && paciente.get('fecha_nacimiento').touched">Este campo es requerido.</span>
+                        </p>
+                        <p class="control is-expanded has-icon has-icon-right">
+                            <label class="label">Hora Nacimiento (si aplica)</label>
+                          <input class="input" type="text" placeholder="HH:mm" formControlName="hora_nacimiento">
+                          
+                        </p>
+                      </div>
+                      <div class="control is-grouped">
+                        
+                        <p class="control is-expanded  has-icon has-icon-right">
+                            <label class="label">Domicilio</label>
+                            <input class="input" type="text" placeholder="Domicilio" formControlName="domicilio">
+                            <span class="icon is-small" *ngIf="paciente.get('domicilio').hasError('required') && paciente.get('domicilio').touched">
+                                <i class="fa fa-warning"></i>
+                            </span>
+                            <span class="help is-danger" *ngIf="paciente.get('domicilio').hasError('required') && paciente.get('domicilio').touched">Este campo es requerido.</span>
+                         
+                        </p>
+                        <p class="control is-expanded has-icon has-icon-right">
+                        <label class="label">Colonia</label>
+                          <input class="input" type="text" placeholder="Colonia" formControlName="colonia">
+                          <span class="icon is-small" *ngIf="paciente.get('colonia').hasError('required') && paciente.get('colonia').touched">
+                            <i class="fa fa-warning"></i>
+                          </span>
+                          <span class="help is-danger" *ngIf="paciente.get('colonia').hasError('required') && paciente.get('colonia').touched">Este campo es requerido.</span>
+                        </p>
+                     </div>
+                     <div class="control is-grouped">  
+                        
+                        <p class="control is-expanded has-icon has-icon-right">
+                          <label class="label">Municipio</label> 
+                          <span class="select is-fullwidth">
+                                <select  formControlName="municipio_id" name="municipio_id" #municipio (change)="cargarLocalidades(municipio.value)">
+                                    <option *ngFor="let item of Municipios" value="{{item.id}}">{{ item.nombre }} </option>
+                                </select>
+                                
+                            </span> 
+                            <span class="icon is-small" *ngIf="paciente.get('municipio_id').hasError('required') && paciente.get('municipio_id').touched">
+                                <i class="fa fa-warning"></i>
+                            </span>
+                            <span class="help is-danger" *ngIf="paciente.get('municipio_id').hasError('required') && paciente.get('municipio_id').touched">Este campo es requerido.</span>
+                        </p>
+                        <p class="control is-expanded has-icon has-icon-right">
+                          <label class="label">Localidad</label>    
+                          <span class="select is-fullwidth">
+                                <select formControlName="localidad_id" name="localidad_id">
+                                    <option *ngFor="let item of Localidades" value="{{item.id}}">{{ item.nombre }} </option>
+                                </select>
+                                
+                            </span> 
+                            <span class="icon is-small" *ngIf="paciente.get('localidad_id').hasError('required') && paciente.get('localidad_id').touched">
+                                    <i class="fa fa-warning"></i>
+                                </span>
+                            <span class="help is-danger" *ngIf="paciente.get('localidad_id').hasError('required') && paciente.get('localidad_id').touched">Este campo es requerido.</span>
+                        </p>
+                         <p class="control is-expanded has-icon has-icon-right">
+                            <label class="label">No Expediente</label>
+                            <input class="input" type="text" placeholder="No Expediente" formControlName="no_expediente">
+                            <span class="icon is-small" *ngIf="paciente.get('no_expediente').hasError('required') && paciente.get('no_expediente').touched">
+                                <i class="fa fa-warning"></i>
+                            </span>
+                            <span class="help is-danger" *ngIf="paciente.get('no_expediente').hasError('required') && paciente.get('no_expediente').touched">Este campo es requerido.</span>
+                            
+                        </p>
+                        <p class="control is-expanded has-icon has-icon-right">
+                            <label class="label">No Afililación</label>
+                            <input class="input" type="text" placeholder="No Afiliación" formControlName="no_afiliacion">
+                            <span class="icon is-small" *ngIf="paciente.get('no_afiliacion').hasError('required') && paciente.get('no_afiliacion').touched">
+                                <i class="fa fa-warning"></i>
+                            </span>
+                            <span class="help is-danger" *ngIf="paciente.get('no_afiliacion').hasError('required') && paciente.get('no_afiliacion').touched">Este campo es requerido.</span>
+                            
+                        </p>
+                      </div>
+                    </div> 
+                    <div [hidden]="verFormResponsable">
+                      <section class="section" style="padding: 1rem 1.5rem; background-color: #EFEFEF">
+                        <div class="container">
+                          <div class="heading">
+                            <h1 class="title">Datos del Responsable</h1>
+                          </div>
+                        </div>
+                      </section>  
+                      <div class="control is-grouped">
+                        <p class="control is-expanded  has-icon has-icon-right">
+                            <label class="label">Nombre</label>
+                          <input class="input" autofocus type="text"  placeholder="Nombre Responsable" formControlName="nombre_responsable">
+                          <span class="icon is-small" *ngIf="paciente.get('nombre_responsable').hasError('required') && paciente.get('nombre_responsable').touched">
+                            <i class="fa fa-warning"></i>
+                          </span>
+                          <span class="help is-danger" *ngIf="paciente.get('nombre_responsable').hasError('required') && paciente.get('nombre_responsable').touched">Este campo es requerido.</span>
+                        </p>
+                        
+                      </div>
+                      <div class="control is-grouped">
+                        <p class="control is-expanded  has-icon has-icon-right">
+                            <label class="label">Patentesco</label>
+                               <input class="input" autofocus type="text"  placeholder="Parentesco" formControlName="parentesco">
+                              <span class="icon is-small" *ngIf="paciente.get('parentesco').hasError('required') && paciente.get('parentesco').touched">
+                                <i class="fa fa-warning"></i>
+                              </span>
+                              <span class="help is-danger" *ngIf="paciente.get('parentesco').hasError('required') && paciente.get('parentesco').touched">Este campo es requerido.</span>
+
+                        </p>
+                         <p class="control is-expanded  has-icon has-icon-right">
+                            <label class="label">Domicilio</label>
+                            <input class="input" type="text" placeholder="Domicilio Responsable" formControlName="domicilio_responsable">
+                            <span class="icon is-small" *ngIf="paciente.get('domicilio_responsable').hasError('required') && paciente.get('domicilio_responsable').touched">
+                                <i class="fa fa-warning"></i>
+                            </span>
+                            <span class="help is-danger" *ngIf="paciente.get('domicilio_responsable').hasError('required') && paciente.get('domicilio_responsable').touched">Este campo es requerido.</span>
+                         
+                        </p>
+                        <p class="control is-expanded has-icon has-icon-right">
+                            <label class="label">Teléfono</label>
+                          <input class="input" type="text" placeholder="Telefono Responsable" formControlName="telefono_responsable">
+                          <span class="icon is-small" *ngIf="paciente.get('telefono_responsable').hasError('required') && paciente.get('telefono_responsable').touched">
+                            <i class="fa fa-warning"></i>
+                          </span>
+                          <span class="help is-danger" *ngIf="paciente.get('telefono_responsable').hasError('required') && paciente.get('telefono_responsable').touched">Este campo es requerido.</span>
+                        </p>
+                        
+                      </div>
+                     
+                    </div>    
+                   
+                    <div [hidden]="verFormArea">
+                        <section class="section" style="padding: 1rem 1.5rem; background-color: #EFEFEF">
+                            <div class="container">
+                              <div class="heading">
+                                <h1 class="title">Area de Seguimiento</h1>
+                              </div>
+                            </div>
+                        </section> 
+                        <div class="control is-grouped">
+                            <p class="control is-expanded  has-icon has-icon-right">
+                                <br>
+                                <input type="hidden" name='area' formControlName="area">
+                                <label class="checkbox">
+                                    <input type="checkbox" name='trabajo_social' formControlName="trabajo_social" (change)="verifica_area()" value="1">
+                                        Trabajo Social
+                                </label>
+                                <br>
+                                <label class="checkbox" >
+                                    <input type="checkbox" name='juridico' formControlName="juridico"  (change)="verifica_area()" value="1">
+                                        Asuntos Jurídicos
+                                </label>
+                                <br>
+                                <label class="checkbox">
+                                    <input type="checkbox" name='ministerio' formControlName="ministerio"  (change)="verifica_area()" value="1">
+                                        Ministerio Público
+                                </label>
+                                
+                                
+                            </p>
+
+                        </div>
+                      
+                    </div>  
+                  <br>
+                  <div class="control is-grouped">
+                    <p class="control">
+                      <button class="button is-primary" type="submit" [ngClass]="{'is-loading': cargando}" [disabled]="paciente.invalid">Guardar</button>
+                    </p>
+                  </div>
+              </form>
+            </section>
+    <footer class="" style="position:relative; padding:1em;background: #FFF; border-top:1px solid #EEE; border-radius:0 0 0.8em 0.8em " >
+    </footer>
+  </div>
+</div>
+
+
+
+
+<div class="notification is-danger" style="position:fixed; left:1em;  bottom:1em;" *ngIf="mensajeError.mostrar">
+    <button class="delete" (click)="mensajeError.mostrar = false"></button>        
+    <b>Error:</b> {{ mensajeError.texto }}<br><br>
+    <p style="text-align:center" ><a  class="button is-danger is-inverted" (click)="ultimaPeticion(); mensajeError.mostrar = false"> <span class="icon"><i class="fa fa-refresh"></i></span> <span>Volver a intentar</span></a></p>        
+</div>
+
+<div class="notification is-success" style="position:fixed; left:1em;  bottom:1em; width: auto" *ngIf="mensajeExito.mostrar">       
+    <button class="delete" (click)="mensajeExito.mostrar = false"></button>
+    <p><span class="icon" style="margin-right: 0.5em;"><i class="fa fa-check-circle"></i></span> <span>{{ mensajeExito.texto }}</span></p>
+    <br>
+    <p style="text-align: center;"><small >Este mensaje desaparecerá en {{ mensajeExito.cuentaAtras }} segundos.</small></p>       
+</div>

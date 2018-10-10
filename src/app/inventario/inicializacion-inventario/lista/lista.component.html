@@ -1,0 +1,128 @@
+<app-menu-inventario [modulo]="'Inicialización de Inventario'" [icono]="'assets/icono-ajustes-inventario.svg'" [url]="'/inventario/inicializacion-inventario'"></app-menu-inventario>
+
+<div style="height:50px;"></div>
+<div class="contenedor columns " style="height:100%; ">
+    <div class="column" style="padding:2em;">
+        <div style="background: #FFF; border-radius: 1em; overflow: hidden;">
+            <section class="hero" [ngClass] = " {'is-dark': busquedaActivada, 'is-primary': !busquedaActivada } " >
+                
+                <div class="hero-body" style="position:relative;">
+                    <a class="button  is-dark" *ngIf="busquedaActivada" style="position:absolute; top:1em; right:1em;" (click)="busquedaActivada=false;searchBox.value='';resultadosBusqueda=[]"><span class="icon "><i class="fa fa-close"></i></span></a>
+                    <a class="button  is-dark" *ngIf="busquedaActivada" style="position:absolute; top:1em; right:3.5em;" (click)="listarBusqueda(searchBox.value,1)"><span class="icon "><i class="fa fa-refresh"></i></span></a>
+                    <a class="button  is-primary" *ngIf="!busquedaActivada" style="position:absolute; top:1em; right:1em;" (click)="listar(1)"><span class="icon "><i class="fa fa-refresh"></i></span></a>
+                    <div class="container is-fluid">
+                        
+                        <h1 class="title" *ngIf="!busquedaActivada">
+                            <span class="icon is-medium"><i class="fa {{ icono }}"></i></span> {{ titulo }}
+                        </h1>
+                        <h1 class="title" *ngIf="busquedaActivada">
+                            <span class="icon is-medium"><i class="fa fa-search"></i></span> Búsqueda 
+                        </h1>
+                        <div class="control is-grouped">
+                            <p class="control is-expanded">
+                                <input class="input is-medium" type="text" placeholder="Buscar" #searchBox id="search-box" (keyup)="buscar(searchBox.value)">
+                            </p>
+                            <p class="control">
+                                <a class="button is-medium is-primary is-inverted " routerLink="/inventario/inicializacion-inventario/inicializar">
+                                <span class="icon"><i class="fa fa-archive"></i></span><span>Inicializar</span>
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <div class="is-fullwidth has-text-centered" *ngIf="cargando">
+                <br>
+                <span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span> &nbsp;<span>Cargando...</span></span>
+                <br>
+                <br>
+            </div>
+
+            <table class="table" *ngIf="!cargando">
+                <thead>
+                    <tr>
+                        <th>Estatus</th>
+                        <th>Descripcion</th>
+                        <th>Fecha de Inicio</th>
+                        <th>Fecha de Conclusión</th>
+                        <th>Total Claves</th>
+                        <th>Total Monto</th>
+                        <th style="text-align:center;" width="1">Opciones</th>
+                    </tr>
+                </thead>
+                <tbody  *ngIf="!busquedaActivada">
+                    <tr *ngFor="let item of inventarios; let i=index">
+                        <th style="vertical-align: middle;">
+                        </th>
+                        <td style="vertical-align: middle;"></td>
+                        <td style="vertical-align: middle;"></td>
+                        <td style="vertical-align: middle;">
+                        </td>
+                        <td style="vertical-align: middle;">
+                        </td>
+                        <td style="vertical-align: middle;">
+                        </td>
+                        <td style="vertical-align: middle;" class="has-text-centered">
+                        </td>
+                    </tr>
+                    <tr *ngIf="inventarios.length == 0">
+                        <td colspan="5" style="vertical-align: middle; color:#888;">Esta lista está vacía.</td>                    
+                    </tr>
+                </tbody>
+                <tbody *ngIf="busquedaActivada">
+                    <tr *ngFor="let item of resultadosBusqueda; let i=index">
+                        <th style="vertical-align: middle;">
+                        </th>
+                        <td style="vertical-align: middle;"></td>
+                        <td style="vertical-align: middle;"></td>
+                        <td style="vertical-align: middle;">
+                        </td>
+                        <td style="vertical-align: middle;">
+                        </td>
+                        <td style="vertical-align: middle;">
+                        </td>
+                        <td style="vertical-align: middle;" class="has-text-centered">
+                        </td>
+                    </tr>
+
+                    <tr *ngIf="resultadosBusqueda.length == 0 && busquedaActivada">
+                        <td colspan="5" style="vertical-align: middle; color:#888;">No se encontraron resultados.</td>                    
+                    </tr>
+                </tbody>
+            </table>
+            <!-- Paginación para la lista  -->
+            <paginacion 
+                [total]="total" 
+                [paginasTotales]="paginasTotales" 
+                [resultadosPorPagina]="resultadosPorPagina" 
+                [paginaActual]="paginaActual" 
+                [indicePaginas]="indicePaginas"
+                (onSiguiente)="paginaSiguiente()" 
+                (onAnterior)="paginaAnterior()" 
+                (onListar)="listar($event)" 
+                *ngIf="total>0 && total > resultadosPorPagina && !busquedaActivada"></paginacion>
+            <!-- Paginación para la búsqueda  -->
+            <paginacion 
+                [total]="totalBusqueda" 
+                [paginasTotales]="paginasTotalesBusqueda" 
+                [resultadosPorPagina]="resultadosPorPaginaBusqueda" 
+                [paginaActual]="paginaActualBusqueda" 
+                [indicePaginas]="indicePaginasBusqueda"
+                (onSiguiente)="paginaSiguienteBusqueda(searchBox.value)" 
+                (onAnterior)="paginaAnteriorBusqueda(searchBox.value)" 
+                (onListar)="listarBusqueda(searchBox.value,$event)" 
+                *ngIf="totalBusqueda > 0 && totalBusqueda > resultadosPorPaginaBusqueda && busquedaActivada"></paginacion>
+        </div>
+    </div>
+</div>
+
+<div class="notification is-danger" style="position:fixed; left:1em;  bottom:1em;" *ngIf="mensajeError.mostrar">
+    <button class="delete" (click)="mensajeError.mostrar = false"></button>        
+    <b>Error:</b> {{ mensajeError.texto }}<br><br>
+</div>
+
+<div class="notification is-success" style="position:fixed; left:1em;  bottom:1em; width: auto" *ngIf="mensajeExito.mostrar">       
+    <button class="delete" (click)="mensajeExito.mostrar = false"></button>
+    <p><span class="icon" style="margin-right: 0.5em;"><i class="fa fa-check-circle"></i></span> <span>{{ mensajeExito.texto }}</span></p>
+    <br>
+</div>

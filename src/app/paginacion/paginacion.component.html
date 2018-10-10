@@ -1,0 +1,59 @@
+<div style="padding:1em;" *ngIf="total>0 && total > resultadosPorPagina">
+    <nav class="pagination" >
+        <a class="pagination-previous" [ngClass]="{'is-disabled': 1 == paginaActual }" (click)="anterior()">Anterior</a>
+        <a class="pagination-next"  [ngClass]="{'is-disabled': paginasTotales <= paginaActual }" (click)="siguiente()">Siguiente</a>
+        <ul class="pagination-list" *ngIf="paginasTotales<=7">
+            <li *ngFor="let i of indicePaginas">
+            <a class="pagination-link" [ngClass]="{'is-current': i == paginaActual }" (click)="listar(i)">{{ i }}</a>
+            </li>
+        </ul>
+
+        <ul class="pagination-list" *ngIf="paginaActual < 4 && paginasTotales > 7">
+            <li>
+                <a class="pagination-link" [ngClass]="{'is-current': 1 == paginaActual }" (click)="listar(1)">1</a>
+            </li>
+            <li><a class="pagination-link" [ngClass]="{'is-current': 2== paginaActual }" (click)="listar(2)">2</a></li>
+            <li><a class="pagination-link" [ngClass]="{'is-current': 3== paginaActual }" (click)="listar(3)">3</a></li>
+            <li><a class="pagination-link" [ngClass]="{'is-current': 4== paginaActual }" (click)="listar(4)">4</a></li>
+            <li><span class="pagination-ellipsis">&hellip;</span></li>
+            <li >
+            <a class="pagination-link" [ngClass]="{'is-current': paginasTotales == paginaActual }" (click)="listar(paginasTotales)">{{ paginasTotales }}</a>
+            </li>
+        </ul>
+
+        <ul class="pagination-list" *ngIf="paginaActual > paginasTotales - 4 && paginasTotales > 7">
+            <li>
+                <a class="pagination-link" [ngClass]="{'is-current': 1 == paginaActual }" (click)="listar(1)">1</a>
+            </li>
+            <li><span class="pagination-ellipsis">&hellip;</span></li>
+            <li><a class="pagination-link" [ngClass]="{'is-current': paginasTotales - 3 == paginaActual }" (click)="listar(paginasTotales - 3)">{{ paginasTotales - 3 }}</a></li>
+            <li><a class="pagination-link" [ngClass]="{'is-current': paginasTotales - 2 == paginaActual }" (click)="listar(paginasTotales - 2)">{{ paginasTotales - 2 }}</a></li>
+            <li><a class="pagination-link" [ngClass]="{'is-current': paginasTotales - 1 == paginaActual }" (click)="listar(paginasTotales - 1)">{{ paginasTotales - 1 }}</a></li>
+        
+            <li >
+            <a class="pagination-link" [ngClass]="{'is-current': paginasTotales == paginaActual }" (click)="listar(paginasTotales)">{{ paginasTotales }}</a>
+            </li>
+        </ul>
+
+        <ul class="pagination-list" *ngIf="paginaActual >= 4 && paginaActual <= paginasTotales - 4 && paginasTotales > 7">
+            <li>
+            <a class="pagination-link" [ngClass]="{'is-current': 1 == paginaActual }" (click)="listar(1)">1</a>
+            </li>
+            <li><span class="pagination-ellipsis">&hellip;</span>
+            </li>
+            <li>
+            <a class="pagination-link" [ngClass]="{'is-current': paginaActual-1 == paginaActual }" (click)="listar(paginaActual-1)">{{ paginaActual-1 }}</a>
+            </li>
+            <li>
+            <a class="pagination-link" [ngClass]="{'is-current': paginaActual == paginaActual }" (click)="listar(paginaActual)">{{ paginaActual }}</a>
+            </li>
+            <li >
+            <a class="pagination-link" [ngClass]="{'is-current': paginaActual+1 == paginaActual }" (click)="listar(paginaActual+1)">{{ paginaActual+1 }}</a>
+            </li>
+            <li><span class="pagination-ellipsis">&hellip;</span></li>
+            <li >
+            <a class="pagination-link" [ngClass]="{'is-current': paginasTotales == paginaActual }" (click)="listar(paginasTotales)">{{ paginasTotales }}</a>
+            </li>
+        </ul>
+    </nav>
+</div>

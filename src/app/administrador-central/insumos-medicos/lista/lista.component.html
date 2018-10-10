@@ -1,0 +1,981 @@
+<administrador-central-menu></administrador-central-menu>
+<div style="height:50px;"></div>
+<div class="contenedor columns " style="height:100%; ">
+    <div class="column is-narrow is-hidden-mobile">
+        <administrador-central-menu-lateral></administrador-central-menu-lateral>
+    </div>
+    <div class="column" style="overflow: scroll;">
+        <div style="background: #FFF; border-radius: 1em;  margin:20px">
+            <div class="top-bar is-primary" [ngClass]=" {'is-dark': busquedaActivada, 'is-primary': !busquedaActivada } ">
+                <h1 class="title" *ngIf="!busquedaActivada">
+                    <span class="icon is-medium">
+                        <i class="fa fa-medkit"></i>
+                    </span> Insumos médicos
+                </h1>
+                <h1 class="title" *ngIf="busquedaActivada">
+                    <span class="icon is-medium">
+                        <i class="fa fa-search"></i>
+                    </span> Búsqueda
+                </h1>
+                <a class="button  is-dark" *ngIf="busquedaActivada" style="position:absolute; top:1em; right:1em;" (click)="busquedaActivada=false;searchBox.value='';resultadosBusqueda=[]">
+                    <span class="icon ">
+                        <i class="fa fa-close"></i>
+                    </span>
+                </a>
+                <a class="button  is-dark" *ngIf="busquedaActivada" style="position:absolute; top:1em; right:3.5em;" (click)="listarBusqueda(searchBox.value,1)">
+                    <span class="icon ">
+                        <i class="fa fa-refresh"></i>
+                    </span>
+                </a>
+                <a class="button  is-primary" *ngIf="!busquedaActivada" style="position:absolute; top:1em; right:1em;" (click)="listar(1)">
+                    <span class="icon ">
+                        <i class="fa fa-refresh"></i>
+                    </span>
+                </a>
+                <div style="position:absolute; top:1em; right:3.5em;">
+                    <a class="button is-primary " (click)="mostrarModalCarga = true;">
+                        <span class="icon">
+                            <i class="fa fa-upload"></i>
+                        </span>
+                        <span>Importar</span>
+                    </a>
+                    <a class="button is-primary " (click)="exportarExcel()">
+                        <span class="icon">
+                            <i class="fa fa-file-excel-o"></i>
+                        </span>
+                        <span>Exportar</span>
+                    </a>
+                </div>
+                <div class="control is-grouped">
+                    <p class="control is-expanded">
+                        <input class="input is-medium" type="text" placeholder="Buscar" #searchBox id="search-box" (keyup)="buscar(searchBox.value)">
+                    </p>
+                    <p class="control">
+                        <a class="button is-medium is-primary is-inverted " routerLink="/administrador-central/insumos-medicos/nuevo">
+                            <span class="icon">
+                                <i class="fa fa-plus"></i>
+                            </span>
+                            <span>Nuevo</span>
+                        </a>
+                    </p>
+                </div>
+                <div class="columns">
+                    <div class="column">
+                        <div class="">
+                            <span class="select is-fullwidth">
+                                <select (change)="seleccionarFiltroTipo($event.target.value)">
+                                    <option value="">Tipo (Todos)</option>
+                                    <option value="ME">ME Medicamentos</option>
+                                    <option value="MC">MC Material de curación</option>
+                                </select>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="column">
+                        <div class="">
+                            <span class="select is-fullwidth">
+                                <select (change)="seleccionarFiltroCauses($event.target.value)">
+                                    <option value="-1">Causes (Sin filtro)</option>
+                                    <option value="0">Solo No Causes</option>
+                                    <option value="1">Solo Causes</option>
+                                </select>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="column">
+                        <div class="">
+                            <span class="select is-fullwidth">
+                                <select (change)="seleccionarFiltroUnidosis($event.target.value)">
+                                    <option value="-1">Unidosis (Sin filtro)</option>
+                                    <option value="0">Ignorar unidosis</option>
+                                    <option value="1">Solo unidosis</option>
+                                </select>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="columns">
+                    <div class="column">
+                        <div class="">
+                            <span class="select is-fullwidth">
+                                <select (change)="seleccionarFiltroDescontinuados($event.target.value)">
+                                    <option value="-1">Descontinuados (Sin filtro)</option>
+                                    <option value="0">Ignorar descontinuados</option>
+                                    <option value="1">Solo descontinuados</option>
+                                </select>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="column">
+                        <div class="">
+                            <span class="select is-fullwidth">
+                                <select (change)="seleccionarFiltroAtencionMedica($event.target.value)">
+                                    <option value="-1">Atención médica (Sin filtro)</option>
+                                    <option value="0">Ignorar Atención Médica</option>
+                                    <option value="1">Incluir Atención Médica</option>
+                                </select>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="column">
+                        <div class="">
+                            <span class="select is-fullwidth">
+                                <select (change)="seleccionarFiltroSaludPublica($event.target.value)">
+                                    <option value="-1">Salud Publica (Sin filtro)</option>
+                                    <option value="0">Ignorar Salud Pública</option>
+                                    <option value="1">Incluir Salud Pública</option>
+                                </select>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="is-fullwidth has-text-centered" *ngIf="cargando">
+                <br>
+                <span class="tag is-primary is-large ">
+                    <span class="icon">
+                        <i class="fa fa-refresh fa-spin"></i>
+                    </span> &nbsp;
+                    <span>Cargando...</span>
+                </span>
+                <br>
+                <br>
+            </div>
+
+            <table class="table" style="font-size:0.8em; table-layout: fixed;" *ngIf="!cargando">
+                <thead>
+                    <tr>
+                        <th style="width: 100px">Clave</th>
+                        <th>Descripcion</th>
+                        <th style="width:50px">Tipo</th>
+                        <th style="width:50px">Causes</th>
+                        <th style="width:70px">Unidosis</th>
+                        <th style="width:50px; text-align: center;">
+                            <abbr title="Atención Médica">AM</abbr>
+                        </th>
+                        <th style="width:50px; text-align: center;">
+                            <abbr title="Salud Pública">SP</abbr>
+                        </th>
+                        <th style="width:50px; text-align: center;">
+                            <abbr title="Bloqueado en pedidos">B/P</abbr>
+                        </th>
+                        <th style="width:50px; text-align: center;">
+                            <abbr title="Descontinuado">
+                                <span class="icon is-small">
+                                    <i class="fa fa-ban"></i>
+                                </span>
+                            </abbr>
+                        </th>
+                        <th style="text-align:center; width:50px"></th>
+                    </tr>
+                </thead>
+                <tbody *ngIf="!busquedaActivada">
+                    <tr *ngFor="let item of lista; let i=index">
+                        <td style="vertical-align: middle;">
+                            <a routerLink="/administrador-central/insumos-medicos/editar/{{item.clave}}">{{ item.clave }}</a>
+                        </td>
+                        <td style="vertical-align: middle;">
+                            <a routerLink="/administrador-central/insumos-medicos/editar/{{item.clave}}" title="{{ item.descripcion }}">
+                                <span class="text-overflow">{{ item.descripcion }}</span>
+                            </a>
+                        </td>
+                        <td style="vertical-align: middle; text-align: center;">
+                            <a routerLink="/administrador-central/insumos-medicos/editar/{{item.clave}}" title="{{ item.tipo=='ME'?'Medicamento':'Material de curación' }}">{{ item.tipo }}</a>
+                        </td>
+                        <td style="vertical-align: middle; text-align: center;">
+                            <a routerLink="/administrador-central/insumos-medicos/editar/{{item.clave}}">
+                                <span class="icon is-small" *ngIf="item.es_causes">
+                                    <i class="fa fa-check"></i>
+                                </span>
+                            </a>
+                        </td>
+                        <td style="vertical-align: middle; text-align: center;">
+                            <a routerLink="/administrador-central/insumos-medicos/editar/{{item.clave}}">
+                                <span class="icon is-small" *ngIf="item.es_unidosis">
+                                    <i class="fa fa-check"></i>
+                                </span>
+                            </a>
+                        </td>
+                        <td style="vertical-align: middle; text-align: center;">
+                            <a routerLink="/administrador-central/insumos-medicos/editar/{{item.clave}}">
+                                <span class="icon is-small" *ngIf="item.atencion_medica">
+                                    <i class="fa fa-check"></i>
+                                </span>
+                            </a>
+                        </td>
+                        <td style="vertical-align: middle; text-align: center;">
+                            <a routerLink="/administrador-central/insumos-medicos/editar/{{item.clave}}">
+                                <span class="icon is-small" *ngIf="item.salud_publica">
+                                    <i class="fa fa-check"></i>
+                                </span>
+                            </a>
+                        </td>
+                        <td style="vertical-align: middle; text-align: center;">
+                            <a routerLink="/administrador-central/insumos-medicos/editar/{{item.clave}}">
+                                <span class="icon is-small" *ngIf="item.no_disponible_pedidos">
+                                    <i class="fa fa-lock"></i>
+                                </span>
+                            </a>
+                        </td>
+                        <td style="vertical-align: middle; text-align: center;">
+                            <a routerLink="/administrador-central/insumos-medicos/editar/{{item.clave}}">
+                                <span class="icon is-small" *ngIf="item.descontinuado">
+                                    <i class="fa fa-ban"></i>
+                                </span>
+                            </a>
+                        </td>
+                        <td style="vertical-align: middle; text-align: center;" class="has-text-centered">
+                            <span class="icon " *ngIf="item.cargando">
+                                <i class="fa fa-circle-o-notch fa-spin"></i>
+                            </span>
+                            <a *ngIf="!item.cargando" class="button is-white is-small" (click)="eliminar(item, i)">
+                                <span class="icon is-small">
+                                    <i class="fa fa-trash-o"></i>
+                                </span>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr *ngIf="lista.length == 0">
+                        <td colspan="9" style="vertical-align: middle; color:#888;">Esta lista está vacía.</td>
+                    </tr>
+                </tbody>
+                <tbody *ngIf="busquedaActivada">
+                    <tr *ngFor="let item of resultadosBusqueda; let i=index">
+                        <td style="vertical-align: middle;">
+                            <a routerLink="/administrador-central/insumos-medicos/editar/{{item.clave}}">{{ item.clave }}</a>
+                        </td>
+                        <td style="vertical-align: middle;">
+                            <a routerLink="/administrador-central/insumos-medicos/editar/{{item.clave}}" title="{{ item.descripcion }}">
+                                <span class="text-overflow">{{ item.descripcion }}</span>
+                            </a>
+                        </td>
+                        <td style="vertical-align: middle; text-align: center;">
+                            <a routerLink="/administrador-central/insumos-medicos/editar/{{item.clave}}" title="{{ item.tipo=='ME'?'Medicamento':'Material de curación' }}">{{ item.tipo }}</a>
+                        </td>
+                        <td style="vertical-align: middle; text-align: center;">
+                            <a routerLink="/administrador-central/insumos-medicos/editar/{{item.clave}}">
+                                <span class="icon is-small" *ngIf="item.es_causes">
+                                    <i class="fa fa-check"></i>
+                                </span>
+                            </a>
+                        </td>
+                        <td style="vertical-align: middle; text-align: center;">
+                            <a routerLink="/administrador-central/insumos-medicos/editar/{{item.clave}}">
+                                <span class="icon is-small" *ngIf="item.es_unidosis">
+                                    <i class="fa fa-check"></i>
+                                </span>
+                            </a>
+                        </td>
+                        <td style="vertical-align: middle; text-align: center;">
+                            <a routerLink="/administrador-central/insumos-medicos/editar/{{item.clave}}">
+                                <span class="icon is-small" *ngIf="item.atencion_medica">
+                                    <i class="fa fa-check"></i>
+                                </span>
+                            </a>
+                        </td>
+                        <td style="vertical-align: middle; text-align: center;">
+                            <a routerLink="/administrador-central/insumos-medicos/editar/{{item.clave}}">
+                                <span class="icon is-small" *ngIf="item.salud_publica">
+                                    <i class="fa fa-check"></i>
+                                </span>
+                            </a>
+                        </td>
+                        <td style="vertical-align: middle; text-align: center;">
+                            <a routerLink="/administrador-central/insumos-medicos/editar/{{item.clave}}">
+                                <span class="icon is-small" *ngIf="item.no_disponible_pedidos">
+                                    <i class="fa fa-lock"></i>
+                                </span>
+                            </a>
+                        </td>
+                        <td style="vertical-align: middle; text-align: center;">
+                            <a routerLink="/administrador-central/insumos-medicos/editar/{{item.clave}}">
+                                <span class="icon is-small" *ngIf="item.descontinuado">
+                                    <i class="fa fa-ban"></i>
+                                </span>
+                            </a>
+                        </td>
+                        <td style="vertical-align: middle; text-align: center;" class="has-text-centered">
+                            <span class="icon " *ngIf="item.cargando">
+                                <i class="fa fa-circle-o-notch fa-spin"></i>
+                            </span>
+                            <a *ngIf="!item.cargando" class="button is-white is-small" (click)="eliminar(item, i)">
+                                <span class="icon is-small">
+                                    <i class="fa fa-trash-o"></i>
+                                </span>
+                            </a>
+                        </td>
+                    </tr>
+
+                    <tr *ngIf="resultadosBusqueda.length == 0 && busquedaActivada">
+                        <td colspan="9" style="vertical-align: middle; color:#888;">No se encontraron resultados.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <!-- Paginación para la lista  -->
+            <paginacion [total]="total" [paginasTotales]="paginasTotales" [resultadosPorPagina]="resultadosPorPagina" [paginaActual]="paginaActual"
+                [indicePaginas]="indicePaginas" (onSiguiente)="paginaSiguiente()" (onAnterior)="paginaAnterior()" (onListar)="listar($event)"
+                *ngIf="total>0 && total > resultadosPorPagina && !busquedaActivada"></paginacion>
+            <!-- Paginación para la búsqueda  -->
+            <paginacion [total]="totalBusqueda" [paginasTotales]="paginasTotalesBusqueda" [resultadosPorPagina]="resultadosPorPaginaBusqueda"
+                [paginaActual]="paginaActualBusqueda" [indicePaginas]="indicePaginasBusqueda" (onSiguiente)="paginaSiguienteBusqueda(searchBox.value)"
+                (onAnterior)="paginaAnteriorBusqueda(searchBox.value)" (onListar)="listarBusqueda(searchBox.value,$event)" *ngIf="totalBusqueda > 0 && totalBusqueda > resultadosPorPaginaBusqueda && busquedaActivada"></paginacion>
+
+        </div>
+
+    </div>
+</div>
+
+<div class="notification is-danger" style="position:fixed; left:1em;  bottom:1em;" *ngIf="mensajeError.mostrar">
+    <button class="delete" (click)="mensajeError.mostrar = false"></button>
+    <b>Error:</b> {{ mensajeError.texto }}
+    <br>
+    <br>
+    <p style="text-align:center">
+        <a class="button is-danger is-inverted" (click)="ultimaPeticion(); mensajeError.mostrar = false">
+            <span class="icon">
+                <i class="fa fa-refresh"></i>
+            </span>
+            <span>Volver a intentar</span>
+        </a>
+    </p>
+</div>
+
+<div class="notification is-success" style="position:fixed; left:1em;  bottom:1em; width: auto" *ngIf="mensajeExito.mostrar">
+    <button class="delete" (click)="mensajeExito.mostrar = false"></button>
+    <p>
+        <span class="icon" style="margin-right: 0.5em;">
+            <i class="fa fa-check-circle"></i>
+        </span>
+        <span>{{ mensajeExito.texto }}</span>
+    </p>
+    <br>
+    <p style="text-align: center;">
+        <small>Este mensaje desaparecerá en {{ mensajeExito.cuentaAtras }} segundos.</small>
+    </p>
+</div>
+
+<div class="modal is-active" *ngIf="mostrarModalCarga">
+    <div class="modal-background" (click)="cerrarModalCarga()"></div>
+    <div class="modal-card modal-carga">
+        <header class="modal-card-head">
+            <p class="modal-card-title">
+                <span class="icon">
+                    <i class="fa fa-upload"></i>
+                </span> Importación masiva de datos</p>
+            <button class="delete" (click)="cerrarModalCarga()"></button>
+        </header>
+        <section class="modal-card-body" style="position: relative; padding:0px;">
+            <!-- <div class="notification is-danger" *ngIf="mensajeErrorSync!=''"><span class="icon"><i class="fa fa-exclamation-circle"></i></span> {{ mensajeErrorSync }}</div>-->
+
+            <div class="field" [ngClass]="{ 'is-hidden' : enviandoDatos }" *ngIf="!archivoSubido" style="margin:1em;">
+                <label for="sql" class="label" [ngClass]="{ 'is-danger': errores.archivo != null }">Elige el archivo .xls</label>
+                <input type="file" class="input-file" #archivoInput style="width:100%" name="archivo" is="xls" (change)="fileChange($event)"
+                    accept=".xls,.xlsx">
+            </div>
+            <div *ngIf="enviandoDatos" style="margin:1em;">
+                <h1 class="subtitle" *ngIf="enviandoDatos">Subiendo archivo...</h1>
+                <progress class="progress is-primary" value="{{ progreso }}" max="100">{{ progreso}}%</progress>
+            </div>
+
+            <div *ngIf="confirmando" style="margin:1em;">
+                <h1 class="subtitle" *ngIf="confirmando">
+                    <span class="icon">
+                        <i class="fa fa-cog fa-spin"></i>
+                    </span> Confirmando importación de insumos...</h1>
+            </div>
+
+            <div class="tabs is-centered" *ngIf="archivoSubido && !confirmando" style="position: fixed; width:88%; background: white">
+                <ul>
+                    <li [ngClass]="{ 'is-active': tabMedicamentos }" (click)="tabMedicamentos = true; tabMaterialCuracion = false;">
+                        <a>Medicamentos ({{ listaCargaMasiva.medicamentos.correctos.length + listaCargaMasiva.medicamentos.por_validar.length
+                            + listaCargaMasiva.medicamentos.errores.length }})</a>
+                    </li>
+                    <li [ngClass]="{ 'is-active': tabMaterialCuracion }" (click)="tabMedicamentos = false; tabMaterialCuracion = true;">
+                        <a>Material de curación ({{ listaCargaMasiva.material_curacion.correctos.length + listaCargaMasiva.material_curacion.por_validar.length
+                            + listaCargaMasiva.material_curacion.errores.length }})</a>
+                    </li>
+                </ul>
+            </div>
+            <table class="table import-table" style="font-size:0.7em; margin-top:50px; margin-bottom:50px;" *ngIf="archivoSubido && tabMedicamentos && !confirmando">
+                <thead>
+                    <tr>
+                        <th>Clave</th>
+                        <th>Causes</th>
+                        <th>Unidosis</th>
+                        <th>Tiene Fecha Caducidad</th>
+                        <th>Controlado</th>
+                        <th>Surfactante</th>
+                        <th>Bloquear en Pedidos</th>
+                        <th>Descontinuado</th>
+                        <th>Atención Médica</th>
+                        <th>Salud Pública</th>
+                        <th>Descripción</th>
+                        <th>Presentación</th>
+                        <th>Concentración</th>
+                        <th>Contenido</th>
+                        <th>Cantidad X Envase</th>
+                        <th>Unidad de medida</th>
+                        <th>Via Admnistración</th>
+                        <th>Dosis</th>
+                        <th>Indicaciones</th>
+                    </tr>
+                </thead>
+                <tbody *ngIf="tabMedicamentosCorrectos">
+                    <tr *ngFor="let item of listaCargaMasiva.medicamentos.correctos; let i=index" (click)="editarRegistroListaMasiva(i,'ME',false, false)">
+                        <td>{{ item.clave }}</td>
+                        <td>{{ item.es_causes ? "SI" : "NO" }}</td>
+                        <td>{{ item.es_unidosis ? "SI" : "NO" }}</td>
+                        <td>{{ item.tiene_fecha_caducidad ? "SI" : "NO" }}</td>
+                        <td>{{ item.medicamento.es_controlado ? "SI" : "NO" }}</td>
+                        <td>{{ item.medicamento.es_surfactante ? "SI" : "NO" }}</td>
+                        <td>{{ item.no_disponible_pedidos ? "SI" : "NO" }}</td>
+                        <td>{{ item.descontinuado ? "SI" : "NO" }}</td>
+                        <td>{{ item.atencion_medica ? "SI" : "NO" }}</td>
+                        <td>{{ item.salud_publica ? "SI" : "NO" }}</td>
+                        <td class="text-overflow-ellipsis">{{ item.descripcion }}</td>
+                        <td class="text-overflow-ellipsis">
+                            <span *ngIf="item.medicamento.presentacion_medicamento != null">{{ item.medicamento.presentacion_medicamento.nombre }}</span>
+                            <strong *ngIf="item.medicamento.presentacion_medicamento == null">INVÁLIDO</strong>
+                        </td>
+                        <td>{{ item.medicamento.concentracion }}</td>
+                        <td class="text-overflow-ellipsis">{{ item.medicamento.contenido }}</td>
+                        <td>{{ item.medicamento.cantidad_x_envase }}</td>
+                        <td class="text-overflow-ellipsis">
+                            <span *ngIf="item.medicamento.unidad_medida != null">{{ item.medicamento.unidad_medida.nombre }}</span>
+                            <strong *ngIf="item.medicamento.unidad_medida == null">INVÁLIDO</strong>
+                        </td>
+                        <td class="text-overflow-ellipsis">
+                            <span *ngIf="item.medicamento.via_administracion != null">{{ item.medicamento.via_administracion.nombre }}</span>
+                            <strong *ngIf="item.medicamento.via_administracion == null">INVÁLIDO</strong>
+                        </td>
+                        <td class="text-overflow-ellipsis">{{ item.medicamento.dosis }}</td>
+                        <td class="text-overflow-ellipsis">{{ item.medicamento.indicaciones }}</td>
+
+                    </tr>
+                </tbody>
+
+                <tbody *ngIf="tabMedicamentosPorValidar">
+                    <tr *ngFor="let item of listaCargaMasiva.medicamentos.por_validar; let i=index" (click)="editarRegistroListaMasiva(i,'ME',false, true)">
+                        <td>{{ item.clave }}</td>
+                        <td>{{ item.es_causes ? "SI" : "NO" }}</td>
+                        <td>{{ item.es_unidosis ? "SI" : "NO" }}</td>
+                        <td>{{ item.tiene_fecha_caducidad ? "SI" : "NO" }}</td>
+                        <td>{{ item.medicamento.es_controlado ? "SI" : "NO" }}</td>
+                        <td>{{ item.medicamento.es_surfactante ? "SI" : "NO" }}</td>
+                        <td>{{ item.no_disponible_pedidos ? "SI" : "NO" }}</td>
+                        <td>{{ item.descontinuado ? "SI" : "NO" }}</td>
+                        <td>{{ item.atencion_medica ? "SI" : "NO" }}</td>
+                        <td>{{ item.salud_publica ? "SI" : "NO" }}</td>
+                        <td class="text-overflow-ellipsis">{{ item.descripcion }}</td>
+                        <td class="text-overflow-ellipsis">
+                            <span *ngIf="item.medicamento.presentacion_medicamento != null">{{ item.medicamento.presentacion_medicamento.nombre }}</span>
+                            <strong *ngIf="item.medicamento.presentacion_medicamento == null">INVÁLIDO</strong>
+                        </td>
+                        <td>{{ item.medicamento.concentracion }}</td>
+                        <td class="text-overflow-ellipsis">{{ item.medicamento.contenido }}</td>
+                        <td>{{ item.medicamento.cantidad_x_envase }}</td>
+                        <td class="text-overflow-ellipsis">
+                            <span *ngIf="item.medicamento.unidad_medida != null">{{ item.medicamento.unidad_medida.nombre }}</span>
+                            <strong *ngIf="item.medicamento.unidad_medida == null">INVÁLIDO</strong>
+                        </td>
+                        <td class="text-overflow-ellipsis">
+                            <span *ngIf="item.medicamento.via_administracion != null">{{ item.medicamento.via_administracion.nombre }}</span>
+                            <strong *ngIf="item.medicamento.via_administracion == null">INVÁLIDO</strong>
+                        </td>
+                        <td class="text-overflow-ellipsis">{{ item.medicamento.dosis }}</td>
+                        <td class="text-overflow-ellipsis">{{ item.medicamento.indicaciones }}</td>
+
+                    </tr>
+                </tbody>
+                <tbody *ngIf="tabMedicamentosErrores" style="color:darkred">
+                    <tr *ngFor="let item of listaCargaMasiva.medicamentos.errores; let i=index" (click)="editarRegistroListaMasiva(i,'ME',true, false)">
+                        <td>{{ item.clave }}</td>
+                        <td>{{ item.es_causes ? "SI" : "NO" }}</td>
+                        <td>{{ item.es_unidosis ? "SI" : "NO" }}</td>
+                        <td>{{ item.tiene_fecha_caducidad ? "SI" : "NO" }}</td>
+                        <td>{{ item.medicamento.es_controlado ? "SI" : "NO" }}</td>
+                        <td>{{ item.medicamento.es_surfactante ? "SI" : "NO" }}</td>
+                        <td>{{ item.no_disponible_pedidos ? "SI" : "NO" }}</td>
+                        <td>{{ item.descontinuado ? "SI" : "NO" }}</td>
+                        <td>{{ item.atencion_medica ? "SI" : "NO" }}</td>
+                        <td>{{ item.salud_publica ? "SI" : "NO" }}</td>
+                        <td class="text-overflow-ellipsis">{{ item.descripcion }}</td>
+                        <td class="text-overflow-ellipsis">
+                            <span *ngIf="item.medicamento.presentacion_medicamento != null">{{ item.medicamento.presentacion_medicamento.nombre }}</span>
+                            <strong *ngIf="item.medicamento.presentacion_medicamento == null">INVÁLIDO</strong>
+                        </td>
+                        <td>{{ item.medicamento.concentracion }}</td>
+                        <td class="text-overflow-ellipsis">{{ item.medicamento.contenido }}</td>
+                        <td>{{ item.medicamento.cantidad_x_envase }}</td>
+                        <td class="text-overflow-ellipsis">
+                            <span *ngIf="item.medicamento.unidad_medida != null">{{ item.medicamento.unidad_medida.nombre }}</span>
+                            <strong *ngIf="item.medicamento.unidad_medida == null">INVÁLIDO</strong>
+                        </td>
+                        <td class="text-overflow-ellipsis">
+                            <span *ngIf="item.medicamento.via_administracion != null">{{ item.medicamento.via_administracion.nombre }}</span>
+                            <strong *ngIf="item.medicamento.via_administracion == null">INVÁLIDO</strong>
+                        </td>
+                        <td class="text-overflow-ellipsis">{{ item.medicamento.dosis }}</td>
+                        <td class="text-overflow-ellipsis">{{ item.medicamento.indicaciones }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+
+            <div class="tabs is-centered is-boxed is-tab-bottom" *ngIf="archivoSubido  && tabMedicamentos" style="position: fixed; bottom:110px; width:88%">
+                <ul>
+                    <li [ngClass]="{ 'is-active' : tabMedicamentosCorrectos }" (click)="tabMedicamentosCorrectos = true; tabMedicamentosErrores = false; tabMedicamentosPorValidar = false;">
+                        <a>
+                            <span class="icon is-small">
+                                <i class="fa fa-check"></i>
+                            </span>
+                            <span> {{ listaCargaMasiva.medicamentos.correctos.length }} correctos</span>
+                        </a>
+                    </li>
+                    <li *ngIf="listaCargaMasiva.medicamentos.por_validar.length>0" [ngClass]="{ 'is-active' : tabMedicamentosPorValidar }" (click)="tabMedicamentosCorrectos = false; tabMedicamentosErrores = false; tabMedicamentosPorValidar = true;">
+                        <a>
+                            <span class="icon is-small">
+                                <i class="fa fa-warning"></i>
+                            </span>
+                            <span> {{ listaCargaMasiva.medicamentos.por_validar.length }} por validar</span>
+                        </a>
+                    </li>
+                    <li [ngClass]="{ 'is-active' : tabMedicamentosErrores, 'is-danger': listaCargaMasiva.material_curacion.errores.length > 0 }"
+                        (click)="tabMedicamentosCorrectos = false; tabMedicamentosErrores = true; tabMedicamentosPorValidar = false;">
+                        <a>
+                            <span class="icon is-small">
+                                <i class="fa fa-times-circle"></i>
+                            </span>
+                            <span>{{ listaCargaMasiva.medicamentos.errores.length }} errores</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <table class="table import-table" style="font-size:0.7em;  margin-top:50px" *ngIf="archivoSubido && tabMaterialCuracion">
+                <thead>
+                    <tr>
+                        <th>Clave</th>
+                        <th>Causes</th>
+                        <th>Unidosis</th>
+                        <th>Tiene Fecha Caducidad</th>
+                        <th>Bloquear en Pedidos</th>
+                        <th>Descontinuado</th>
+                        <th>Atención Médica</th>
+                        <th>Salud Pública</th>
+                        <th>Descripción</th>
+                        <th>Cantidad X Envase</th>
+                        <th>Unidad de medida</th>
+                    </tr>
+                </thead>
+                <tbody *ngIf="tabMaterialCuracionCorrectos">
+                    <tr *ngFor="let item of listaCargaMasiva.material_curacion.correctos; let i=index" (click)="editarRegistroListaMasiva(i, 'MC', false,false)">
+                        <td>{{ item.clave }}</td>
+                        <td>{{ item.es_causes ? "SI" : "NO" }}</td>
+                        <td>{{ item.es_unidosis ? "SI" : "NO" }}</td>
+                        <td>{{ item.tiene_fecha_caducidad ? "SI" : "NO" }}</td>
+                        <td>{{ item.no_disponible_pedidos ? "SI" : "NO" }}</td>
+                        <td>{{ item.descontinuado ? "SI" : "NO" }}</td>
+                        <td>{{ item.atencion_medica ? "SI" : "NO" }}</td>
+                        <td>{{ item.salud_publica ? "SI" : "NO" }}</td>
+                        <td class="text-overflow-ellipsis">{{ item.descripcion }}</td>
+                        <td>{{ item.material_curacion.cantidad_x_envase }}</td>
+                        <td class="text-overflow-ellipsis">
+                            <span *ngIf="item.material_curacion.unidad_medida != null">{{ item.material_curacion.unidad_medida.nombre }}</span>
+                            <strong *ngIf="item.material_curacion.unidad_medida == null">INVÁLIDO</strong>
+                        </td>
+                    </tr>
+                </tbody>
+                <tbody *ngIf="tabMaterialCuracionPorValidar">
+                    <tr *ngFor="let item of listaCargaMasiva.material_curacion.por_validar; let i=index" (click)="editarRegistroListaMasiva(i, 'MC', false,true)">
+                        <td>{{ item.clave }}</td>
+                        <td>{{ item.es_causes ? "SI" : "NO" }}</td>
+                        <td>{{ item.es_unidosis ? "SI" : "NO" }}</td>
+                        <td>{{ item.tiene_fecha_caducidad ? "SI" : "NO" }}</td>
+                        <td>{{ item.no_disponible_pedidos ? "SI" : "NO" }}</td>
+                        <td>{{ item.descontinuado ? "SI" : "NO" }}</td>
+                        <td>{{ item.atencion_medica ? "SI" : "NO" }}</td>
+                        <td>{{ item.salud_publica ? "SI" : "NO" }}</td>
+                        <td class="text-overflow-ellipsis">{{ item.descripcion }}</td>
+                        <td>{{ item.material_curacion.cantidad_x_envase }}</td>
+                        <td class="text-overflow-ellipsis">
+                            <span *ngIf="item.material_curacion.unidad_medida != null">{{ item.material_curacion.unidad_medida.nombre }}</span>
+                            <strong *ngIf="item.material_curacion.unidad_medida == null">INVÁLIDO</strong>
+                        </td>
+                    </tr>
+                </tbody>
+                <tbody *ngIf="tabMaterialCuracionErrores" style="color:darkred;">
+                    <tr *ngFor="let item of listaCargaMasiva.material_curacion.errores; let i=index" (click)="editarRegistroListaMasiva(i, 'MC', true,false)">
+                        <td>{{ item.clave }}</td>
+                        <td>{{ item.es_causes ? "SI" : "NO" }}</td>
+                        <td>{{ item.es_unidosis ? "SI" : "NO" }}</td>
+                        <td>{{ item.tiene_fecha_caducidad ? "SI" : "NO" }}</td>
+                        <td>{{ item.no_disponible_pedidos ? "SI" : "NO" }}</td>
+                        <td>{{ item.descontinuado ? "SI" : "NO" }}</td>
+                        <td>{{ item.atencion_medica ? "SI" : "NO" }}</td>
+                        <td>{{ item.salud_publica ? "SI" : "NO" }}</td>
+                        <td class="text-overflow-ellipsis">{{ item.descripcion }}</td>
+                        <td>{{ item.material_curacion.cantidad_x_envase }}</td>
+                        <td class="text-overflow-ellipsis">
+                            <span *ngIf="item.material_curacion.unidad_medida != null">{{ item.material_curacion.unidad_medida.nombre }}</span>
+                            <strong *ngIf="item.material_curacion.unidad_medida == null">INVÁLIDO</strong>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="tabs  is-centered is-boxed is-tab-bottom" *ngIf="archivoSubido  && tabMaterialCuracion" style="position: fixed; bottom:110px; background: white; width:88%">
+                <ul>
+                    <li [ngClass]="{ 'is-active' : tabMaterialCuracionCorrectos }" (click)="tabMaterialCuracionCorrectos = true; tabMaterialCuracionErrores = false; tabMaterialCuracionPorValidar = false;">
+                        <a>
+                            <span class="icon is-small">
+                                <i class="fa fa-check"></i>
+                            </span>
+                            <span> {{ listaCargaMasiva.material_curacion.correctos.length }} correctos</span>
+                        </a>
+                    </li>
+                    <li *ngIf="listaCargaMasiva.material_curacion.por_validar.length>0" [ngClass]="{ 'is-active' : tabMaterialCuracionPorValidar }"
+                        (click)="tabMaterialCuracionCorrectos = false; tabMaterialCuracionErrores = false; tabMaterialCuracionPorValidar = true;">
+                        <a>
+                            <span class="icon is-small">
+                                <i class="fa fa-warning"></i>
+                            </span>
+                            <span> {{ listaCargaMasiva.material_curacion.por_validar.length }} por validar</span>
+                        </a>
+                    </li>
+                    <li [ngClass]="{ 'is-active' : tabMaterialCuracionErrores, 'is-danger': listaCargaMasiva.material_curacion.errores.length > 0 }"
+                        (click)="tabMaterialCuracionCorrectos = false; tabMaterialCuracionErrores = true; tabMaterialCuracionPorValidar = false;">
+                        <a>
+
+                            <span class="icon is-small">
+                                <i class="fa fa-times-circle"></i>
+                            </span>
+                            <span>{{ listaCargaMasiva.material_curacion.errores.length }} errores</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </section>
+        <footer class="modal-card-foot">
+            <a class="button is-hidden-desktop" [ngClass]="{ 'is-disabled' : enviandoDatos  }" *ngIf="!archivoSubido" (click)="descargarFormato()">
+                <span class="icon">
+                    <i class="fa fa-file-excel-o"></i>
+                </span>
+            </a>
+            <a class="button is-hidden-desktop is-success" [ngClass]="{ 'is-disabled' : confirmando  }" *ngIf="archivoSubido" (click)="confirmar()">
+                <span class="icon">
+                    <i class="fa fa-check"></i>
+                </span>
+            </a>
+            <a class="button is-primary is-hidden-desktop" [ngClass]="{ 'is-disabled' : enviandoDatos || !archivo  }" *ngIf="!archivoSubido"
+                (click)="subir()">
+                <span class="icon">
+                    <i class="fa fa-upload"></i>
+                </span>
+            </a>
+            <a class="button is-hidden-touch" [ngClass]="{ 'is-disabled' : enviandoDatos  }" *ngIf="!archivoSubido" (click)="descargarFormato()">
+                <span class="icon">
+                    <i class="fa fa-file-excel-o"></i>
+                </span>
+                <span>Descargar formato de llenado</span>
+            </a>
+            <a class="button is-hidden-touch is-primary" [ngClass]="{ 'is-disabled' : enviandoDatos || !archivo  }" *ngIf="!archivoSubido"
+                (click)="subir()">
+                <span class="icon">
+                    <i class="fa fa-upload"></i>
+                </span>
+                <span>Subir</span>
+            </a>
+            <a class="button is-hidden-touch is-warning" [ngClass]="{ 'is-disabled' : confirmando  }" *ngIf="archivoSubido" (click)="cambiarArchivo()">
+                <span class="icon">
+                    <i class="fa fa-file-excel-o"></i>
+                </span>
+                <span>Cambiar archivo</span>
+            </a>
+            <a class="button is-hidden-touch is-success" [ngClass]="{ 'is-disabled' : confirmando  }" *ngIf="archivoSubido" (click)="confirmar()">
+                <span class="icon">
+                    <i class="fa fa-check"></i>
+                </span>
+                <span>Confirmar importación</span>
+            </a>
+            <a class="button" [ngClass]="{ 'is-disabled' : enviandoDatos  }" (click)="cerrarModalCarga()">Cancelar</a>
+        </footer>
+    </div>
+</div>
+<div class="modal is-active" *ngIf="mostrarModalEditarRegistro">
+    <div class="modal-background" (click)="cerrarModalEditarRegistro()"></div>
+    <div class="modal-card">
+        <header class="modal-card-head">
+            <p class="modal-card-title">
+                <span class="icon">
+                    <i class="fa fa-edit"></i>
+                </span> Editar registro</p>
+            <button class="delete" (click)="cerrarModalEditarRegistro()"></button>
+        </header>
+        <section class="modal-card-body">
+            <div class="notification is-danger" *ngIf="errorRegistro != ''">{{ errorRegistro }}</div>
+
+            <section style="padding:1em;">
+                <div class="field">
+                    <label class="label">Clave:</label>
+                    <p class="control is-expanded  has-icon has-icon-right">
+                        <input class="input" autofocus type="text" placeholder="Clave: Ej. 010.000.0000000.00" [(ngModel)]="insumo_medico.clave">
+                        <span class="icon is-small" *ngIf="false">
+                            <i class="fa fa-warning"></i>
+                        </span>
+                    </p>
+                </div>
+                <br>
+                <div class="columns" style="font-size: 0.8em">
+                    <div class="column">
+                        <div class="field">
+                            <p class="control">
+                                <label class="checkbox" [ngClass]="{ 'is-disabled': guardando}">
+                                    <input type="checkbox" (change)="insumo_medico.atencion_medica = !insumo_medico.atencion_medica" [checked]="insumo_medico.atencion_medica">
+                                    <strong>ATENCIÓN MÉDICA</strong>
+                                </label>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="column" style="text-align: center">
+                        <div class="field">
+                            <p class="control">
+                                <label class="checkbox" [ngClass]="{ 'is-disabled': guardando}">
+                                    <input type="checkbox" (change)="insumo_medico.salud_publica = !insumo_medico.salud_publica" [checked]="insumo_medico.salud_publica">
+                                    <strong>SALUD PÚBLICA</strong>
+                                </label>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="column"  style="text-align: center">
+                        <div class="field">
+                            <p class="control">
+                                <label class="checkbox" [ngClass]="{ 'is-disabled': guardando}">
+                                    <input type="checkbox" (change)="insumo_medico.es_causes = !insumo_medico.es_causes" [checked]="insumo_medico.es_causes"> CAUSES
+                                </label>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <!--
+                <div class="field ">
+                    <label class="label">Tipo:</label>
+                    <p class="control is-expanded">
+                        <span class="select is-fullwidth">
+                            <select (change)="seleccionarTipo($event.target.value)" [ngClass]="{'is-danger': errores.tipo != null, 'is-disabled': guardando}">
+                                <option value="">Selecciona un tipo</option>
+                                <option value="ME" [selected]="insumo_medico.tipo == 'ME'">ME Medicamentos</option>
+                                <option value="MC" [selected]="insumo_medico.tipo == 'MC'">ME Material de curación</option>
+                            </select>
+                        </span>
+                        <span class="help is-danger" *ngIf="errores.tipo == 'required'">Este campo es requerido.</span>
+                    </p>
+                </div>
+            -->
+                <div class="columns" style="font-size: 0.8em">
+                    <div class="column">
+                        <div class="field">
+                            <p class="control">
+                                <label class="checkbox" [ngClass]="{ 'is-disabled': guardando}">
+                                    <input type="checkbox" (change)="insumo_medico.es_unidosis = !insumo_medico.es_unidosis" [checked]="insumo_medico.es_unidosis"> Unidosis
+                                </label>
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="column is-4">
+                        <div class="field">
+                            <p class="control">
+                                <label class="checkbox" [ngClass]="{ 'is-disabled': guardando}">
+                                    <input type="checkbox" (change)="insumo_medico.tiene_fecha_caducidad = !insumo_medico.tiene_fecha_caducidad" [checked]="insumo_medico.tiene_fecha_caducidad"> Fecha de caducidad
+                                </label>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="column">
+                        <div class="field">
+                            <p class="control">
+                                <label class="checkbox" [ngClass]="{ 'is-disabled': guardando}">
+                                    <input type="checkbox" (change)="insumo_medico.no_disponible_pedidos = !insumo_medico.no_disponible_pedidos" [checked]="insumo_medico.no_disponible_pedidos"> Bloquear en pedidos
+                                </label>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="column">
+                        <div class="field">
+                            <p class="control">
+                                <label class="checkbox" [ngClass]="{ 'is-disabled': guardando}">
+                                    <input type="checkbox" (change)="insumo_medico.descontinuado = !insumo_medico.descontinuado" [checked]="insumo_medico.descontinuado"> Descontinuado
+                                </label>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">Descripción completa del insumo:</label>
+                    <div class="control">
+                        <textarea name="observaciones" class="textarea" placeholder="Ej. ÁCIDO ACETILSALICÍLICO Tableta 500 mg 20 tabletas" [(ngModel)]="insumo_medico.descripcion"></textarea>
+                    </div>
+                </div>
+            </section>
+            <section *ngIf="insumo_medico.tipo =='ME'" style="padding: 1em;">
+                <div class="columns">
+                    <div class="column">
+                        <div class="field">
+                            <p class="control">
+                                <label class="checkbox" [ngClass]="{ 'is-disabled': guardando}">
+                                    <input type="checkbox" (change)="insumo_medico.medicamento.es_controlado = !insumo_medico.medicamento.es_controlado" [checked]="insumo_medico.medicamento.es_controlado"> Controlado
+                                </label>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="column">
+                        <div class="field">
+                            <p class="control">
+                                <label class="checkbox" [ngClass]="{ 'is-disabled': guardando}">
+                                    <input type="checkbox" (change)="insumo_medico.medicamento.es_surfactante = !insumo_medico.medicamento.es_surfactante" [checked]="insumo_medico.medicamento.es_surfactante"> Surfactante
+                                </label>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="columns">
+                    <div class="column">
+                        <div class="field ">
+                            <label class="label">Presentacion:</label>
+                            <p class="control is-expanded">
+                                <span class="select is-fullwidth">
+                                    <select (change)="seleccionarPresentacion($event.target.value)">
+                                        <option value="">Selecciona una opción</option>
+                                        <option *ngFor="let item of presentaciones" value="{{ item.id }}" [selected]="insumo_medico.medicamento.presentacion_id == item.id">{{ item.nombre }}</option>
+                                    </select>
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="column">
+                        <div class="field">
+                            <label class="label">Contenido:</label>
+                            <p class="control is-expanded  has-icon has-icon-right">
+                                <input class="input" autofocus type="text" placeholder="Ej. Caja con un frasco ámpula o una ampolleta con 1 ml." [(ngModel)]="insumo_medico.medicamento.contenido">
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="columns">
+                    <div class="column">
+                        <div class="field">
+                            <label class="label">Concentración :</label>
+                            <p class="control is-expanded  has-icon has-icon-right">
+                                <input class="input" autofocus type="text" placeholder="Ejemplos: 5 mg, 40 mg/200 mg, etc." [(ngModel)]="insumo_medico.medicamento.concentracion">
+                                <span class="icon is-small" *ngIf="false">
+                                    <i class="fa fa-warning"></i>
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="column">
+                        <div class="field">
+                            <label class="label">Cantidad x envase:</label>
+                            <p class="control is-expanded  has-icon has-icon-right">
+                                <input class="input" autofocus type="number" [(ngModel)]="insumo_medico.medicamento.cantidad_x_envase">
+                                <span class="icon is-small" *ngIf="false">
+                                    <i class="fa fa-warning"></i>
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="columns">
+                    <div class="column">
+                        <div class="field ">
+                            <label class="label">Unidad de medida:</label>
+                            <p class="control is-expanded">
+                                <span class="select is-fullwidth">
+                                    <select (change)="seleccionarUnidadMedida($event.target.value)" [ngClass]="{'is-danger': errores.medicamento  && errores.medicamento.unidad_medida_id, 'is-disabled': guardando}">
+                                        <option value="">Selecciona una opción</option>
+                                        <option *ngFor="let item of unidades_medida" value="{{ item.id }}" [selected]="insumo_medico.medicamento.unidad_medida_id == item.id">{{ item.clave }} - {{ item.nombre }}</option>
+                                    </select>
+                                </span>
+                                <span class="help is-danger" *ngIf="errores.medicamento && errores.medicamento.unidad_medida_id == 'required'">Este campo es requerido.</span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="column">
+                        <div class="field ">
+                            <label class="label">Vía de administración:</label>
+                            <p class="control is-expanded">
+                                <span class="select is-fullwidth">
+                                    <select (change)="seleccionarViaAdministracion($event.target.value)" [ngClass]="{'is-disabled': guardando}">
+                                        <option value="">Selecciona una opción</option>
+                                        <option *ngFor="let item of vias_administracion" value="{{ item.id }}" [selected]="insumo_medico.medicamento.via_administracion_id == item.id">{{ item.nombre }}</option>
+                                    </select>
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="columns">
+                    <div class="column">
+                        <div class="field">
+                            <label class="label">Dosis</label>
+                            <div class="control">
+                                <textarea name="dosis" class="textarea" [ngClass]="{'is-disabled': guardando}" placeholder="Ej. La que el médico señale"
+                                    [(ngModel)]="insumo_medico.medicamento.dosis"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="column">
+                        <div class="field">
+                            <label class="label">Indicaciones</label>
+                            <div class="control">
+                                <textarea name="indicaciones" class="textarea" [ngClass]="{'is-disabled': guardando}" placeholder="Ej. Enfermedades alérgicas. Enfermedades inflamatorias, etc..."
+                                    [(ngModel)]="insumo_medico.medicamento.indicaciones"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section *ngIf="insumo_medico.tipo =='MC'" style="padding: 1em;">
+                <div class="columns">
+                    <div class="column">
+                        <div class="field">
+                            <label class="label">Cantidad x envase:</label>
+                            <p class="control is-expanded  has-icon has-icon-right">
+                                <input class="input" autofocus type="number" [(ngModel)]="insumo_medico.material_curacion.cantidad_x_envase">
+                                <span class="icon is-small" *ngIf="false">
+                                    <i class="fa fa-warning"></i>
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="column">
+                        <div class="field ">
+                            <label class="label">Unidad de medida:</label>
+                            <p class="control is-expanded">
+                                <span class="select is-fullwidth">
+                                    <select (change)="seleccionarUnidadMedida($event.target.value)">
+                                        <option value="">Selecciona una opción</option>
+                                        <option *ngFor="let item of unidades_medida" value="{{ item.id }}" [selected]="insumo_medico.material_curacion.unidad_medida_id == item.id">{{ item.clave }} - {{ item.nombre }}</option>
+                                    </select>
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </section>
+        <footer class="modal-card-foot">
+
+            <a class="button is-primary" [ngClass]="{ 'is-disabled' : (insumo_medico.tipo == 'MC' && (insumo_medico.material_curacion.unidad_medida_id == '' || (insumo_medico.material_curacion.unidad_medida == null && insumo_medico.material_curacion.unidad_medida_id != '' ) )) || (insumo_medico.tipo == 'ME' && (insumo_medico.medicamento.unidad_medida_id == ''  || insumo_medico.medicamento.presentacion_id ==''  || insumo_medico.medicamento.via_administracion_id == '' ))   }"
+                (click)="aplicarCambiosRegistro()">
+                <span class="icon">
+                    <i class="fa fa-check"></i>
+                </span>
+                <span>Aplicar cambios</span>
+            </a>
+            <a class="button" [ngClass]="{ 'is-disabled' : enviandoDatos  }" (click)="cerrarModalEditarRegistro()">Cancelar</a>
+        </footer>
+    </div>
+</div>

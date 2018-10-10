@@ -1,0 +1,146 @@
+<panel-control-menu></panel-control-menu>
+<div style="height:50px;"></div>
+<div class="contenedor columns " style="height:100%">
+    <div class="column is-one-quarter is-hidden-mobile">
+        <panel-control-menu-aside></panel-control-menu-aside>
+    </div>
+    <div class="column" style="padding:2em; overflow:auto">
+        <div style="background: #FFF; border-radius: 1em; overflow: hidden;">
+            <section class="hero is-primary">
+                <div class="hero-body">
+                    <div class="container is-fluid">
+                        <nav class="level">
+                            <div class="level-left">
+                                <h1 class="title">
+                                    <span  *ngIf="!cargando" class="icon is-medium"><i class="fa fa-cloud"></i></span>
+                                    <span  *ngIf="cargando" class="icon is-medium"><i class="fa fa-refresh fa-spin"></i></span> 
+                                    Servidor central
+                                </h1>
+                            </div>
+                            <div class="level-right">
+                                <div class="block">                               
+                                  <a class="button is-primary is-inverted"  (click)="mostrarModalSubirArchivoSync = true;">
+                                    <span class="icon"><i class="fa fa-cloud-upload"></i></span><span>Subir sincronización</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </nav>  
+                    </div>
+                </div>
+            </section>
+            <section >
+                <table class="table" style="font-size:0.9em;">
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>Servidor</th>
+							<th>Nombre</th>
+							<th>Generado</th>
+							<th>Sincronizado</th>
+                            <th>Usuario</th>
+                        </tr>
+                    </thead>
+                    <tbody  *ngIf="!busquedaActivada">
+                        <tr *ngFor="let item of lista; let i=index">  
+                            <td>{{ item.id }}</td>   
+                            <td>{{ item.servidor_id }}</td>                      
+                            <td>{{ item.servidor_nombre }}</td> 
+                            <td><small>{{ item.fecha_generacion }}</small></td>  
+                            <td><small>{{ item.created_at }}</small></td>    
+                            <td>{{ item.usuario_id }}</td>                                                  
+                        </tr>
+                        <tr *ngIf="lista.length == 0">
+                            <td colspan="5" style="vertical-align: middle; color:#888;">Esta lista está vacía.</td>                    
+                        </tr>
+                    </tbody>
+                    <tbody *ngIf="busquedaActivada">
+                        <tr *ngFor="let item of resultadosBusqueda; let i=index">
+                            <td>{{ item.id }}</td>   
+                            <td>{{ item.servidor_id }}</td>                      
+                            <td>{{ item.servidor_nombre }}</td> 
+                            <td><small>{{ item.fecha_generacion }}</small></td>  
+                            <td><small>{{ item.created_at }}</small></td> 
+                            <td>{{ item.usuario_id }}</td>                                                  
+                        </tr>
+
+                        <tr *ngIf="resultadosBusqueda.length == 0 && busquedaActivada">
+                            <td colspan="5" style="vertical-align: middle; color:#888;">No se encontraron resultados.</td>                    
+                        </tr>
+                    </tbody>
+                </table>
+                <!-- Paginación para la lista  -->
+                <paginacion 
+                    [total]="total" 
+                    [paginasTotales]="paginasTotales" 
+                    [resultadosPorPagina]="resultadosPorPagina" 
+                    [paginaActual]="paginaActual" 
+                    [indicePaginas]="indicePaginas"
+                    (onSiguiente)="paginaSiguiente()" 
+                    (onAnterior)="paginaAnterior()" 
+                    (onListar)="listar($event)" 
+                    *ngIf="total>0 && total > resultadosPorPagina && !busquedaActivada"></paginacion>
+                <!-- Paginación para la búsqueda  -->
+                <paginacion 
+                    [total]="totalBusqueda" 
+                    [paginasTotales]="paginasTotalesBusqueda" 
+                    [resultadosPorPagina]="resultadosPorPaginaBusqueda" 
+                    [paginaActual]="paginaActualBusqueda" 
+                    [indicePaginas]="indicePaginasBusqueda"
+                    (onSiguiente)="paginaSiguienteBusqueda(searchBox.value)" 
+                    (onAnterior)="paginaAnteriorBusqueda(searchBox.value)" 
+                    (onListar)="listarBusqueda(searchBox.value,$event)" 
+                    *ngIf="totalBusqueda > 0 && totalBusqueda > resultadosPorPaginaBusqueda && busquedaActivada"></paginacion>
+            </section>
+          
+        </div>
+        
+        <br>
+       
+    </div>
+</div>
+
+<div class="notification is-danger" style="position:fixed; left:1em;  bottom:1em;" *ngIf="mensajeError.mostrar">
+    <button class="delete" (click)="mensajeError.mostrar = false"></button>        
+    <b>Error:</b> {{ mensajeError.texto }}<br><br>     
+</div>
+
+<div class="notification is-success" style="position:fixed; left:1em;  bottom:1em; width: auto" *ngIf="mensajeExito.mostrar">       
+    <button class="delete" (click)="mensajeExito.mostrar = false"></button>
+    <p><span class="icon" style="margin-right: 0.5em;"><i class="fa fa-check-circle"></i></span> <span>{{ mensajeExito.texto }}</span></p>
+    <br>
+    <p style="text-align: center;"><small >Este mensaje desaparecerá en {{ mensajeExito.cuentaAtras }} segundos.</small></p>       
+</div>
+
+
+
+
+<div class="modal"  [ngClass]="{ 'is-active': mostrarModalSubirArchivoSync }">
+  <div class="modal-background" (click)="mostrarModalSubirArchivoSync =!mostrarModalSubirArchivoSync"></div>
+  <div class="modal-card">
+    <header class="modal-card-head">
+      <p class="modal-card-title"><span class="icon"><i class="fa fa-cloud-upload"></i></span> Subir archivo de sincronización manual</p>
+      <button class="delete" (click)="mostrarModalSubirArchivoSync = !mostrarModalSubirArchivoSync"></button>
+    </header>
+    <section class="modal-card-body">        
+        <div class="notification is-danger" *ngIf="mensajeErrorSync!=''"><span class="icon"><i class="fa fa-exclamation-circle"></i></span> {{ mensajeErrorSync }}</div>
+       
+        <div class="field" [ngClass]="{ 'is-hidden' : enviandoDatos || documentoSubido }">
+            <label for="sync" class="label" [ngClass]="{ 'is-danger': errores.archivo != null }">Elige el archivo sync.XXXX.zip</label>            
+            <input class="input-file" type="file" #archivoInput  name="sync" id="sync" style="width:100%" [disabled]="documentoSubido" (change)="fileChange($event)" accept=".zip">            
+            <p class="help is-danger" *ngIf="errores.archivo == 'required'">Debe elegir un archivo.</p>
+            <p class="help is-danger" *ngIf="errores.archivo == 'max'">El archivo no puede ser superior a los <b>10MB</b>.</p>
+            <p class="help is-danger" *ngIf="errores.archivo == 'mimetypes'">El tipo de archivo no es valido, verifique que tenga las siguientes extensiones: .zip</p>
+        </div>
+        <div *ngIf="enviandoDatos || documentoSubido">
+            <h1 class="subtitle" *ngIf="enviandoDatos">Subiendo documento...</h1>
+            <h1 class="subtitle" *ngIf="documentoSubido && !enviandoDatos"><span class="icon"><i class="fa fa-check-circle"></i></span> ¡El documento se ha subido exitosamente!</h1>
+            <progress class="progress is-primary" value="{{ progreso }}" max="100">{{ progreso}}%</progress>
+        </div>
+    </section>
+    <footer class="modal-card-foot">
+        <a class="button is-primary" [ngClass]="{ 'is-disabled' : !archivo || enviandoDatos  }" *ngIf="!documentoSubido" (click)="adjuntar()">Adjuntar</a>
+        <a class="button is-primary" [ngClass]="{ 'is-disabled' : !archivo || enviandoDatos  }" *ngIf="documentoSubido" (click)="reset()">Adjuntar otro documento</a>
+        <a class="button" [ngClass]="{ 'is-disabled' : enviandoDatos  }" (click)="mostrarModalSubirArchivoSync = !mostrarModalSubirArchivoSync">Cerrar</a>      
+    </footer>
+  </div>
+</div>

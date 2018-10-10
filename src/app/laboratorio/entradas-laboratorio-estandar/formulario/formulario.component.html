@@ -1,0 +1,806 @@
+<formulario #ctrl URL="entrada-laboratorio" titulo="Entrada de laboratorio" [dato]="dato"></formulario>
+<app-menu-laboratorio [modulo]="'Entrada de laboratorio'" [icono]="'assets/icono-entradas.svg'" [url]="'/laboratorio-estandar/entradas'" (ayudaModal)="abrirModal('ayuda')"></app-menu-laboratorio>
+<div style="height:50px;"></div>
+<form name="form" novalidate [formGroup]="dato" (ngSubmit)="ctrl.enviar()">
+    <div class="contenedor columns " style="height:90%">
+        <div class="column is-one-third" style="padding:1em;">
+            <div style="background: #FFF; border-radius: 1em; ">
+                <section class="hero is-primary">
+                    <h1 *ngIf="!tieneid || ctrl.dato.get('estatus').value == 'BR'" class="title" style="margin:0.5em; ">
+                        <span class="icon is-medium">
+                            <i class="fa fa-file-text"></i>
+                        </span> {{ctrl.moduloTitulo}}
+                    </h1>
+                    <h1 *ngIf="tieneid && ctrl.dato.get('estatus').value == 'FI'" class="title" style="margin:0.5em; ">
+                        <span class="icon is-medium">
+                            <i class="fa fa-file-text"></i>
+                        </span> Folio {{ctrl.id}}
+                    </h1>
+                </section>
+                <div style="padding: 1em; overflow: scroll; overflow-x: hidden;">              
+                    <h3 class="title">
+                        <!-- <i class="fa fa-file"></i>
+                         Datos del movimiento -->
+                         <div class="columns" style="font-size: 22px; text-align: right">
+                            <strong class="column">Subtotal: </strong><strong class="column">{{   ( subtotal_precios | currency:'' ) }}  &nbsp;  &nbsp;  </strong>
+                         </div>
+                         <div class="columns" style="font-size: 22px; text-align: right">
+                            <strong class="column">IVA: </strong><strong class="column">{{   ( total_iva | currency:'' ) }}  &nbsp;  &nbsp;  </strong>
+                         </div>
+                         <div class="columns" style="font-size: 30px; text-align: right">
+                            <strong class="column">TOTAL: </strong><strong class="column">{{   ( total_precio | currency:'' ) }}  &nbsp;  &nbsp;  </strong>
+                         </div>
+                    </h3>
+                </div>
+                    <div style="padding: 1em; overflow: scroll; overflow-x: hidden;" [style.height.px]="ctrl.tamano-300">                    
+                        <div class="field" >
+                            <label class="label">Fecha de referencia:</label>
+                            <p class="control is-expanded  has-icon has-icon-right">
+    
+                                <input class="input" [value]="fecha_actual" [(ngModel)]='fecha_referencia' formControlName="fecha_referencia" ngui-datetime-picker
+                                    [min-date]="MinDate" [max-date]="MaxDate" date-only="true" 
+                                    [ngClass]="{'is-disabled': tieneid && ctrl.dato.get('estatus').value == 'FI',
+                                    'is-danger': ctrl.dato.get('fecha_referencia').hasError('required')}"
+                                    placeholder="YYYY-MM-DD" readonly/>
+    
+                                <span class="icon is-small" *ngIf="ctrl.dato.get('fecha_referencia').hasError('required')">
+                                    <i class="fa fa-warning"></i>
+                                </span>
+                                <span class="help is-danger" *ngIf="ctrl.dato.get('fecha_referencia').hasError('required')">Este campo es requerido.</span>
+                            </p>
+                        </div> 
+                    
+                    <div class="columns">
+                        <div class="field column" >
+                            <label class="label">Fecha del movimiento:</label>
+                            <p class="control is-expanded  has-icon has-icon-right">
+
+                                <input class="input" [value]="fecha_actual" [(ngModel)]='fecha_movimiento' formControlName="fecha_movimiento" ngui-datetime-picker
+                                    [min-date]="MinDate" [max-date]="MaxDate" date-only="true" 
+                                    [ngClass]="{'is-disabled': tieneid && ctrl.dato.get('estatus').value == 'FI', 'is-danger': ctrl.dato.get('fecha_movimiento').hasError('required') && ctrl.dato.get('fecha_movimiento').touched}"
+                                    placeholder="YYYY-MM-DD" readonly/>
+
+                                <span class="icon is-small" *ngIf="ctrl.dato.get('fecha_movimiento').hasError('required')">
+                                    <i class="fa fa-warning"></i>
+                                </span>
+                                <span class="help is-danger" *ngIf="ctrl.dato.get('fecha_movimiento').hasError('required') && ctrl.dato.get('fecha_movimiento').touched">Este campo es requerido.</span>
+                            </p>
+                        </div> 
+                        <div class="column " formGroupName="movimiento_metadato">
+                            <label *ngIf=" (ctrl.dato.get('movimiento_metadato').value.donacion == 1 || ctrl.dato.get('movimiento_metadato').value.donacion == '1') && tieneid && ctrl.dato.get('estatus').value == 'FI'"> 
+                                <label class="label"> &nbsp; </label>
+                                <strong style="color: darkblue"> <i class="fa fa-check" aria-hidden="true"></i>&nbsp; Donación </strong>
+                            </label> 
+                            <div class="field" [ngClass]="{'is-hidden': tieneid && ctrl.dato.get('estatus').value == 'FI'}">
+                                <label class="label"> &nbsp; </label>
+                                <p class="b-checkbox control is-expanded  has-icon has-icon-right" style="padding-left: 5px">
+                                    <input type="checkbox" id="donacion" #donacion 
+                                    (change)="no_requerirCampo('numero_pedido', 'movimiento_metadato'); no_requerirCampo('folio_factura', 'movimiento_metadato');
+                                    no_requerirCampo('programa_id'); no_requerirCampo('proveedor_id', 'movimiento_metadato');"
+                                    [ngClass]="{'is-disabled': tieneid && ctrl.dato.get('estatus').value === 'FI'}"
+                                    [disabled]="tieneid && ctrl.dato.get('estatus').value === 'FI'"
+                                    class="styled" value="ctrl.dato.get('movimiento_metadato').get('donacion').value" formControlName="donacion"
+                                    [checked]="ctrl.dato.get('movimiento_metadato').get('donacion').value == '1' || 
+                                    ctrl.dato.get('movimiento_metadato').get('donacion').value == 1 ||
+                                    ctrl.dato.get('movimiento_metadato').get('donacion').value == true ? true : false">
+                                    <label for="donacion"> 
+                                        <strong> &nbsp; Donación </strong>
+                                    </label>                                            
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div formGroupName="movimiento_metadato">
+                            <div class="field column" *ngIf="ctrl.dato.get('movimiento_metadato').value.donacion == 1 || ctrl.dato.get('movimiento_metadato').value.donacion == '1'"
+                            [ngClass]="{'is-hidden': ctrl.dato.get('movimiento_metadato').value.donacion == 0 || ctrl.dato.get('movimiento_metadato').value.donacion == '0'}">
+                                <label class="label">Donante</label>
+                                <p class="control is-expanded  has-icon has-icon-right" >
+                                    <input class="input" type="text"  #donante
+                                        [ngClass]="{'is-danger': ctrl.dato.get('movimiento_metadato').get('donante').hasError('required')}"
+                                        placeholder="Donante" formControlName="donante" id="donante">
+                                    <span class="icon is-small" *ngIf="ctrl.dato.get('movimiento_metadato').get('donante').hasError('required')">
+                                        <i class="fa fa-warning"></i>
+                                    </span>
+                                    <span class="help is-danger" *ngIf="ctrl.dato.get('movimiento_metadato').get('donante').hasError('required')">Este campo es requerido.</span>
+                                </p>
+                            </div>
+                    </div>
+                
+                    <div formGroupName="movimiento_metadato">
+                        <nav class="panel">
+                            <div class="field" [ngClass]="{'is-hidden': (ctrl.dato.get('movimiento_metadato').value.donacion == 1 || ctrl.dato.get('movimiento_metadato').value.donacion == '1')}">
+                                <label class="label">Número de pedido:</label>
+                                <p class="control is-expanded  has-icon has-icon-right">
+                                    <input class="input" type="text" 
+                                        [ngClass]="{'is-disabled': tieneid && ctrl.dato.get('estatus').value == 'FI', 
+                                        'is-danger': ctrl.dato.get('movimiento_metadato').get('numero_pedido').hasError('required')}"
+                                        placeholder="Número de pedido" formControlName="numero_pedido">
+                                    <span class="icon is-small" *ngIf="ctrl.dato.get('movimiento_metadato').get('numero_pedido').hasError('required')">
+                                        <i class="fa fa-warning"></i>
+                                    </span>
+                                    <span class="help is-danger" *ngIf="ctrl.dato.get('movimiento_metadato').get('numero_pedido').hasError('required')">Este campo es requerido.</span>
+                                </p>
+                            </div>
+
+                        </nav>
+                    </div>
+                    <div formGroupName="movimiento_metadato">
+                        <nav class="panel">
+                            <div class="field" [ngClass]="{'is-hidden': (ctrl.dato.get('movimiento_metadato').value.donacion == 1 || ctrl.dato.get('movimiento_metadato').value.donacion == '1') }">
+                                <label class="label">Folio de la factura:</label>
+                                <p class="control is-expanded  has-icon has-icon-right">
+                                    <input class="input" type="text" [ngClass]="{'is-disabled': tieneid && ctrl.dato.get('estatus').value == 'FI', 'is-danger': ctrl.dato.get('movimiento_metadato').get('folio_factura').hasError('required')}"
+                                        placeholder="Folio de la factura" formControlName="folio_factura">
+                                    <span class="icon is-small" *ngIf="ctrl.dato.get('movimiento_metadato').get('folio_factura').hasError('required')">
+                                        <i class="fa fa-warning"></i>
+                                    </span>
+                                    <span class="help is-danger" *ngIf="ctrl.dato.get('movimiento_metadato').get('folio_factura').hasError('required')">Este campo es requerido.</span>
+                                </p>
+                            </div>
+
+                        </nav>
+                    </div>
+                    <div class="field" [ngClass]="{'is-hidden': (ctrl.dato.get('movimiento_metadato').value.donacion == 1 || ctrl.dato.get('movimiento_metadato').value.donacion == '1')}">
+                        <div class="field">
+                            <label class="label">Proveedor:</label>
+                        </div><!-- SI carga los turnos -->
+                        <div class="control is-grouped" formGroupName="movimiento_metadato">
+                            <span *ngIf="ctrl.cargando || cargandoCatalogo" class="tag is-primary is-medium">Cargando programas. 
+                                <i class="fa fa-refresh fa-spin" aria-hidden="true"></i>
+                            </span>
+                            <div  *ngIf="!ctrl.cargando && !cargandoCatalogo" class="control is-expanded  has-icon has-icon-right">
+                                <select class="select" name="programa" formControlName="proveedor_id" 
+                                    [ngClass]="{'is-disabled': tieneid && ctrl.dato.get('estatus').value == 'FI'}">
+                                    <option value="">Seleccione un proveedor</option>
+                                    <option *ngFor="let item of lista_proveedores" value="{{item.id}}">{{ item.nombre }}</option>
+                                </select>
+                                <span class="icon is-small" *ngIf="ctrl.dato.get('movimiento_metadato').get('proveedor_id').hasError('required')">
+                                    <i class="fa fa-warning"></i>
+                                </span>
+                                <span class="help is-danger" *ngIf="ctrl.dato.get('movimiento_metadato').get('proveedor_id').hasError('required')">Este campo es requerido.</span>
+                                <span class="help is-danger" *ngIf="lista_proveedores.length == 0"> No se cargaron programas, contacte al administrador.</span>
+                            </div>
+                            <!-- Botón para agregar turnos 
+                            <div class="control">
+                                <a class="button" *ngIf="permisos.indexOf('J1mYtHwF7WVbie5dCZhFptvYzNEtqHXQ') > -1 && !tieneid" 
+                                    (click)="abrirModal('modal_multiprograma')" title="Agregar turno">
+                                    <i class="fa fa-plus fa-fw" aria-hidden="true"></i>
+                                </a>
+                            </div> -->
+                        </div>
+                    </div>
+                    <hr [ngClass]="{'is-hidden': (ctrl.dato.get('movimiento_metadato').value.donacion == 1 || ctrl.dato.get('movimiento_metadato').value.donacion == '1') }">
+                    <div class="control" *ngIf="mostrarCancelado">
+                        <!-- *ngIf -->
+                        <div class="field">
+                            <div class="b-checkbox control is-expanded  has-icon has-icon-right">
+
+                                <input type="checkbox" id="cancelado" class="styled" [checked]="ctrl.dato.get('cancelado').value == '1' ? true : false" (change)="ctrl.dato.get('cancelado').patchValue(ctrl.dato.get('cancelado').value == '1' ? '0' : '1')">
+                                <label for="cancelado">  Cancelado
+                                </label>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label class="label">Observaciones de cancelación:</label>
+                            <p class="control is-expanded  has-icon has-icon-right">
+                                <textarea class="textarea" type="text" [ngClass]="{'is-danger': ctrl.dato.get('observaciones_cancelacion').hasError('required') && ctrl.dato.get('observaciones_cancelacion').touched}"
+                                    placeholder="Observaciones de cancelacion" formControlName="observaciones_cancelacion"></textarea>
+                                <span class="icon is-small" *ngIf="ctrl.dato.get('observaciones_cancelacion').hasError('required') && ctrl.dato.get('observaciones_cancelacion').touched">
+                                    <i class="fa fa-warning"></i>
+                                </span>
+                                <span class="help is-danger" *ngIf="ctrl.dato.get('observaciones_cancelacion').hasError('required') && ctrl.dato.get('observaciones_cancelacion').touched">Este campo es requerido.</span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="control" [ngClass]="{'is-hidden': (ctrl.dato.get('movimiento_metadato').value.donacion == 1 || ctrl.dato.get('movimiento_metadato').value.donacion == '1')}">
+                        <div class="field">
+                            <label class="label">Programa:</label>
+                        </div><!-- SI carga los turnos -->
+                        <div class="control is-grouped">
+                            <span *ngIf="ctrl.cargando || cargandoCatalogo" class="tag is-primary is-medium">Cargando programas. 
+                                <i class="fa fa-refresh fa-spin" aria-hidden="true"></i>
+                            </span>
+                            <div  *ngIf="!ctrl.cargando && !cargandoCatalogo" class="control is-expanded  has-icon has-icon-right">
+                                <select class="select" name="programa" formControlName="programa_id" 
+                                    [ngClass]="{'is-disabled': tieneid && ctrl.dato.get('estatus').value == 'FI'}">
+                                    <option value="">Seleccione un programa</option>
+                                    <option *ngFor="let item of lista_programas" value="{{item.id}}">{{ item.nombre }}</option>
+                                </select>
+                                <span class="icon is-small" *ngIf="ctrl.dato.get('programa_id').hasError('required')">
+                                    <i class="fa fa-warning"></i>
+                                </span>
+                                <span class="help is-danger" *ngIf="ctrl.dato.get('programa_id').hasError('required')">Este campo es requerido.</span>
+                                <span class="help is-danger" *ngIf="lista_programas.length == 0"> No se cargaron programas, contacte al administrador.</span>
+                            </div>
+                            <!-- Botón para agregar turnos  *ngIf="permisos.indexOf('ygwsEwz3cUw4yVMCeaQ9hVMCFXUHri5q') > -1 && !tieneid"  -->
+                            <div class="control"  *ngIf="1==2">
+                                <a class="button" 
+                                    (click)="abrirModal('modal_multiprograma')" title="Editar multiprograma">
+                                    <i class="fa fa-plus fa-fw" aria-hidden="true"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div >
+                        <nav class="panel" formGroupName="movimiento_metadato">
+                            <div class="field">
+                                <label class="label">Persona que entrega:</label>
+                                <p class="control is-expanded  has-icon has-icon-right">
+                                    <input class="input" type="text" [ngClass]="{'is-disabled': tieneid && ctrl.dato.get('estatus').value == 'FI', 'is-danger': ctrl.dato.get('movimiento_metadato').get('persona_entrega').hasError('required')}"
+                                        placeholder="Persona que entrega" formControlName="persona_entrega">
+                                    <span class="icon is-small" *ngIf="ctrl.dato.get('movimiento_metadato').get('persona_entrega').hasError('required')">
+                                        <i class="fa fa-warning"></i>
+                                    </span>
+                                    <span class="help is-danger" *ngIf="ctrl.dato.get('movimiento_metadato').get('persona_entrega').hasError('required')">Este campo es requerido.</span>
+                                </p>
+                            </div>
+
+                        </nav>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">Observaciones:</label>
+                        <p class="control is-expanded  has-icon has-icon-right">
+                            <textarea class="textarea" type="text" [ngClass]="{'is-disabled': tieneid && ctrl.dato.get('estatus').value == 'FI', 'is-danger': ctrl.dato.get('observaciones').hasError('required') && ctrl.dato.get('observaciones').touched}"
+                                placeholder="Observaciones" formControlName="observaciones"></textarea>
+                            <span class="icon is-small" *ngIf="ctrl.dato.get('observaciones').hasError('required') && ctrl.dato.get('observaciones').touched">
+                                <i class="fa fa-warning"></i>
+                            </span>
+                            <span class="help is-danger" *ngIf="ctrl.dato.get('observaciones').hasError('required') && ctrl.dato.get('observaciones').touched">Este campo es requerido.</span>
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <!-- apartado de insumos -->
+        <div class="column" style="padding: 1em; overflow: scroll; overflow-x: hidden;" [style.height.px]="ctrl.tamano-100">
+            <div style="background: #FFF; border-radius: 1em; ">
+                <section class="hero is-primary">
+                    <div class="hero-body">
+                        <nav class="level">
+                            <div class="level-left"></div>
+                            <!-- Right side -->
+                            <div class="level-right"> <!-- (click)="ctrl.regresar()" -->
+                                <p class="level-item"><a class="button is-primary" routerLink="/laboratorio-estandar/entradas">Regresar</a></p>
+                                <p class="level-item" *ngIf="tieneid && ctrl.dato.get('estatus').value == 'FI'"><a class="button is-primary" routerLink="/laboratorio-estandar/entradas/nuevo" *ngIf="!ctrl.busquedaActivada"><i class="fa fa-plus" aria-hidden="true"></i>&nbsp;<span>Nueva entrada</span></a></p>
+                                <p class="level-item" *ngIf="tieneid && ctrl.dato.get('estatus').value == 'FI'"><a *ngIf="tieneid" class="button is-primary" (click)="imprimir()"><span class="icon"><i class="fa fa-print"></i></span></a></p>
+                                <!--
+                                <p class="level-item" *ngIf="!tieneid">
+                                    <button class="button is-primary" type="submit" [ngClass]="{'is-loading': ctrl.cargando}" [disabled]="ctrl.dato.invalid"> <span class="icon"><i class="fa fa-floppy-o" aria-hidden="true"></i></span> &nbsp; Guardar</button>
+                                </p>
+                                -->
+                                <p class="level-item" *ngIf="!tieneid || ctrl.dato.get('estatus').value == 'BR'">
+                                    <button class="button is-primary" type="button" [ngClass]="{'is-loading': ctrl.cargando}" 
+                                    (click)="guardar_movimiento()" [disabled]="ctrl.dato.invalid">
+                                        <span class="icon"><i class="fa fa-floppy-o" aria-hidden="true"></i></span> &nbsp; Finalizar entrada
+                                    </button>
+                                </p>
+                                <p class="level-item" *ngIf="!tieneid">
+                                    <button class="button is-primary" type="button" [ngClass]="{'is-loading': ctrl.cargando}" (click)="guardarBorrador();">
+                                        <span class="icon"><i class="fa fa-floppy-o" aria-hidden="true"></i></span> &nbsp; Guardar avance
+                                        <span id="borrador" (click)="ctrl.enviar(false, '/laboratorio-estandar/entradas/editar'); tieneid ? ctrl.cargarDatos() : '';"></span>
+                                    </button>
+                                </p>
+                                <p class="level-item" *ngIf="tieneid && ctrl.dato.get('estatus').value == 'BR'">
+                                    <button class="button is-primary" type="button" [ngClass]="{'is-loading': ctrl.cargando}" (click)="actualizarDatos();">
+                                        <span class="icon"><i class="fa fa-floppy-o" aria-hidden="true"></i></span> &nbsp; Guardar avance
+                                    </button>
+                                </p>
+                                <p class="level-item" *ngIf="tieneid"><a class="button is-primary" id="actualizar" title="Actualizar" (click)="ctrl.cargarDatos();"><span class="icon "><i class="fa fa-refresh"></i></span></a></p>
+                                <p class="level-item" *ngIf="!tieneid">
+                                    <a class="button is-primary" title="Actualizar" (click)="cargarCatalogo('programa', 'lista_programas', 'estatus');cargarCatalogo('proveedor', 'lista_proveedores', 'activo');">
+                                        <span class="icon "><i class="fa fa-refresh"></i>
+                                        </span>
+                                    </a>
+                                </p>
+                                <p class="level-item">&nbsp;</p>
+                            </div>
+                        </nav>
+                        <div class="container is-fluid">
+                            <h1 class="title">
+                                <span *ngIf="!ctrl.cargando || !cargando" class="icon is-medium"><i class="fa fa-edit"></i></span>
+                                <span *ngIf="ctrl.cargando || cargando" class="icon is-medium"><i class="fa fa-refresh fa-spin"></i></span>                                Insumos
+                            </h1>
+
+                        </div>
+                    </div>
+                </section>
+                <div class="is-fullwidth has-text-centered" *ngIf="!ctrl.datosCargados">
+                    <br>
+                    <span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span>                    &nbsp;<span>Cargando...</span></span>
+                </div>
+                <section class="section">
+
+                    <div class="field has-addons has-addons-centered" *ngIf="!tieneid || ctrl.dato.get('estatus').value == 'BR'">
+
+<!-- ******************************************* AUTOCOMPLETE ********************************************* 
+                        <p class="control">
+                            <input ngui-auto-complete [source]="insumos_term" [list-formatter]="autocompleListFormatter" id="buscarInsumo" value-property-name="clave"
+                                display-property-name="nombre" path-to-data="" loading-text="Cargando..." no-match-found-text="No hay resultados."
+                                (valueChanged)="select_insumo_autocomplete($event)" min-chars="1" class="input is-success is-medium"
+                                type="text" placeholder="Escanea el codigo de barra, o empieza escribir el nombre del producto" >
+
+                        </p>
+******************************************* AUTOCOMPLETE ********************************************* -->
+
+                        <!-- *****************     INPUT DE BUSQUEDA DE INSUMO     ****************** -->    
+                        <div class="control is-grouped">
+                            <div class="control is-expanded">
+                                <input 
+                                    (keyup.enter)="buscarInsumo.value != '' ?  enviarAutocomplete(buscarInsumo.value) : buscarInsumo.value = ''" 
+                                    id="buscarInsumo"
+                                    name="buscarInsumo"
+                                    #buscarInsumo
+                                    class="input is-success is-medium"
+                                    type="text"
+                                    placeholder="Escriba la clave o el nombre del insumo y presione la tecla ENTER"/>
+                            </div>
+                            <div class="control">
+                                <a class="button is-success is-medium" title="Buscar insumo" (click)="buscarInsumo.value != '' ?  enviarAutocomplete(buscarInsumo.value) : buscarInsumo.value = ''">
+                                    <i class="fa fa-search" aria-hidden="true"></i> &nbsp; Buscar
+                                </a>
+                            </div>
+                            <div class="control" *ngIf="buscarInsumo.value != ''">
+                                <a class="button is-info is-medium" title="Borrar texto" (click)="res_busq_insumos=[]; buscarInsumo.value='';">
+                                    <i class="fa fa-times" aria-hidden="true"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="is-fullwidth has-text-centered" *ngIf="cargando" style="height:100px;">
+                            <br>
+                            <span class="tag is-primary is-large">
+                                <span class="icon"><i class="fa fa-refresh fa-spin"></i></span> &nbsp;<span>Cargando...</span>
+                            </span>
+                        </div>
+                        <!-- *****************     RESULTADOS DE BUSQUEDA DE INSUMO     ****************** -->
+                        <div *ngIf="res_busq_insumos.length > 0 && !cargando" style="height: 200px;">
+                            <div *ngIf="res_busq_insumos.length > 0 && !cargando" style="overflow: scroll; overflow-x: hidden; height: 90%;">
+                                <div class="content" style="z-index: 1;" *ngFor="let item_insumo of res_busq_insumos; let c = index">
+                                    <div class="card" (click)="select_insumo_autocomplete(item_insumo)" style="background: rgba(242,248,253, 0.8)">
+                                        <div class="card-content">
+                                            <div class="media">          
+                                                <div class="media-content">
+                                                    <p class="title is-4">{{item_insumo.descripcion}}</p>
+                                                    <p class="subtitle is-6">
+                                                        <strong>Clave: </strong> {{item_insumo.clave}}
+                                                        <label class="tag is-success" *ngIf="item_insumo.es_causes == 1"><strong>Cause </strong></label>
+                                                        <label class="tag" *ngIf="item_insumo.es_causes == 0" style="background: #B8FB7E; border-color: #B8FB7E; color: rgba(0,0,0,0.7);" ><strong>No Cause </strong> </label>
+                                                        <label class="tag is-warning" *ngIf="item_insumo.es_unidosis == 1"><strong>Unidosis</strong> </label>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <hr> <!-- Línea de division -->
+
+                    <div *ngIf="!llenando_formulario" formArrayName="insumos" style="overflow: scroll; overflow-x: hidden; height: 550px;">
+                        <div class="box" *ngFor="let item of ctrl.dato.controls.insumos.controls; let i=index" [ngStyle]="{'background': i%2 == 0 ? 'rgba(230, 230, 232, 0.44)' : ''}">
+                            <article class="media" [formGroupName]="i">
+                                <div class="media-content">
+                                    <div class="content">
+                                        <span style="float:right; padding-left: 15px;" >
+                                            <a *ngIf="!tieneid || ctrl.dato.get('estatus').value == 'BR'" class="button is-danger" title="Quitar este elemento de la lista" (click)="abrirModal('borrarInsumo', i);"><span class="icon"><i class="fa fa-trash-o"></i></span></a>
+                                        </span>
+                                        <a *ngIf="!tieneid || ctrl.dato.get('estatus').value == 'BR'" class="button is-success" 
+                                            [ngClass]="{'is-disabled': ctrl.dato.controls.insumos.invalid}" 
+                                            title="Agregar más insumos de esta clave" style="float:right" 
+                                            (click)="select_insumo_autocomplete(item.value);">
+                                            <span class="icon"><i class="fa fa-plus-circle" aria-hidden="true"></i></span>
+                                        </a>
+                                        <span *ngIf="!tieneid || ctrl.dato.get('estatus').value == 'BR'" style="float:right; padding-left: 15px; font-size: 24px; color: navy" >
+                                             &nbsp; <strong>Importe: {{ ctrl.dato.controls.insumos?.controls[i].controls.importe?.value ? ( ctrl.dato.controls.insumos.controls[i].controls.importe.value | currency:'') : ( 0 | currency:'' ) }}  &nbsp;  &nbsp; </strong> 
+                                        </span>
+                                        <p>
+                                            <strong>
+                                                <span style="color:cornflowerblue">
+                                                    Clave: {{ ctrl.dato.controls.insumos.controls[i].controls.clave.value }} 
+                                                </span>
+                                                Nombre: {{ctrl.dato.controls.insumos.controls[i].controls.descripcion.value}}
+                                            
+                                                <label class="tag is-success" *ngIf="ctrl.dato.controls.insumos.controls[i].controls.es_causes.value == 1"><strong>Cause </strong></label>
+                                                <label class="tag is-success" *ngIf="ctrl.dato.controls.insumos.controls[i].controls.es_causes.value == 0"><strong>No Cause </strong> </label>                                           
+                                                                                            
+                                                <label class="tag is-warning" *ngIf="ctrl.dato.controls.insumos.controls[i].controls.es_unidosis.value == 1"><strong>Unidosis</strong> </label>
+                                            </strong>
+                                            <br> {{ctrl.dato.controls.insumos.controls[i].controls.descripcion.value}}
+                                        </p>
+                                    </div>
+                                   <section *ngIf="tieneid && ctrl.dato.get('estatus').value == 'FI' && estoymodificando == false">
+                                        <table *ngIf="tieneid && ctrl.dato.get('estatus').value == 'FI'" class="table is-narrow is-bordered is-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th></th>
+                                                    <th>Lote</th>
+                                                    <th>Caducidad</th>
+                                                    <th>Codigo de barras</th>
+                                                    <!-- <th *ngIf="!tieneid || ctrl.dato.get('estatus').value == 'BR'">Existencia</th> -->
+                                                    <th>Cantidad</th>
+                                                    <th>Precio unitario</th>
+                                                    <th>Importe</th>
+                                                    <!-- <th *ngIf="!tieneid || ctrl.dato.get('estatus').value == 'BR'"></th> -->
+                                                </tr>
+                                            </thead>
+                                            <tbody formArrayName="lotes">
+                                                <tr *ngFor="let val of ctrl.dato.controls.insumos.controls[i].controls.lotes.controls;  let i2 = index;">
+                                                    <td>
+                                                        <span *ngIf="val.value.exclusivo == '1'"> Exclusivo </span>
+                                                    </td>
+                                                    <td>{{val.value.lote}}</td>
+                                                    <td>{{val.value.fecha_caducidad}}</td>
+                                                    <td>{{val.value.codigo_barras}}</td>
+                                                    <!-- <td *ngIf="!tieneid">{{val.value.existencia}}</td> -->
+                                                    <td [formGroupName]="i2">
+                                                        {{val.value.cantidad}}
+                                                    </td>
+                                                    <td style="text-align: right;">{{val.value.precio_unitario | currency: ""}}</td>
+                                                    <td style="text-align: right;">{{val.value.importe | currency: ""}}</td>
+                                                    <!-- <td *ngIf="!tieneid">
+                                                        <a class="is-danger" title="Quitar este lote" (click)="quitar_lote_insumo(i, val.value, i2)">
+                                                            <span class="icon">
+                                                                <i class="fa fa-trash-o"></i>
+                                                            </span>
+                                                        </a>
+                                                    </td> -->
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </section>
+                                    <!-- || ctrl.dato.get('estatus').value == 'BR' -->
+                                    <div *ngIf="!tieneid || ctrl.dato.get('estatus').value == 'BR'"  class="level-left">
+                                        <div class="columns is-flex-desktop" style="width: 100%">
+                                            <div class="column is-1">
+                                                <p class="b-checkbox control is-expanded  has-icon has-icon-right" style="margin-left: 1em;">
+                                                    <input class="styled" type="checkbox"
+                                                        id="exclusivo{{i}}"
+                                                        class="input is-small" formControlName="exclusivo"
+                                                        [checked]="ctrl.dato.controls.insumos.controls[i].controls.exclusivo.value == true ? true : false">
+                                                    <label for="exclusivo{{i}}" title="Para distribución exclusiva del programa">Exclusivo</label>
+                                                </p>
+                                            </div>
+                                            <div class="column is-3">
+                                                <p class="control is-expanded">
+                                                    <label class="label">Lote:</label>
+                                                    <input type="text" class="input" formControlName="lote"
+                                                    [ngClass]="{'is-danger': ctrl.dato.controls.insumos.controls[i].controls.lote.hasError('required') ||
+                                                                             ctrl.dato.controls.insumos.controls[i].controls.lote.value == '' ||
+                                                                             ctrl.dato.controls.insumos.controls[i].controls.lote.value == null}">
+                                                </p>
+                                                <span class="help is-danger" 
+                                                      *ngIf="ctrl.dato.controls.insumos.controls[i].controls.lote.hasError('required') ||
+                                                             ctrl.dato.controls.insumos.controls[i].controls.lote.value == '' ||
+                                                             ctrl.dato.controls.insumos.controls[i].controls.lote.value == null">Este campo es requerido.</span>
+                                            </div>                       
+                                            <div class="column is-2">
+                                                <p class="control is-expanded">
+                                                    <label class="label">Caducidad: </label>
+<!--
+                                                        <input class="input" type="date" [textMask]="{mask:mask, keepCharPositions: true, pipe: autoCorrectedDatePipe}"
+                                                            formControlName="fecha_caducidad" ngui-datetime-picker (blur)="validar_fecha(ctrl.dato.controls.insumos.controls[i].controls.fecha_caducidad.value)"
+                                                            [min-date]="MinDateCaducidad" date-only="true" placeholder="YYYY-MM-DD"
+                                                            [ngClass]="{'is-danger': ctrl.dato.controls.insumos.controls[i].controls.fecha_caducidad.hasError('required') 
+                                                            && ctrl.dato.controls.insumos.controls[i].controls.fecha_caducidad.touched}">
+-->
+                                                    <input class="input" formControlName="fecha_caducidad" (blur)="validar_fecha(ctrl.dato.controls.insumos.controls[i].controls.fecha_caducidad.value, i)"
+                                                        min="MinDateCaducidad" date-only="true" 
+                                                        [ngClass]="{'is-danger': ctrl.dato.controls.insumos.controls[i].controls.fecha_caducidad.hasError('required') ||
+                                                                                 ctrl.dato.controls.insumos.controls[i].controls.fecha_caducidad.value == '' ||
+                                                                                 ctrl.dato.controls.insumos.controls[i].controls.fecha_caducidad.value == null}"
+                                                        placeholder="YYYY-MM-DD" [textMask]="{mask:mask, keepCharPositions: true, pipe: autoCorrectedDatePipe}"/>
+                                                </p>
+                                                <span class="help is-danger" 
+                                                *ngIf="ctrl.dato.controls.insumos.controls[i].controls.fecha_caducidad.hasError('required') || ctrl.dato.controls.insumos.controls[i].controls.fecha_caducidad.value == '' || ctrl.dato.controls.insumos.controls[i].controls.fecha_caducidad.value == null">Este campo es requerido.</span>
+                                            </div>                          
+                                            <div class="column is-2">
+                                                <p class="control is-expanded">
+                                                    <label class="label">Codigo de barras:</label>
+                                                    <input type="text" class="input" formControlName="codigo_barras">
+                                                </p>
+                                            </div>    
+                                            <div class="column is-2">                                                
+                                                <p class="control is-expanded">
+                                                    <label class="label">Cantidad:</label>
+                                                    <input type="number" class="input" formControlName="cantidad" (keypress)="quitar_punto($event); "
+                                                    (keyup)="cambio_cantidad_stock_key($event, ctrl.dato.controls.insumos.controls[i].controls, i)"
+                                                    (change)="calcular_cantidad_subtotal(ctrl.dato.controls.insumos.controls[i].controls, i)"
+                                                    (blur)="calcular_cantidad_subtotal(ctrl.dato.controls.insumos.controls[i].controls, i)"
+                                                    [ngClass]="{'is-danger': ctrl.dato.controls.insumos.controls[i].controls.cantidad.hasError('required') ||
+                                                                             ctrl.dato.controls.insumos.controls[i].controls.cantidad.value == '' ||
+                                                                             ctrl.dato.controls.insumos.controls[i].controls.cantidad.value == null}">
+                                                </p>
+                                                <span class="help is-danger" 
+                                                *ngIf="ctrl.dato.controls.insumos.controls[i].controls.cantidad.hasError('required') || ctrl.dato.controls.insumos.controls[i].controls.cantidad.value == '' || ctrl.dato.controls.insumos.controls[i].controls.cantidad.value == null">Este campo es requerido.</span>
+                                            </div> 
+                                            <div class="column is-2">                                                
+                                                <p class="control is-expanded">
+                                                    <label class="label">Precio unitario: </label>
+                                                    <!-- <input type="number" class="input" formControlName="precio_unitario" (keypress)="validar_precio($event); "
+                                                    (keyup)="cambio_cantidad_stock_key($event, ctrl.dato.controls.insumos.controls[i].controls, i)"
+                                                    (change)="calcular_cantidad_subtotal(ctrl.dato.controls.insumos.controls[i].controls, i)"
+                                                    (blur)="calcular_cantidad_subtotal(ctrl.dato.controls.insumos.controls[i].controls, i)"
+                                                    [ngClass]="{'is-danger'  : ctrl.dato.controls.insumos.controls[i].controls.precio_unitario.hasError('required'),
+                                                                'is-disabled': ctrl.dato.controls.insumos.controls[i].controls.precio_unitario.value != ''}"> -->
+
+                                                    <input class="input" formControlName="precio_unitario" (keypress)="validar_precio($event);"
+                                                        [textMask]="{mask:numberMask}"
+                                                        (keyup)="cambio_cantidad_stock_key($event, ctrl.dato.controls.insumos.controls[i].controls, i)"
+                                                        (change)="calcular_cantidad_subtotal(ctrl.dato.controls.insumos.controls[i].controls, i)"
+                                                        (blur)="calcular_cantidad_subtotal(ctrl.dato.controls.insumos.controls[i].controls, i)"
+                                                        [ngClass]="{'is-danger'  : ctrl.dato.controls.insumos.controls[i].controls.precio_unitario.hasError('required'),
+                                                                    'is-disabled': ctrl.dato.controls.insumos.controls[i].controls.precio_unitario_base.value != '' && ctrl.dato.controls.insumos.controls[i].controls.precio_unitario_base.value != null}">
+                                                </p>
+                                                <span class="help is-danger" 
+                                                *ngIf="ctrl.dato.controls.insumos.controls[i].controls.precio_unitario.hasError('required')">Este campo es requerido.</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </article>
+                        </div>
+                    </div>
+
+                </section>
+            </div>
+        </div>
+    </div>
+</form>
+
+<div class="modal" id="guardarMovimiento">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+        <header class="modal-card-head">
+            <p class="modal-card-title"><i class="fa fa-warning"></i> Alerta</p>
+            <button class="delete" (click)="cancelarModal('guardarMovimiento')"></button>
+        </header>
+        <section class="modal-card-body">
+            <div class="content">
+                <h1>¿Esta seguro de finalizar la entrada?</h1>
+                <p>Ya no se podrá realizar cambios</p>
+            </div>
+        </section>
+        <footer class="modal-card-foot">
+            <a class="button is-success" (click)="ctrl.enviar(false, 'laboratorio-estandar/entradas'); cancelarModal('guardarMovimiento')">Continuar</a>
+            <a class="button" (click)="cancelarModal('guardarMovimiento')">Cancelar</a>
+        </footer>
+    </div>
+</div>
+
+
+<div class="modal" id="borrarInsumo">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+        <header class="modal-card-head">
+            <p class="modal-card-title"><i class="fa fa-warning"></i> Alerta</p>
+            <button class="delete" (click)="cancelarModal('borrarInsumo')"></button>
+        </header>
+        <section class="modal-card-body">
+            <div class="content">
+                <h1>¿Esta seguro de eliminar el insumo? {{i}}</h1>
+                <p>Se borrarán todos los lotes del insumo que se hayan agregado.</p>
+            </div>
+        </section>
+        <footer class="modal-card-foot">
+            <a class="button is-success" (click)="ctrl.quitar_form_array(ctrl.dato.controls.insumos, index_borrar); sumaTotal(); cancelarModal('borrarInsumo')">Continuar</a>
+            <a class="button" (click)="cancelarModal('borrarInsumo')">Cancelar</a>
+        </footer>
+    </div>
+</div>
+<!-- ****************************************************     PROGRAMAS     ******************************************-->
+<div class="modal" id="modal_multiprograma">
+    <div class="modal-background"></div>
+    <div class="modal-card" style="width: 90%; height: 90%;">
+        <header class="modal-card-head is-primary" style="height: 10%;">
+            <p class="modal-card-title"><i class="fa fa-pencil is-succes" aria-hidden="true"></i>&nbsp; Editar Multiprograma</p>
+            <button type="button" class="delete" (click)="cancelarModal('modal_multiprograma'); cargarCatalogo('programa', 'lista_programas', 'estatus');"></button>
+        </header>
+        <section class="modal-card-body" style="height: 100%; padding: 1em;" *ngIf="1==2">
+                <app-modal-programas
+                (MultiprogramaJson)="llenarJson($event)"></app-modal-programas>
+            <div *ngIf="ctrl.dato.get('estatus').value != 'FI'" style="padding: 0.5em; overflow-x: hidden; overflow-y: hidden; height: 100%;">
+                
+            </div>
+        </section>
+        <footer class="modal-card-foot">
+            <button class="button" (click)="cancelarModal('modal_multiprograma'); cargarCatalogo('programa', 'lista_programas', 'estatus');">Cerrar</button>
+        </footer>
+    </div>
+</div>
+
+
+<!-- **************************************************************\ MODAL AYUDA /************************************************************ --> 
+
+ <div class="modal" id="ayuda">
+    <div class="modal-background"></div>
+    <div class="modal-card" style="width: 80%">
+        <header class="modal-card-head">
+            <p class="modal-card-title"><i class="fa fa-warning"></i> Ayuda</p>
+            <button class="delete" (click)="cancelarModal('ayuda')"></button>
+        </header>
+        <section class="modal-card-body">
+            <div class="content">
+                <div class="columns">
+                    <div class="column is-3"> 
+                        <div class="control">
+                            <nav class="panel">
+                                <div style="padding: 1em; overflow: scroll; overflow-x: hidden;" [style.height.px]="tamano-230">
+                                    <a class="panel-block is-active" [routerLink]="[enlaceAyuda]" fragment="salida-de-insumos">
+                                        <span class="panel-icon">
+                                            <i class="fa fa-question-circle"></i>
+                                        </span>
+                                        Salida de insumos
+                                    </a>
+                                    <a class="panel-block is-active" fragment="lista-de-salidas-estandar-de-medicamentos"
+                                        [routerLink]="[enlaceAyuda]">
+                                        <span class="panel-icon">
+                                            <i class="fa fa-question-circle"></i>
+                                        </span>
+                                        Lista de salidas estandar de laboratorio
+                                    </a>
+                                    <a class="panel-block is-active" [routerLink]="[enlaceAyuda]" fragment="nueva-salida-formulario-3">
+                                        <span class="panel-icon">
+                                            <i class="fa fa-question-circle"></i>
+                                        </span>Nueva salida: Formulario </a>
+                                    <a class="panel-block is-active" [routerLink]="[enlaceAyuda]" fragment="nueva-salida-busqueda-3">
+                                        <span class="panel-icon">
+                                            <i class="fa fa-question-circle"></i>
+                                        </span>Nueva salida: Búsqueda </a>
+                                    <a class="panel-block is-active" [routerLink]="[enlaceAyuda]" fragment="nueva-salida-detalle-de-insumos-3">
+                                        <span class="panel-icon">
+                                            <i class="fa fa-question-circle"></i>
+                                        </span>Nueva salida: Detalle de insumos</a>
+                                    <a class="panel-block is-active" [routerLink]="[enlaceAyuda]" fragment="nueva-salida-guardar-3">
+                                        <span class="panel-icon">
+                                            <i class="fa fa-question-circle"></i>
+                                        </span>Nueva salida: Guardar</a>
+                                    <a class="panel-block is-active" [routerLink]="[enlaceAyuda]" fragment="ver-salida-de-medicamentos-2">
+                                        <span class="panel-icon">
+                                            <i class="fa fa-question-circle"></i>
+                                        </span>Ver salida de medicamentos</a>
+                                </div>
+                            </nav>
+                        </div>
+                    </div>
+                    <div class="column">
+                        <div class="content" style="padding: 1em; overflow: scroll; overflow-x: hidden;" [style.height.px]="tamano-230"> 
+                        
+                        <div class="row">
+                            <div class="span9">
+                                <h1 class="title" id="salida-de-insumos"> Salida de insumos</h1>
+                                <h2 class="subtitle" id="lista-de-salidas-estandar-de-medicamentos">Lista de salidas estandar de medicamentos</h2>
+                                <p>Vista donde se muestra el listado de las salidas estandar de medicamentos que se han hecho en el almacén. En esta vista se pueden filtrar la lista por periodo de tiempo, turno y persona que entregó los medicamentos.</p>
+                                <div class="figure" id="figure-16-1">
+                                    <img [src]="'assets/manual/laboratorio-estandar/salidas-estandar/salida_medicamentos_estandar.svg'" alt="" />
+                                </div>
+                                <ol>
+                                    <li><strong>Nueva salida:</strong> Dar click al botón para crear una nueva salida de medicamentos.</li>
+                                    <li><strong>(2) Actualizar:</strong> Botón para recargar el listado de la página.</li>
+                                    <li><strong>(3) PDF:</strong> Al dar clic se genera un archivo en formato PDF con la lista completa de salidas de medicamentos del almacén.</li>
+                                    <li><strong>(4) Excel:</strong> Al dar clic se genera un archivo en formato Excel con la lista completa de salidas de medicamentos del almacén.</li>
+                                    <li><strong>Desde:</strong> En este campo se ingresa la fecha inicial del periodo a consultar.</li>
+                                    <li><strong>Hasta:</strong> En este campo se ingresa la fecha final del periodo a consultar.</li>
+                                    <li><strong>Turno:</strong> Se elige entre los turnos de la lista para filtrar las salidas por turno.</li>
+                                    <li><strong>Recibe:</strong> Se ingresa el nombre de la persona que recibe los medicamentos.</li>
+                                    <li><strong>(9) Limpiar:</strong> Al dar clic al botón se limpian los filtros de la lista.</li>
+                                    <li><strong>(10) Filtrar:</strong> Al dar clic al botón se muestra la lista con los filtros aplicados.</li>
+                                    <li><strong>Datos generales:</strong> Se muestran datos generales de las salidas de medicamentos como la fecha de la operación, el folio, entre otros; para tener información a grandes rasgos de la salida. Si el usuario requiere de información más detallada, debe dar clic en alguno de los datos mostrados y abrirá una ventana con los datos específicos de la salida estándar de medicamentos.</li>
+                                </ol>   
+                                <hr>
+                        
+                                <h2 class="subtitle" id="nueva-salida-formulario-3">Nueva salida: Formulario</h2>
+                        
+                                <p>Vista del formulario para crear un nuevo almacén.</p>
+                        
+                                <div class="figure" id="figure-16-2">
+                                    <img [src]="'assets/manual/laboratorio-estandar/salidas-estandar/nueva_salida_estandar.svg'" alt="" />
+                                
+                                </div>
+                                
+                                
+                                <p>Los campos y opciones contenidos en el formulario se describen a continuación:</p>
+                        
+                                    <ol>
+                                        <li><strong>Subtotal, IVA y TOTAL:</strong> Contiene la cantidad de dinero que cuestan los medicamentos a los que se les dará salida, se desglosa en un Subtotal sin iva, el IVA de los insumos correspondientes y se suman para generar el TOTAL.</li>
+                                        <li><strong>Fecha del movimiento:</strong> Fecha en la que se realiza la operación.</li>
+                                        <li><strong>Programa:</strong> Se selecciona el <em>Programa</em> al que corresponden los insumos de la salida. Esta opción es opcional.</li>
+                                        <li><strong>Turno:</strong> Se selecciona el turno en el que se hace la salida de medicamentos.</li>
+                                        <li><strong>Recibe:</strong> Debe capturarse el nombre de la persona que recibe el medicamento.</li>
+                                        <li><strong>Observaciones:</strong> Si hay alguna observación de la salida de medicamentos, debe capturarse en este campo.</li>
+                                        <li><strong>(7) Regresar:</strong> Al dar clic al botón nos regresa a la lista de salidas de medicamentos.</li>
+                                        <li><strong>(8) Guardar:</strong> Al dar clic en la opción se guarda el avance de la captura y no se puede modificar posteriormente. El botón se activa cuando se han llenado los campos requeridos.</li>
+                                        <li><strong>(9) Actualizar:</strong> Botón para recargar la página.</li>
+                                        <li><strong>Búsqueda:</strong> En este campo debe ingresar la clave o nombre del medicamento para buscarlo en el catálogo. Una vez ingresado el nombre o clave del insumo médico puede usar el botón buscar para activar la búsqueda. También puede usar la tecla <em>Enter</em> para activar la búsqueda.</li>
+                                    </ol>
+                        
+                                    <h2 class="subtitle" id="nueva-salida-busqueda-3">Nueva salida: Búsqueda</h2>
+                                    
+                                    <p>Parte del formulario donde se buscan los insumos que se van a agregar a la salida.</p>
+                                    
+                                    <div class="figure" id="figure-16-3">
+                                        <img [src]="'assets/manual/laboratorio-estandar/salidas-estandar/nueva_salida_estandar_busqueda.svg'" alt="" />
+                                    
+                                    </div>
+                        
+                        
+                                    <ol>
+                                        <li><strong>Resultados:</strong> Se muestran los resultados que coinciden con la búsqueda.</li>
+                                        <li><strong>(2) Buscar:</strong> Una vez ingresado el nombre o clave del insumo médico puede usar el botón buscar para activar la búsqueda. También puede usar la tecla <em>Enter</em> para activar la búsqueda.</li>
+                                        <li><strong>(3) Borrar:</strong> Al dar clic al botón, borramos la búsqueda y sus resultados.</li>
+                                    </ol>
+                        
+                                    <h2 class="subtitle" id="nueva-salida-detalle-de-insumos-3">Nueva salida: Detalle de insumos</h2>
+                                    
+                                    <p>Parte del formulario donde se asignan los tipos de movimientos que podrá realizar el almacén.</p>
+                                    
+                                    <div class="figure" id="figure-16-4">
+                                        <img [src]="'assets/manual/laboratorio-estandar/salidas-estandar/nueva_salida_estandar_detalle.svg'" alt="" />
+                                    </div>
+                        
+                        
+                                    <p>Deben capturarse los datos del insumo médico que se agrega a la salida.</p>
+                                    
+                                    <ol>
+                                        <li><strong>Tipo:</strong> Debe elegir el tipo de salida del medicamento, por unidosis o normal (caja).</li>
+                                        <li><strong>Cantidad solicitada:</strong> En este campo se ingresa la cantidad total solicitada del insumo médico.</li>
+                                        <li><strong>Datos de insumo:</strong> Se muestran datos como el lote, fecha de caducidad, código de barras, programa al que pertenece y existencia; para identificar el insumo médico que se va a entregar en la salida.</li>
+                                        <li><strong>Cantidad:</strong> En este campo se ingresa el número de insumos médicos con el mismo lote, fecha de caducidad y código de barras que saldrá del almacén.</li>
+                                        <li><strong>Agregar nuevo lote:</strong> Dar clic cuando se va a entregar un medicamento que aún no está capturado. Muestra un pequeño formulario con los campos que deben capturarse.</li>
+                                        <li><strong>Aceptar:</strong> Si la captura del insumo médico se ha completado debe dar clic aquí.</li>
+                                        <li><strong>Cancelar:</strong> Si no desea guardar la captura de este insumo médico ddebe dar clic aquí.</li>
+                                    </ol>
+                                    
+                                    <h2 class="subtitle" id="nueva-salida-guardar-3">Nueva salida: Guardar</h2>
+                                    
+                                    <div class="figure" id="figure-16-5">
+                                        <img [src]="'assets/manual/laboratorio-estandar/salidas-estandar/nueva_salida_estandar_guardar.svg'" alt="" />
+                                    </div>
+                        
+                                    <ol>
+                                        <li><strong>Guardar:</strong> Al dar clic en la opción se guarda la salida y no se puede editar posteriormente.</li>
+                                    </ol>
+                                    
+                                    <p>El usuario debe confirmar que quiere finalizar la salida debido a la restricción de los cambios posteriores.</p>
+                                    
+                                    <div class="figure" id="figure-16-6">
+                                        <img [src]="'assets/manual/laboratorio-estandar/salidas-estandar/nueva_salida_estandar_confirm.svg'" alt="" />
+                                    </div>
+                        
+                                    <ol>
+                                        <li><strong>Continuar:</strong> Si el usuario está seguro de finalizar la salida, debe dar clic en el botón continuar.</li>
+                                        <li><strong>Cancelar:</strong> Dar clic sobre el botón <em>Cancelar</em>  si el usuario no está seguro de haber concluído con la salida de medicamentos.</li>
+                                    </ol>
+                                    
+                                    <h2 class="subtitle" id="ver-salida-de-medicamentos-2">Ver salida de medicamentos</h2>
+                                    
+                                    <p>Cuando una salida de medicamentos ha sido finalizada se pueden consultar los detalles de la misma</p>
+                                    
+                                    <div class="figure" id="figure-16-7">
+                                        <img [src]="'assets/manual/laboratorio-estandar/salidas-estandar/ver_salida_estandar.svg'" alt="" />
+                                    
+                                    </div>
+                                    <ol>
+                                        <li><strong>(1) Folio:</strong> Se muestra el Folio de la salida correspondiente.</li>
+                                        <li><strong>(2) Regresar:</strong> Al dar clic al botón nos regresa a la lista de salidas de medicamentos.</li>
+                                        <li><strong>(3) Nueva salida:</strong> Dar click al botón para crear una nueva salida de medicamentos.</li>
+                                        <li><strong>(4) Imprimir:</strong> Al dar clic a este botón se genera un archivo en formato PDF de la salida que puede imprimir o guardar en la PC.</li>
+                                        <li><strong>(5) Actualizar:</strong> Botón para recargar la página.</li>
+                                        <li><strong>(6) + :</strong> De clic en el botón para ver detalle del insumo.</li>
+                                        <li><strong>(7) Lista de insumos:</strong> Se muestran los insumos médicos capturados en la salida estándar de medicamentos.</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <footer class="modal-card-foot">
+            <!-- <a class="button is-success" (click)="quitar_form_array(form_dato.insumos, index_borrar); cancelarModal('ayuda');">Continuar</a> -->
+            <a class="button" (click)="cancelarModal('ayuda')">Cancelar</a>
+        </footer>
+    </div>
+</div>

@@ -1,0 +1,185 @@
+<formulario #ctrl URL="medicamentos" titulo="Medicamentos / Catalogo" [dato]="dato"></formulario>
+<articulos-catalogo-menu></articulos-catalogo-menu>
+<div style="height:50px;"></div>
+<div class="contenedor columns " style="height:100%">
+    <div class="column is-one-quarter is-hidden-mobile">
+        <panel-control-menu-aside></panel-control-menu-aside>
+    </div>
+    <div class="column" style="padding: 0em 2em 0em 0em;">
+        <!-- formulario -->
+        <form name="form" novalidate [formGroup]="dato" (ngSubmit)="ctrl.enviar()">
+            <div style="background: #FFF; overflow: hidden;">
+                <section class="hero is-primary">
+                    <div class="hero-body">
+                        <!-- Opciones  -->
+                        <formulario-opciones [ctrl]="ctrl" class="control is-grouped" style="position:absolute; top:8em; right:3em;">
+                        </formulario-opciones>
+                        <div class="container is-fluid">
+                            <h1 class="title">
+                                <span *ngIf="!ctrl.cargando" class="icon is-medium"><i class="fa fa-edit"></i></span>
+                                <span *ngIf="ctrl.cargando" class="icon is-medium"><i class="fa fa-refresh fa-spin"></i></span>                                {{ctrl.moduloTitulo}} Medicamentos
+                            </h1>
+
+                        </div>
+                    </div>
+                </section>
+                <div class="is-fullwidth has-text-centered" *ngIf="!ctrl.datosCargados">
+                    <br>
+                    <span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span>                    &nbsp;<span>Cargando...</span></span>
+                </div>
+                <section class="section">
+
+                    <a id="catalogos" (click)="ctrl.cargarCatalogo('unidades_medidas', 'unidad-medida'); ctrl.cargarCatalogo('presentacion_medicamento', 'presentacion-medicamento'); ctrl.cargarCatalogo('vias_administracion', 'via-administracion'); ctrl.cargarCatalogo('formas_farmaceuticas', 'forma-farmaceutica'); "></a>
+
+                    <div class="field">
+                        <label class="label">Clave:</label>
+                        <p class="control is-expanded  has-icon has-icon-right">
+                            <input class="input" type="text" [ngClass]="{'is-danger': ctrl.dato.get('insumo_medico_clave').hasError('required')}" placeholder="clave insumo medico"
+                                formControlName="insumo_medico_clave">
+                            <span class="icon is-small" *ngIf="ctrl.dato.get('insumo_medico_clave').hasError('required')">
+                                                        <i class="fa fa-warning"></i>
+                                                    </span>
+                            <span class="help is-danger" *ngIf="ctrl.dato.get('insumo_medico_clave').hasError('required')">Este campo es requerido.</span>
+                        </p>
+                    </div>
+                    <div class="columns">
+                        <div class="column is-6">
+                            <div class="field">
+                                <label class="label">Cantidad por envase:</label>
+                                <p class="control is-expanded  has-icon has-icon-right">
+                                    <input class="input" type="text" [ngClass]="{'is-danger': ctrl.dato.get('cantidad_x_envase').hasError('required')}" placeholder="Cantidad por envase"
+                                        formControlName="cantidad_x_envase">
+                                    <span class="icon is-small" *ngIf="ctrl.dato.get('cantidad_x_envase').hasError('required')">
+                                                                <i class="fa fa-warning"></i>
+                                                            </span>
+                                    <span class="help is-danger" *ngIf="ctrl.dato.get('cantidad_x_envase').hasError('required')">Este campo es requerido.</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="column is-6">
+                            <div class="field">
+                                    <label class="label">Concentracion:</label>
+                                    <p class="control is-expanded  has-icon has-icon-right">
+                                        <input class="input" type="text" [ngClass]="{'is-danger': ctrl.dato.get('concentracion').hasError('required')}" placeholder="Concentracion"
+                                            formControlName="concentracion">
+                                        <span class="icon is-small" *ngIf="ctrl.dato.get('concentracion').hasError('required')">
+                                                                    <i class="fa fa-warning"></i>
+                                                                </span>
+                                        <span class="help is-danger" *ngIf="ctrl.dato.get('concentracion').hasError('required')">Este campo es requerido.</span>
+                                    </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="columns">
+                        <div class="column is-6">
+                            <div class="field">
+                                    <label class="label">Contenido:</label>
+                                    <p class="control is-expanded  has-icon has-icon-right">
+                                        <input class="input" type="text" [ngClass]="{'is-danger': ctrl.dato.get('contenido').hasError('required')}" placeholder="Contenido"
+                                            formControlName="contenido">
+                                        <span class="icon is-small" *ngIf="ctrl.dato.get('contenido').hasError('required')">
+                                                                    <i class="fa fa-warning"></i>
+                                                                </span>
+                                        <span class="help is-danger" *ngIf="ctrl.dato.get('contenido').hasError('required')">Este campo es requerido.</span>
+                                    </p>
+                            </div>
+                        </div>
+                        <div class="column is-6">
+                            <div class="field">
+                                <label class="label">Dosis:</label>
+                                <p class="control is-expanded  has-icon has-icon-right">
+                                    <input class="input" type="text" formControlName="dosis">
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="columns">
+                        <div class="column is-6">
+                            <br>
+                            <div class="b-checkbox control is-expanded  has-icon has-icon-right">
+                                <input type="checkbox" id="es_controlado" class="styled" formControlName="es_controlado" [checked]="ctrl.dato.get('es_controlado').value == 1 ? true : false">
+                                <label for="es_controlado">  Es controlado?
+                                </label>
+                            </div>
+                        </div>
+                        <div class="column is-6">
+                            <br>
+                            <div class="b-checkbox control is-expanded  has-icon has-icon-right">
+                                <input type="checkbox" id="es_surfactante" class="styled" formControlName="es_surfactante" [checked]="ctrl.dato.get('es_surfactante').value == 1 ? true : false">
+                                <label for="es_surfactante">  Es surfactante?
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">Indicaciones:</label>
+                        <p class="control is-expanded  has-icon has-icon-right">
+                            <textarea class="textarea" type="text" rows="2" placeholder="Indicaciones" formControlName="indicaciones" [ngClass]="{'is-danger': ctrl.dato.get('indicaciones').hasError('required')}"></textarea>
+                            <span class="icon is-small" *ngIf="ctrl.dato.get('indicaciones').hasError('required')">
+                                    <i class="fa fa-warning"></i>
+                                </span>
+                            <span class="help is-danger" *ngIf="ctrl.dato.get('indicaciones').hasError('required')">Este campo es requerido.</span>
+                        </p>
+                    </div>
+                    
+
+
+                    <div class="field">
+                        <label>Unidad de medida: </label>
+                        <div class="select control is-expanded has-icon has-icon-right">
+                            <select class="select" name="unidad_medida_id" formControlName="unidad_medida_id" [ngClass]="{'is-danger': ctrl.dato.get('unidad_medida_id').hasError('required')}">
+                                <option *ngFor="let val of ctrl.unidades_medidas" value="{{val.id}}" >{{ val.nombre }}</option>
+                            </select>
+                            <span class="icon is-small" *ngIf="ctrl.dato.get('unidad_medida_id').hasError('required')">
+                                <i class="fa fa-warning"></i>
+                            </span>
+                            <span class="help is-danger" *ngIf="ctrl.dato.get('unidad_medida_id').hasError('required')">Este campo es requerido.</span>
+                        </div>
+
+                    </div>
+
+                    <div class="field">
+                        <label>Forma farmaceutica: </label>
+                        <div class="select control is-expanded has-icon has-icon-right">
+                            <select class="select" name="forma_farmaceutica_id" formControlName="forma_farmaceutica_id" [ngClass]="{'is-danger': ctrl.dato.get('forma_farmaceutica_id').hasError('required')}">
+                                                                <option *ngFor="let val of ctrl.formas_farmaceuticas" value="{{val.id}}" >{{ val.nombre }}</option>
+                                                            </select>
+                            <span class="icon is-small" *ngIf="ctrl.dato.get('forma_farmaceutica_id').hasError('required')">
+                                                                <i class="fa fa-warning"></i>
+                                                            </span>
+                            <span class="help is-danger" *ngIf="ctrl.dato.get('forma_farmaceutica_id').hasError('required')">Este campo es requerido.</span>
+                        </div>
+
+                    </div>
+                    <div class="field">
+                        <label>Presentación: </label>
+                        <div class="select control is-expanded has-icon has-icon-right">
+                            <select class="select" name="presentacion_id" formControlName="presentacion_id" [ngClass]="{'is-danger': ctrl.dato.get('presentacion_id').hasError('required')}">
+                                                                    <option *ngFor="let val of ctrl.presentacion_medicamento" value="{{val.id}}" >{{ val.nombre }}</option>
+                                                                </select>
+                            <span class="icon is-small" *ngIf="ctrl.dato.get('presentacion_id').hasError('required')">
+                                                                    <i class="fa fa-warning"></i>
+                                                                </span>
+                            <span class="help is-danger" *ngIf="ctrl.dato.get('presentacion_id').hasError('required')">Este campo es requerido.</span>
+                        </div>
+
+                    </div>
+                    <div class="field">
+                        <label>via de administración: </label>
+                        <div class="select control is-expanded has-icon has-icon-right">
+                            <select class="select" name="via_administracion_id" formControlName="via_administracion_id" [ngClass]="{'is-danger': ctrl.dato.get('via_administracion_id').hasError('required')}">
+                                                                        <option *ngFor="let val of ctrl.vias_administracion" value="{{val.id}}" >{{ val.nombre }}</option>
+                                                                    </select>
+                            <span class="icon is-small" *ngIf="ctrl.dato.get('via_administracion_id').hasError('required')">
+                                                                        <i class="fa fa-warning"></i>
+                                                                    </span>
+                            <span class="help is-danger" *ngIf="ctrl.dato.get('via_administracion_id').hasError('required')">Este campo es requerido.</span>
+                        </div>
+
+                    </div>
+
+                </section>
+            </div>
+        </form>
+    </div>
+</div>

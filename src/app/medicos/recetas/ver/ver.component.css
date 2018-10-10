@@ -1,0 +1,32 @@
+@media only screen {
+	.printable {
+		display: none;
+	}
+}
+
+@media only print {
+
+
+	.web {
+		display: none;
+	}
+	.printable {
+		font-family: Courier New, Courier, monospace
+	}
+	h1,
+	h2 {
+		padding: none;
+	}
+	/*
+	.printable {
+		text-align: center;
+		display: inherit;
+	}
+	.printable * {
+		display: inherit;
+	}
+	.printable > table > * {
+		display: inherit;
+	}*/
+
+}

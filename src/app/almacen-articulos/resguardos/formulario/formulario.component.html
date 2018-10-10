@@ -1,0 +1,491 @@
+<!-- crud asignar url de la api URL="url de la api" titulo="un titulo para la pestaña de la pagina" [dato]="variable que contiene el formulario]-->
+<formulario #ctrl URL="resguardos-articulo" titulo="Resguardos" [dato]="dato"></formulario>
+
+<!-- Menu principal "-->
+<menu-almacen-articulos [modulo]="'Resguardos  de artículos'" [icono]="'assets/icono-resguardoss.svg'" [url]="'/almacen-articulos/resguardos-articulo'"></menu-almacen-articulos>
+<div style="height:50px;"></div>
+<form name="form" novalidate [formGroup]="dato" (ngSubmit)="enviar();">
+  <div class="contenedor columns " style="padding: 1em; overflow:auto;" [style.maxHeight.px]="tamano-50">
+
+    <a id="catalogos" (click)="ctrl.cargarCatalogo('condicion_articulo', 'condicion-articulo'); "></a>
+    <!-- apartado de resguardos_articulos -->
+    <div class="column">
+      <div style="background: #FFF; border-radius: 1em; ">
+        <section class="hero is-primary">
+          <div class="hero-body">
+            <div class="container is-fluid">
+              <h1 class="title">
+                <span *ngIf="!ctrl.cargando || !cargando" class="icon is-medium">
+                  <i class="fa fa-edit"></i>
+                </span>
+                <span *ngIf="ctrl.cargando || cargando" class="icon is-medium">
+                  <i class="fa fa-refresh fa-spin"></i>
+                </span> Artículos
+              </h1>
+
+            </div>
+          </div>
+        </section>
+        <div class="is-fullwidth has-text-centered" *ngIf="!ctrl.datosCargados">
+          <br>
+          <span class="tag is-primary is-large ">
+            <span class="icon">
+              <i class="fa fa-refresh fa-spin"></i>
+            </span> &nbsp;
+            <span>Cargando...</span>
+          </span>
+        </div>
+        <section class="section">
+
+          <div class="notification is-danger" *ngIf="error_resguardos">
+            ¡No se completo el resguardos!
+            <strong>Intente de nuevo</strong>, Si no contacte con soporte
+          </div>
+          <div class="notification is-success" *ngIf="resguardos_ok">
+            Resguardos realizada con exito
+          </div>
+
+          <div *ngIf="!tieneid" class="columns">
+            <button class="button is-medium is-info tooltip" type="button" (click)="listar(1)">
+              <span class="icon">
+                <i class="fa fa-plus"> </i>
+              </span>
+              <span class="tooltiptext">Agregar</span>
+            </button>
+          </div>
+
+          <!-- <div class="container is-fullhd">
+            <div class="notification">
+                <div class="columns">
+                  <div class="column">
+                      <label for="fecha_desde" class="label">Desde:</label>
+                      <input  style="width: 150px; z-index: 1000;" class="input is-medium" [(ngModel)]='fecha_desde' ngui-datetime-picker date-only="true" placeholder="YYYY-MM-DD" />
+                  </div>
+                  <div class="column">
+                      <label for="fecha_hasta" class="label">Hasta:</label>
+                      <input readonly style="width: 150px; z-index: 1000;" class="input is-medium" [(ngModel)]='fecha_hasta' ngui-datetime-picker date-only="true" placeholder="YYYY-MM-DD" />
+                  </div>
+                  <div class="column">
+                    <button class="button is-large is-info tooltip" type="button" (click)="listar(1)">
+                      <span class="icon">
+                        <i class="fa fa-plus"> </i>
+                      </span>
+                      <span class="tooltiptext">Agregar</span>
+                    </button>
+                  </div>
+                </div>
+            </div>
+          </div> -->
+
+
+          <!-- <div class="columns">
+            <div class="column">
+                <label for="fecha_desde" class="label">Desde:</label>
+                <input  style="width: 150px; z-index: 1000;" class="input is-medium" [(ngModel)]='fecha_desde' ngui-datetime-picker date-only="true" placeholder="YYYY-MM-DD" />
+            </div>
+            <div class="column">
+                <label for="fecha_hasta" class="label">Hasta:</label>
+                <input readonly style="width: 150px; z-index: 1000;" class="input is-medium" [(ngModel)]='fecha_hasta' ngui-datetime-picker date-only="true" placeholder="YYYY-MM-DD" />
+            </div>
+            <div class="column">
+              <button class="button is-large is-info tooltip" type="button" (click)="listar(1)">
+                <span class="icon">
+                  <i class="fa fa-plus"> </i>
+                </span>
+                <span class="tooltiptext">Agregar</span>
+              </button>
+            </div>
+          </div> -->
+          <!-- <div class="field has-addons">
+            <p class="control is-expanded">
+              <input autofocus autocomplete="off" ngui-auto-complete [source]="articulos_term" [list-formatter]="autocompleListFormatter"
+                id="buscarArticulo" value-property-name="clave" display-property-name="nombre" path-to-data="" loading-text="Cargando..."
+                no-match-found-text="No hay resultados." (valueChanged)="select_articulo_autocomplete($event)" min-chars="1"
+                class="input is-success is-medium" type="text" placeholder="Empieza escribir el código de la salida">
+            </p>
+
+          </div> -->
+          <hr>
+          <table class="table is-striped is-narrow is-hoverable is-fullwidth">
+            <thead>
+              <tr>
+                <th>Articulo</th>
+                <th>Datos únicos</th>
+                <th># Inventario</th>
+                <th>Cantidad</th>
+                <th>Iva</th>
+                <th>Importe</th>
+                <th>Condición del articulo</th>
+                <th>Quitar</th>
+              </tr>
+            </thead>
+            <tbody formArrayName="resguardos_articulos">
+              <tr *ngFor="let item of ctrl.dato.controls.resguardos_articulos.controls;  let x = index;"  [formGroupName]="x">
+                <td>
+                  {{item.value.articulos.nombre}}  <i>{{item.value.articulos.descripcion}}</i>
+                </td>
+                <td>
+                  <span formArrayName="inventario_metadato_unico">
+                    <span *ngFor="let mu of item.controls.inventario_metadato_unico.controls; let k = index;" [formGroupName]="k" class="tag is-medium is-info">{{mu.value.campo}} <strong>:  {{mu.value.valor}}</strong> </span>
+                  </span>
+                </td>
+                <td>
+                  {{item.value.numero_inventario}}
+                </td>
+                <td>
+                  {{item.value.cantidad}}
+                </td>
+                <td>
+                  {{item.value.iva | currency:'MXN':true}}
+                </td>
+                <td>
+                  {{item.value.importe | currency:'MXN':true}}
+                </td>
+                <td>
+                  <span class="select is-fullwidth">
+                    <select formControlName="condiciones_articulos_id" [ngClass]="{'is-danger': item.get('condiciones_articulos_id').hasError('required') }">
+                      <option *ngFor="let val of ctrl.condicion_articulo" value="{{ val.id }}">{{ val.nombre }}</option>
+                    </select>
+                  </span>
+                </td>
+                <td>
+                    <a class="button is-danger" title="Quitar" (click)="ctrl.quitar_form_array(ctrl.dato.controls.resguardos_articulos, x); calcular_total();">
+                        <span class="icon is-medium">
+                            <i class="fa fa-trash-o"></i>
+                        </span>
+                    </a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+        </section>
+      </div>
+    </div>
+
+    <!-- datos del cliente y los importes -->
+    <div class="column is-one-third">
+
+      <div style="background: #FFF; border-radius: 1em; ">
+        <section class="hero is-primary">
+          <h1 class="title" style="margin:0.5em; ">
+            <span class="icon is-medium">
+              <i class="fa fa-file-text"></i>
+            </span> Datos del resguardo
+          </h1>
+          <div class="control is-grouped" style="padding:1em; z-index:99">
+            <p class="control">
+              <a class="button is-primary tooltip" (click)="ctrl.regresar()">
+                <span class="icon ">
+                  <i class="fa fa-arrow-left"> </i>
+                </span>
+                <span class="tooltiptext">Regresar</span>
+              </a>
+            </p>
+            <p class="control" *ngIf="ctrl.id">
+              <a class="button is-primary tooltip" (click)="ctrl.cargarDatos()" id="cargar_datos_actualizar">
+                <span class="icon ">
+                  <i class="fa fa-refresh"></i>
+                </span>
+                <span class="tooltiptext">Actualizar</span>
+              </a>
+            </p>
+            <p class="control" *ngIf="ctrl.id">
+              <a class="button is-primary tooltip" routerLink="{{url_nuevo}}">
+                <span class="icon ">
+                  <i class="fa fa-file"></i>
+                </span>
+                <span class="tooltiptext">Nuevo</span>
+              </a>
+            </p>
+            <p class="control" *ngIf="!tieneid">
+              <button class="button is-primary tooltip" type="submit" [ngClass]="{'is-loading': ctrl.cargando}" [disabled]="ctrl.dato.invalid">
+                <span class="icon ">
+                  <i class="fa fa-save"> </i>
+                </span>
+                <span class="tooltiptext">Guardar</span>
+              </button>
+            </p>
+            <p class="control" *ngIf="reimprimir">
+              <button class="button is-primary tooltip" type="button" (click)="imprimir()">
+                <span class="icon ">
+                  <i class="fa fa-print"> </i>
+                </span>
+                <span class="tooltiptext">Reimprimir el ticket</span>
+              </button>
+            </p>
+          </div>
+
+        </section>
+        <div style="padding: 1em;">
+
+
+          <div class="field">
+
+              <label class="label" for="clues_destino">Unidan médica</label>
+              <p class="control"  style="color:black">
+                <input ngui-auto-complete
+                    [source]="clues_term"
+                    [list-formatter]="autocompleListFormatter" id="clues_destino"
+                    value-property-name="clues"
+                    display-property-name="clues"
+                    id="clues_destino"
+                    class="input"
+                    path-to-data=""
+                    loading-text="Cargando..."
+                    no-match-found-text="No hay resultados."
+                    (valueChanged)="select_clues_autocomplete($event)"
+                    min-chars="1"
+                    [ngClass]="{'is-danger': ctrl.dato.get('clues_destino').hasError('required')}"
+                    formControlName="clues_destino"
+                    type="text" placeholder="Escribe la clave o nombre de la clues">
+              </p>
+
+
+            <!-- <label class="label">Clues:</label>
+            <input id="clues_destino" class="input" [ngClass]="{'is-danger': ctrl.dato.get('clues_destino').hasError('required')}" formControlName="clues_destino"
+              placeholder="Clues destino" /> -->
+          </div>
+          <div class="field">
+            <label class="label">Área:</label>
+            <input id="area_resguardante" class="input" [ngClass]="{'is-danger': ctrl.dato.get('area_resguardante').hasError('required')}"
+              formControlName="area_resguardante" placeholder="Área del resguardante" />
+          </div>
+          <div class="field">
+            <label class="label">Nombre:</label>
+            <input id="nombre_resguardante" class="input" [ngClass]="{'is-danger': ctrl.dato.get('nombre_resguardante').hasError('required')}"
+              formControlName="nombre_resguardante" placeholder="Nombre del resguardante" />
+          </div>
+          <div class="field">
+            <label class="label">Apellidos:</label>
+            <input id="apellidos_resguardante" class="input" [ngClass]="{'is-danger': ctrl.dato.get('apellidos_resguardante').hasError('required')}"
+              formControlName="apellidos_resguardante" placeholder="Apellidos del resguardante" />
+          </div>
+
+          <nav class="panel" style="font-size:1.5em">
+            <p class="panel-heading">
+              Total
+            </p>
+            <a class="panel-block">
+              <span class="panel-icon">
+                <i class="fa fa-money"></i>
+              </span>
+              <div class="columns" style="width:100%">
+                <div class="column is-6">
+                  Sub Total:
+                </div>
+                <div class="column is-6">
+                  {{ctrl.dato.get('subtotal').value | currency:'MXN':true}}
+                </div>
+              </div>
+            </a>
+            <a class="panel-block" *ngIf="ctrl.dato.get('iva').value > 0">
+              <span class="panel-icon">
+                <i class="fa fa-money"></i>
+              </span>
+              <div class="columns" style="width:100%">
+                <div class="column is-6">
+                  Iva:
+                </div>
+                <div class="column is-6">
+                  {{ctrl.dato.get('iva').value | currency:'MXN':true}}
+                </div>
+              </div>
+            </a>
+            <a class="panel-block">
+              <span class="panel-icon">
+                <i class="fa fa-money"></i>
+              </span>
+              <div class="columns" style="width:100%">
+                <div class="column is-6">
+                  Total:
+                </div>
+                <div class="column is-6">
+                  {{ctrl.dato.get('total').value | currency:'MXN':true}}
+                </div>
+              </div>
+            </a>
+
+          </nav>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</form>
+
+
+<!-- SALIDAS POSIBLES -->
+<div class="modal" id="salidas">
+  <div class="modal-background"></div>
+  <div class="modal-card" style="width: 80%">
+    <header class="modal-card-head">
+      <p class="modal-card-title">
+        <i class="fa fa-warning"></i> &nbsp; Seleccionar salidas</p>
+      <button class="delete" (click)="cancelarModal('salidas')"></button>
+    </header>
+    <section class="modal-card-body">
+      <div class="content">
+
+          <div class="box">
+              <article class="media">
+                <div class="media-content">
+                  <div class="content">
+                    <div class="columns">
+                      <div class="column">
+                          <label for="fecha_desde" class="label">Desde:</label>
+                          <input  style="width: 150px; z-index: 1000;" class="input is-medium" [(ngModel)]='fecha_desde' ngui-datetime-picker date-only="true" placeholder="YYYY-MM-DD" />
+                      </div>
+                      <div class="column">
+                          <label for="fecha_hasta" class="label">Hasta:</label>
+                          <input readonly style="width: 150px; z-index: 1000;" class="input is-medium" [(ngModel)]='fecha_hasta' ngui-datetime-picker date-only="true" placeholder="YYYY-MM-DD" />
+                      </div>
+                      <div class="column">
+                          <label class="label" for="buscarClues">Unidad médica destino</label>
+                            <p class="control"  style="color:black">
+                              <input ngui-auto-complete [source]="clues_term" [list-formatter]="autocompleListFormatter" id="buscarClues" value-property-name="clues"
+                                  display-property-name="clues" path-to-data="" loading-text="Cargando..." no-match-found-text="No hay resultados."
+                                  (valueChanged)="select_clues_autocomplete($event)" min-chars="1" class="input is-success is-medium"
+                                  type="text" placeholder="Escribe la clave o nombre de la clues" [(ngModel)]='clave_clues'>
+                            </p>
+                      </div>
+                      <div class="column">
+                        <label for="persona_recibe" class="label">Persona recibe:</label>
+                        <input class="input is-medium" type="text" placeholder="Persona que recibe" [(ngModel)]="persona_recibe">
+                      </div>
+                      <div class="column">
+                        <div class="columns">
+                            <div class="column">
+                              <label class="label">&nbsp;</label>
+                              <button class="button is-warning is-large" type="button" [ngClass]="{'is-loading': ctrl.cargando}" (click)="clues_destino=''; persona_recibe=''; fecha_desde=''; fecha_hasta='';" >Limpiar</button>
+                            </div>
+                            <div class="column">
+                              <label class="label">&nbsp;</label>
+                              <button class="button is-large is-success" type="button" (click)="listar(1)">
+                                <span class="icon">
+                                  <i class="fa fa-filter"> </i>
+                                </span>
+                                <span class="tooltiptext">Filtrar</span>
+                              </button>
+                            </div>
+                        </div>
+                        <!-- <label class="label">&nbsp;</label>
+                        <button class="button is-warning is-large" type="button" [ngClass]="{'is-loading': ctrl.cargando}" (click)="clues_destino=''; persona_recibe=''; fecha_desde=''; fecha_hasta='';" >Limpiar</button> -->
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+              </article>
+            </div>
+        <table class="table is-striped is-narrow is-hoverable is-fullwidth" *ngIf="!ctrl.cargando && !cargandoPdf">
+          <thead>
+              <tr>
+                  <th>
+                      <abbr>ID</abbr>
+                  </th>
+                  <th>Fecha</th>
+                  <th>Almacen </th>
+                  <th>Unidad médica destino</th>
+                  <th>Recibe</th>
+                  <th>Total Artículos</th>
+                  <th>Importe Total</th>
+                  <th>Status </th>
+                  <th>Cancelado</th>
+              </tr>
+          </thead>
+
+          <tbody *ngIf="!ctrl.busquedaActivada">
+              <tr *ngFor="let item of datoSalida; let i=index">
+                  <th style="vertical-align: middle;"><a (click)="select_salida(i);">{{ item.id }}</a></th>
+                  <td style="vertical-align: middle;"><a (click)="select_salida(i);">{{ item.fecha_movimiento }} </a></td>
+                  <td style="vertical-align: middle;"><a (click)="select_salida(i);">{{ item.almacen ? item.almacen.nombre : 'NO TIENE' }} </a></td>
+                  <td style="vertical-align: middle;"><a (click)="select_salida(i);">{{ item.movimiento_salida_metadatos_a_g.unidad_medica ? item.movimiento_salida_metadatos_a_g.unidad_medica.clues +': '+item.movimiento_salida_metadatos_a_g.unidad_medica.nombre  : '' }} </a></td>
+                  <td style="vertical-align: middle;"><a (click)="select_salida(i);">{{ item.movimiento_salida_metadatos_a_g.persona_recibe }} </a></td>
+                  <td style="vertical-align: middle;"><a (click)="select_salida(i);"><span class="tag is-warning is-large ">{{ item.total_articulos | number:'1.2-2' }} </span> </a></td>
+                  <td style="vertical-align: middle;"><a (click)="select_salida(i);"><span class="tag is-primary is-large ">$ {{ item.total_importe | number:'1.2-2' }} </span> </a></td>
+                  <td style="vertical-align: middle;"><a (click)="select_salida(i);">{{ item.status }} </a></td>
+                  <td style="vertical-align: middle;"><a (click)="select_salida(i);">{{ item.cancelado == 1 ? 'Si'  : 'No' }} </a></td>
+              </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+    <footer class="modal-card-foot">
+      <a class="button" (click)="cancelarModal('salidas')">Cancelar</a>
+    </footer>
+  </div>
+</div>
+
+<div class="modal" id="articulos">
+  <div class="modal-background"></div>
+  <div class="modal-card" style="width: 80%">
+    <header class="modal-card-head">
+      <p class="modal-card-title">
+        <i class="fa fa-warning"></i> &nbsp; Articulos</p>
+      <button class="delete" (click)="cancelarModal('articulos')"></button>
+    </header>
+    <section class="modal-card-body">
+      <div class="content"  [formGroup]="dato">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Articulo</th>
+              <th>Datos únicos</th>
+              <th># Inventario</th>
+              <th>Cantidad</th>
+              <th>Iva</th>
+              <th>Importe</th>
+              <th>Condición del articulo</th>
+              <th>Quitar</th>
+            </tr>
+          </thead>
+          <tbody formArrayName="temp_resguardos_articulos">
+            <tr *ngFor="let item of ctrl.dato.controls.temp_resguardos_articulos.controls;  let x = index;"  [formGroupName]="x">
+              <td>
+                {{item.value.articulos.nombre}} <i>{{item.value.articulos.descripcion}}</i>
+              </td>
+              <td>
+                <span formArrayName="inventario_metadato_unico">
+                  <span *ngFor="let mu of item.controls.inventario_metadato_unico.controls; let k = index;" [formGroupName]="k" class="tag is-medium is-info">{{mu.value.campo}} <strong>:  {{mu.value.valor}}</strong> </span>
+                </span>
+              </td>
+              <td>
+                {{item.value.numero_inventario}}
+              </td>
+              <td>
+                {{item.value.cantidad}}
+              </td>
+              <td>
+                {{item.value.iva | currency:'MXN':true}}
+              </td>
+              <td>
+                {{item.value.importe | currency:'MXN':true}}
+              </td>
+              <td>
+                <span class="select is-fullwidth">
+                  <select formControlName="condiciones_articulos_id">
+                    <!-- <option value="">Seleccione</option> -->
+                    <option *ngFor="let val of ctrl.condicion_articulo" value="{{ val.id }}">{{ val.nombre }}</option>
+                  </select>
+                </span>
+              </td>
+              <td>
+                <div class="control">
+                  <label class="checkbox">
+                    <input type="checkbox" formControlName="agregar"> Agregar
+                  </label>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+    <footer class="modal-card-foot">
+      <a class="button is-success" (click)="cargarInventario();">Continuar</a>
+      <a class="button" (click)="cancelarModal('articulos')">Cancelar</a>
+    </footer>
+  </div>
+</div>

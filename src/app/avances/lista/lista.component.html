@@ -1,0 +1,358 @@
+<avance-menu></avance-menu>
+<div style="height:50px;"></div>
+<div class="contenedor columns " style="height:100%; ">
+    <div class="column" style="padding:2em;">
+        <div style="background: #FFF; border-radius: 1em; overflow: hidden;">
+            <section class="hero" [ngClass] = " {'is-dark': busquedaActivada, 'is-primary': !busquedaActivada } " >
+                
+                <div class="hero-body" style="position:relative;">
+                    <!--<a class="button  is-dark" *ngIf="busquedaActivada" style="position:absolute; top:1em; right:1em;" (click)="busquedaActivada=false;searchBox.value='';resultadosBusqueda=[]"><span class="icon "><i class="fa fa-close"></i></span></a>-->
+                    <a class="button  is-dark" *ngIf="busquedaActivada" style="position:absolute; top:1em; right:3.5em;" (click)="listarBusqueda(searchBox.value,1)"><span class="icon "><i class="fa fa-refresh"></i></span></a>
+                    <a class="button  is-primary" *ngIf="!busquedaActivada" style="position:absolute; top:1em; right:1em;" (click)="listar(1)"><span class="icon "><i class="fa fa-refresh"></i></span></a>
+                    <div class="container is-fluid">
+                        
+                        <h1 class="title" *ngIf="!busquedaActivada">
+                            <span class="icon is-medium"><i class="fa fa-user"></i></span> Lista de Temas 
+                        </h1>
+                        <h1 class="title" *ngIf="busquedaActivada">
+                            <span class="icon is-medium"><i class="fa fa-search"></i></span> Búsqueda 
+                        </h1>
+                        <div class="columns">
+                          <div class="column"  [ngClass]="{'is-three-quarters': filter }">
+                            <label class="label" style="color: #FFF">Buscar Tema</label>
+                            <input class="input is-medium" type="text" placeholder="Buscar" #searchBox id="search-box" (keyup)="buscar(searchBox.value)">
+                          </div>
+                          <!--<div class="column"  *ngIf="!filter">
+                            <label class="label" style="color: #FFF">Prioridad</label>
+                              <select class="select redondear" #prioridad (change)='filtro(1, prioridad.value)'>
+                                <option value="">TODOS</option>
+                                <option value="1">NORMAL</option>
+                                <option value="2">PRIORITARIO</option>
+                                <option value="3">URGENTE</option>
+                            </select>
+                          </div>-->
+                          <div class="column" *ngIf="!filter">
+                            <label class="label" style="color: #FFF">Estatus</label>
+                            <select class="select redondear" #estatus (change)='filtro(2, estatus.value)'>
+                                <option value="">TODOS</option>
+                                <option value="0">VIGENTES</option>
+                                <option value="1">FINALIZADOS</option>
+                            </select>
+                          </div>
+                          <div class="column" *ngIf="!filter">
+                            <label class="label" style="color: #FFF">Vistos</label>
+                            <select class="select redondear" #vistos (change)='filtro(3, vistos.value)'>
+                                <option value="">TODOS</option>
+                                <option value="1">VISTOS</option>
+                                <option value="2">NO VISTOS</option>
+                            </select>
+                          </div>
+                          <div class="column" *ngIf="!filter">
+                          <label class="label" style="color: #FFF">Área</label>
+                            <select class="select redondear" #area (change)='filtro(4, area.value)'>
+                                <option value="">TODOS</option>
+                                <option  *ngFor="let item of areas; let i=index" value="{{ item.area }}">{{ item.area }}</option>
+                            </select>
+                          </div>
+                          <div class="column" *ngIf="!filter">
+                          <label class="label" style="color: #FFF">Órden</label>
+                            <select class="select redondear" #orden (change)='filtro(5, orden.value)'>
+                                <option value="1" selected="selected">ÚLTIMA ACTUALIZACIÓN</option>
+                                <option value="2">PRIORIDAD</option>
+                            </select>
+                          </div>
+                          <div class="column">
+                            <a class="button is-medium is-primary is-inverted " (click)='showAgregarTema=!showAgregarTema' style="margin-top: 20px">
+                            <span class="icon"><i class="fa fa-plus"></i></span><span>Nuevo</span>
+                            </a>
+                            
+                          </div>
+                        </div>
+                        <!--<div class="control is-grouped">
+                          
+                        <!--<p class="control is-expanded">
+                            
+                        </p>
+                        <p class="control">
+                            
+                        </p>
+                        </div>-->
+                    </div>
+                </div>
+            </section>
+            <div style="overflow: scroll; overflow-x: hidden; height: 630px;">
+              <div class="is-fullwidth has-text-centered" *ngIf="cargando">
+                  <br>
+                  <span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span> &nbsp;<span>Cargando...</span></span>
+                  <br>
+                  <br>
+              </div>
+          
+              <table class="table" *ngIf="!cargando">
+                  <thead>
+                      <tr>
+                      <th style="min-width: 130px"></th>
+                      <th>TEMA</th>
+                      <th>AVANCE</th>
+                      <th>ESTATUS</th>
+                      <th>ACTUALIZADO</th>
+                      <th style="min-width: 130px"></th>
+                      </tr>
+                  </thead>
+                  <tbody  *ngIf="!busquedaActivada">
+                      <tr *ngFor="let item of temas; let i=index">
+                          <th><!--<a class='button is-info' (click)='informacion(item.id, item.porcentaje)'><i class='fa fa-info'></i></a>--><a class='button' [ngClass]="{'is-warning': item.visualizaciones > 0 }"> <span class="tag is-dark"><i class='fa'  [ngClass]="{'fa-envelope-open':item.visualizaciones == 0, 'fa-envelope': item.visualizaciones > 0 }"></i>&nbsp;{{ item.visualizaciones }}</span></a><a class='button'  [ngClass]="{'is-primary':item.prioridad == 1, 'is-warning': item.prioridad == 2, 'is-danger': item.prioridad == 3 }" (click)='informacion(item.id, item.porcentaje)'><i class='fa fa-info-circle'></i></a></th>
+                          <td style="vertical-align: middle; cursor:pointer;"><a routerLink="/temas/avances/{{item.id}}"><b>Tema: {{ item.tema }}</b><br> <b>Responsable:</b> {{ item.responsable }}<br><b>Área:</b> {{ item.area }}</a></td>
+                          <td style="vertical-align: middle; cursor:pointer;"><a routerLink="/temas/avances/{{item.id}}">{{ item.porcentaje }} %</a><progress class="progress is-info is-small" value="{{ item.porcentaje }}" max="100"></progress></td>
+                          
+
+                          <td style="vertical-align: middle; cursor:pointer;" *ngIf="item.estatus==0"><a routerLink="/temas/avances/{{item.id}}">VIGENTE </a></td>
+                          <td style="vertical-align: middle; cursor:pointer;" *ngIf="item.estatus == 1"><a routerLink="/temas/avances/{{item.id}}">CONCLUIDO </a></td>
+                          
+
+                          <td style="vertical-align: middle; cursor:pointer;" *ngIf="item.creacion>=0"><a routerLink="/temas/avances/{{item.id}}"><span *ngIf="item.creacion == 0">Hoy</span><span *ngIf="item.creacion > 0">Hace {{ item.creacion }} Día(s)</span> </a></td>
+                          <td style="vertical-align: middle; cursor:pointer;" *ngIf="item.creacion<0"><a routerLink="/temas/avances/{{item.id}}">SIN ACTUALIZAR </a></td>
+                          
+                          
+                          <td style="vertical-align: middle;" class="has-text-centered">
+                               
+                              <button type="button"  class="button is-primary"  (click)='ver_tema(item.id)'>
+                                <span class="icon"><i class="fa fa-edit"></i></span>
+                              </button>
+                              &nbsp;&nbsp;
+                              <button type="button"  class="button is-danger"  (click)='eliminar_tema(item.id)'>
+                                <span class="icon"><i class="fa fa-close"></i></span>
+                              </button>
+                              
+                          </td>
+                          
+                      </tr>
+                      <tr *ngIf="temas.length == 0">
+                          <td colspan="5" style="vertical-align: middle; color:#888;">Esta lista está vacía.</td>                    
+                      </tr>
+                  </tbody>
+                  <tbody *ngIf="busquedaActivada">
+                      <tr *ngFor="let item of resultadosBusqueda; let i=index">
+                          <th><!--<a class='button is-info' (click)='informacion(item.id, item.porcentaje)'><i class='fa fa-info'></i></a>--><a class='button' [ngClass]="{'is-warning': item.visualizaciones > 0 }"> <span class="tag is-dark"><i class='fa'  [ngClass]="{'fa-envelope-open':item.visualizaciones == 0, 'fa-envelope': item.visualizaciones > 0 }"></i>&nbsp;{{ item.visualizaciones }}</span></a><a class='button'  [ngClass]="{'is-primary':item.prioridad == 1, 'is-warning': item.prioridad == 2, 'is-danger': item.prioridad == 3 }" (click)='informacion(item.id, item.porcentaje)'><i class='fa fa-info-circle'></i></a></th>
+                          <td style="vertical-align: middle; cursor:pointer;"><a routerLink="/temas/avances/{{item.id}}"><b>Tema: {{ item.tema }}</b><br> <b>Responsable:</b> {{ item.responsable }}<br><b>Área:</b> {{ item.area }}</a></td>
+                          <td style="vertical-align: middle; cursor:pointer;"><a routerLink="/temas/avances/{{item.id}}">{{ item.porcentaje }} %</a><progress class="progress is-info is-small" value="{{ item.porcentaje }}" max="100"></progress></td>
+                          
+
+                          <td style="vertical-align: middle; cursor:pointer;" *ngIf="item.estatus==0"><a routerLink="/temas/avances/{{item.id}}">VIGENTE </a></td>
+                          <td style="vertical-align: middle; cursor:pointer;" *ngIf="item.estatus == 1"><a routerLink="/temas/avances/{{item.id}}">CONCLUIDO </a></td>
+                          
+
+                          <td style="vertical-align: middle; cursor:pointer;" *ngIf="item.creacion>=0"><a routerLink="/temas/avances/{{item.id}}"><span *ngIf="item.creacion == 0">Hoy</span><span *ngIf="item.creacion > 0">Hace {{ item.creacion }} Día(s)</span> </a></td>
+                          <td style="vertical-align: middle; cursor:pointer;" *ngIf="item.creacion<0"><a routerLink="/temas/avances/{{item.id}}">SIN ACTUALIZAR </a></td>
+                          
+                          
+                          <td style="vertical-align: middle;" class="has-text-centered">
+                               
+                              <button type="button"  class="button is-primary"  (click)='ver_tema(item.id)'>
+                                <span class="icon"><i class="fa fa-edit"></i></span>
+                              </button>
+                              &nbsp;&nbsp;
+                              <button type="button"  class="button is-danger"  (click)='eliminar_tema(item.id)'>
+                                <span class="icon"><i class="fa fa-close"></i></span>
+                              </button>
+                              
+                          </td>
+                          
+                      </tr>
+                      <tr *ngIf="temas.length == 0">
+                          <td colspan="5" style="vertical-align: middle; color:#888;">Esta lista está vacía.</td>                    
+                      </tr>
+                  </tbody>
+              </table>
+              
+              <paginacion 
+                  [total]="total" 
+                  [paginasTotales]="paginasTotales" 
+                  [resultadosPorPagina]="resultadosPorPagina" 
+                  [paginaActual]="paginaActual" 
+                  [indicePaginas]="indicePaginas"
+                  (onSiguiente)="paginaSiguiente()" 
+                  (onAnterior)="paginaAnterior()" 
+                  (onListar)="listar($event)" 
+                  *ngIf="total>0 && total > resultadosPorPagina && !busquedaActivada"></paginacion>
+              <paginacion 
+                  [total]="totalBusqueda" 
+                  [paginasTotales]="paginasTotalesBusqueda" 
+                  [resultadosPorPagina]="resultadosPorPaginaBusqueda" 
+                  [paginaActual]="paginaActualBusqueda" 
+                  [indicePaginas]="indicePaginasBusqueda"
+                  (onSiguiente)="paginaSiguienteBusqueda(searchBox.value)" 
+                  (onAnterior)="paginaAnteriorBusqueda(searchBox.value)" 
+                  (onListar)="listarBusqueda(searchBox.value,$event)" 
+                  *ngIf="totalBusqueda > 0 && totalBusqueda > resultadosPorPaginaBusqueda && busquedaActivada"></paginacion>
+             
+             
+              
+          </div>
+      </div>    
+    </div>        
+   
+</div>
+
+<div id="modal-temas" class="modal is-active" [ngClass]="{'is-active': showAgregarTema}">
+  <div class="modal-background"  (click)="showDialog = !showAgregarTema"></div>
+  <div class="modal-card" style="width:60%; height: auto;">
+    <header class="modal-card-head" style="background-color: #00d1b2" >
+      <div class="container is-fluid"  style="width:100%;">
+          <h1 class="title" style="color:#FFF;">
+            <span class="icon is-medium"><i class="fa fa-user"></i></span> Agregar Tema
+          </h1>
+      </div>            
+      <a class="button  is-primary" style="position:absolute; top:1em; right:1em;" (click)="showAgregarTema = !showAgregarTema"><span class="icon "><i class="fa fa-close"></i></span></a>
+    </header>
+    <section class="section">
+        
+        <form name="form" [formGroup]="tema_avance"   (ngSubmit)="agregar_tema()" >   
+            <section class="section" style="padding: 1rem 1.5rem; background-color: #EFEFEF">
+                <div class="container">
+                  <div class="heading">
+                    <h1 class="title">Datos del Tema</h1>
+                  </div>
+                </div>
+            </section> 
+              <div class="control is-grouped">
+                <p class="control is-expanded  has-icon has-icon-right">
+                    <label class="label">Tema</label>
+                  <input class="input" autofocus type="text"  placeholder="Tema" formControlName="tema">
+                  <span class="icon is-small" *ngIf="tema_avance.get('tema').hasError('required') && tema_avance.get('tema').touched">
+                    <i class="fa fa-warning"></i>
+                  </span>
+                  <span class="help is-danger" *ngIf="tema_avance.get('tema').hasError('required') && tema_avance.get('tema').touched">Este campo es requerido.</span>
+                </p>
+                
+              </div>
+              <div class="control is-grouped">
+                <p class="control is-expanded  has-icon has-icon-right">
+                    <label class="label">Responsable</label>
+                  <input class="input"  type="text"  placeholder="Responsable" formControlName="responsable">
+                  <span class="icon is-small" *ngIf="tema_avance.get('responsable').hasError('required') && tema_avance.get('responsable').touched">
+                    <i class="fa fa-warning"></i>
+                  </span>
+                  <span class="help is-danger" *ngIf="tema_avance.get('responsable').hasError('required') && tema_avance.get('responsable').touched">Este campo es requerido.</span>
+                </p>
+                
+              </div>
+              <div class="control is-grouped">
+                <p class="control is-expanded  has-icon has-icon-right">
+                    <label class="label">Área</label>
+                  <input class="input"  type="text"  placeholder="Area" formControlName="area">
+                  <span class="icon is-small" *ngIf="tema_avance.get('area').hasError('required') && tema_avance.get('area').touched">
+                    <i class="fa fa-warning"></i>
+                  </span>
+                  <span class="help is-danger" *ngIf="tema_avance.get('area').hasError('required') && tema_avance.get('area').touched">Este campo es requerido.</span>
+                </p>
+                
+              </div>
+
+              <div class="control is-grouped">
+                <p class="control is-expanded  has-icon has-icon-right">
+                    <label class="label">Comentario</label>
+                  <textarea  class="textarea"  placeholder="Comentario" formControlName="comentario"></textarea>
+                  <span class="icon is-small" *ngIf="tema_avance.get('comentario').hasError('required') && tema_avance.get('comentario').touched">
+                    <i class="fa fa-warning"></i>
+                  </span>
+                  <span class="help is-danger" *ngIf="tema_avance.get('comentario').hasError('required') && tema_avance.get('comentario').touched">Este campo es requerido.</span>
+                </p>
+                
+              </div>
+            
+          <br>
+          <div class="control is-grouped">
+            <p class="control">
+              <button class="button is-primary" type="submit" [ngClass]="{'is-loading': cargando}" [disabled]="tema_avance.invalid">Guardar</button>
+            </p>
+          </div>
+      </form>
+    </section>
+    <footer class="" style="position:relative; padding:1em;background: #FFF; border-top:1px solid #EEE; border-radius:0 0 0.8em 0.8em " >
+    </footer>
+  </div>
+</div>
+
+<div id="modal-info" class="modal is-active" [ngClass]="{'is-active': showInfo}">
+  <div class="modal-background"  (click)="showDialog = !showInfo"></div>
+  <div class="modal-card" style="width:60%; height: auto;">
+    <header class="modal-card-head" style="background-color: #00d1b2" >
+      <div class="container is-fluid"  style="width:100%;">
+          <h1 class="title" style="color:#FFF;">
+            <span class="icon is-medium"><i class="fa fa-user"></i></span> Información del Tema
+          </h1>
+      </div>            
+      <a class="button  is-primary" style="position:absolute; top:1em; right:1em;" (click)="showInfo = !showInfo"><span class="icon "><i class="fa fa-close"></i></span></a>
+    </header>
+    <section class="section"  *ngIf="cargando_info">  
+      
+        <div class="is-fullwidth has-text-centered">
+          <br>
+          <span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span> &nbsp;<span>Cargando...</span></span>
+          <br>
+          <br>
+        </div>
+        
+    </section>  
+    <section class="section"  *ngIf="!cargando_info">  
+      
+      <div class="columns">
+        <div class="column is-one-third"><b>Tema</b></div>
+        <div class="column">{{ informacion_tema.tema }}</div>
+      </div>
+      <div class="columns">
+        <div class="column is-one-third"><b>Responsable</b></div>
+        <div class="column">{{ informacion_tema.responsable }}</div>
+      </div>
+      <div class="columns">
+        <div class="column is-one-third"><b>Área</b></div>
+        <div class="column">{{ informacion_tema.area }}</div>
+      </div>
+
+      <div class="columns">
+        <div class="column is-one-third"><b>Creado por</b></div>
+        <div class="column">{{ informacion_tema.creado_por }}</div>
+      </div>
+      <div class="columns">
+        <div class="column is-one-third"><b>Actualizaciones</b></div>
+        <div class="column">{{ informacion_tema.actualizacion }}</div>
+      </div>
+      <div class="columns">
+        <div class="column is-one-third"><b>Creado el</b></div>
+        <div class="column">{{ informacion_tema.created_at }}</div>
+      </div>
+      <div class="columns">
+        <div class="column is-one-third"><b>% de Avance</b></div>
+        <div class="column">{{ informacion_tema.percent }} %</div>
+      </div>
+
+      <div class="columns">
+        <div class="column is-one-third"><b>Comentario</b></div>
+        <div class="column">{{ informacion_tema.comentario }} </div>
+      </div>
+
+      <div class="columns">
+        <div class="column is-one-third"><b>Prioridad</b></div>
+        <div class="column"><a class='button'  [ngClass]="{'is-primary':informacion_tema.prioridad == 1, 'is-warning': informacion_tema.prioridad == 2, 'is-danger': informacion_tema.prioridad == 3 }"><i class='fa fa-info-circle'></i> &nbsp;<span *ngIf='informacion_tema.prioridad == 1'>NORMAL</span> <span *ngIf='informacion_tema.prioridad == 2'>PRIORITARIO</span> <span *ngIf='informacion_tema.prioridad == 3'>URGENTE</span></a> </div>
+      </div>
+     
+    </section>  
+
+    <footer class="" style="position:relative; padding:1em;background: #FFF; border-top:1px solid #EEE; border-radius:0 0 0.8em 0.8em " >
+    </footer>
+  </div>
+</div>
+
+<div class="notification is-danger" style="position:fixed; left:1em;  bottom:1em;" *ngIf="mensajeError.mostrar">
+    <button class="delete" (click)="mensajeError.mostrar = false"></button>        
+    <b>Error:</b> {{ mensajeError.texto }}<br><br>
+    <p style="text-align:center" ><a  class="button is-danger is-inverted" (click)="ultimaPeticion(); mensajeError.mostrar = false"> <span class="icon"><i class="fa fa-refresh"></i></span> <span>Volver a intentar</span></a></p>        
+</div>
+
+<div class="notification is-success" style="position:fixed; left:1em;  bottom:1em; width: auto" *ngIf="mensajeExito.mostrar">       
+    <button class="delete" (click)="mensajeExito.mostrar = false"></button>
+    <p><span class="icon" style="margin-right: 0.5em;"><i class="fa fa-check-circle"></i></span> <span>{{ mensajeExito.texto }}</span></p>
+    <br>
+    <p style="text-align: center;"><small >Este mensaje desaparecerá en {{ mensajeExito.cuentaAtras }} segundos.</small></p>       
+</div>

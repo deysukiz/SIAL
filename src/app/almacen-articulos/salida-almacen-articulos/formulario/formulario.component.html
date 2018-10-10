@@ -1,0 +1,478 @@
+<!-- crud asignar url de la api URL="url de la api" titulo="un titulo para la pestaña de la pagina" [dato]="variable que contiene el formulario]-->
+<formulario #ctrl URL="salida-articulo" titulo="Salida" [dato]="dato"></formulario>
+
+<!-- Menu principal "-->
+<menu-almacen-articulos [modulo]="'Salida  de artículos'" [icono]="'assets/icono-salidas.svg'" [url]="'/almacen-articulos/salidas'"></menu-almacen-articulos>
+<div style="height:50px;"></div>
+<form name="form" novalidate [formGroup]="dato" (ngSubmit)="ctrl.enviar(false, false, 'almacen-articulos/salidas/editar');">
+    <div class="contenedor columns " style="padding: 1em; overflow:auto;" [style.maxHeight.px]="tamano-50">
+
+        <!-- apartado de movimiento_articulos -->
+        <div class="column">
+            <div style="background: #FFF; border-radius: 1em; ">
+                <section class="hero is-primary">
+                    <div class="hero-body">
+                        <div class="container is-fluid">
+                            <h1 class="title">
+                                <span *ngIf="!ctrl.cargando || !cargando" class="icon is-medium"><i class="fa fa-edit"></i></span>
+                                <span *ngIf="ctrl.cargando || cargando" class="icon is-medium"><i class="fa fa-refresh fa-spin"></i></span>                                Artículos
+                            </h1>
+
+                        </div>
+                    </div>
+                </section>
+                <div class="is-fullwidth has-text-centered" *ngIf="!ctrl.datosCargados">
+                    <br>
+                    <span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span> &nbsp;<span>Cargando...</span></span>
+                </div>
+                <section class="section">
+
+                    <div class="notification is-danger" *ngIf="error_salida">
+                        ¡No se completo la salida! <strong>Intente de nuevo</strong>, Si no contacte con soporte
+                    </div>
+                    <div class="notification is-success" *ngIf="salida_ok">
+                        Salida realizada con exito
+                    </div>
+                    <div class="field has-addons">
+                        <p class="control is-expanded" >
+                            <input autofocus autocomplete="off" ngui-auto-complete [source]="articulos_term" [list-formatter]="autocompleListFormatter"
+                                id="buscarArticulo" value-property-name="clave" display-property-name="nombre" path-to-data=""
+                                [readonly]="tieneid"
+                                loading-text="Cargando..." no-match-found-text="No hay resultados." (valueChanged)="select_articulo_autocomplete($event)"
+                                min-chars="1" class="input is-success is-medium" type="text" placeholder="Empieza escribir el nombre del producto">
+                        </p>
+
+                    </div>
+                    <hr>
+
+                    <div formArrayName="movimiento_articulos" style="overflow:auto; display:block" [style.maxHeight.px]="tamano-285">
+                        <div class="box" *ngFor="let val of ctrl.dato.controls.movimiento_articulos.controls;  let i = index;" [ngStyle]="{'background': i%2 == 0 ? 'rgba(230, 230, 232, 0.44)' : 'rgba(237, 242, 243, 0.44)'}">
+                            <article class="media" [formGroupName]="i">
+                                <div class="media-content">
+                                    <div class="content">
+                                        <span  *ngIf="!tieneid" style="float: right;">
+                                          <a class="button is-primary" title="Agregar" (click)="select_articulo_autocomplete(val.value);">
+                                              <span class="icon is-medium">
+                                                  <i class="fa fa-plus"></i>
+                                              </span>
+                                          </a>
+                                          <a class="button is-danger" title="Quitar" (click)="ctrl.quitar_form_array(ctrl.dato.controls.movimiento_articulos, i); calcular_importe_articulo();">
+                                              <span class="icon is-medium">
+                                                  <i class="fa fa-trash-o"></i>
+                                              </span>
+                                          </a>
+                                        </span>
+
+                                        <div class="columns">
+                                            <div class="column is-3">
+                                                <strong>{{val.get("articulos").value.nombre}} | </strong> {{val.get("articulos").value.categoria?.nombre}}
+                                                <small><i>{{val.get("articulos").value.descripcion}}</i></small>
+                                                <span *ngIf="val.get('articulos').value.es_activo_fijo==1" class="tag is-info is-small">Act. fijo</span>
+                                            </div>
+
+                                            <div class="column is-3">
+                                              <span *ngFor="let md of val.get('articulos').value.articulos_metadatos;">
+                                                  <span *ngIf="md.requerido_inventario==0" class="tag is-warning is-small"><strong>{{md.campo}}</strong> : {{md.valor}}</span>
+                                              </span>
+                                            </div>
+
+                                            <div class="column is-2">
+                                                <p class="control">
+                                                    <span class="tag is-info is-medium">Iva: {{val.value.iva | currency:'MXN':true}}</span>
+                                                </p>
+                                            </div>
+
+                                            <div class="column is-2">
+                                                <p class="control">
+                                                    <span class="tag is-success is-medium">Importe: {{val.value.importe | currency:'MXN':true}}</span>
+                                                </p>
+                                            </div>
+                                            <div class="column is-2">
+                                                <p class="control  has-icon has-icon-right">
+                                                    <input class="input" type="text" [ngClass]="{'is-danger': val.get('observaciones').hasError('required') }"
+                                                        placeholder="observaciones"
+                                                        [readonly]="tieneid"
+                                                        formControlName="observaciones" >
+                                                    <span class="icon is-small" *ngIf="val.get('observaciones').hasError('required') ">
+                                                        <i class="fa fa-warning"></i>
+                                                    </span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div class="columns">
+                                            <table class="table is-narrow">
+                                                <thead>
+                                                    <tr>
+                                                        <th>N°</th>
+                                                        <th>Inventario</th>
+                                                        <th>Datos únicos</th>
+                                                        <th>Programa</th>
+                                                        <th>Lote</th>
+                                                        <th>Caducidad</th>
+                                                        <th>PU</th>
+                                                        <th>Iva</th>
+                                                        <th *ngIf="!tieneid">Existencia</th>
+                                                        <th>Cantidad sol.</th>
+                                                        <th></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody formArrayName="inventarios">
+                                                    <tr *ngFor="let stck of val.controls.inventarios.controls; let x = index;" [formGroupName]="x">
+                                                        <td>
+                                                          {{ x + 1 }}
+                                                        </td>
+                                                        <td>
+                                                          <strong>{{stck.value.numero_inventario}}</strong>
+                                                          <span *ngIf="stck.value.es_patrimonio==true" class="tag is-success">Patrimonio</span>
+                                                          <span *ngIf="stck.value.es_patrimonio==false" class="tag is-warning">Dependencia</span>
+                                                        </td>
+                                                        <td>
+                                                            <span formArrayName="inventario_metadato_unico">
+                                                                <span *ngFor="let mu of stck.controls.inventario_metadato_unico.controls; let k = index;" [formGroupName]="k" class="tag is-medium is-info">{{mu.value.campo}} <strong>:  {{mu.value.valor}}</strong> </span>
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                          <p class="has-text-warning">{{stck.value.programa ? stck.value.programa.nombre : 'Sin programa'}}</p>
+                                                        </td>
+                                                        <td>
+                                                          {{stck.value.lote}}
+                                                        </td>
+                                                        <td>
+                                                          {{stck.value.caducidad}}
+                                                        </td>
+                                                        <td>
+                                                          {{ stck.value.movimiento_articulo.precio_unitario | currency:'MXN':true}}
+                                                        </td>
+                                                        <td>
+                                                          {{ (stck.value.cantidad * (stck.value.movimiento_articulo.precio_unitario * (stck.value.movimiento_articulo.iva_porcentaje/ 100))) | currency:'MXN':true}} | {{stck.value.movimiento_articulo.iva_porcentaje}}%
+                                                        </td>
+                                                        <td *ngIf="!tieneid">
+                                                          <strong>{{stck.value.existencia}}</strong>
+                                                        </td>
+                                                        <td>
+                                                            <p class="control has-icon has-icon-right">
+                                                                <input class="input" type="number" [ngClass]="{'is-danger': stck.get('cantidad').hasError('required') }"
+                                                                    placeholder="Cantidad" formControlName="cantidad" min="0"
+                                                                    [readonly]="tieneid || val.get('articulos').value.es_activo_fijo==1"
+                                                                    (change)="cambio_cantidad(x, ctrl.dato.controls.movimiento_articulos.controls[i].controls.inventarios.controls[x].controls)"
+                                                                    (keyup)="cambio_cantidad_key($event, x, ctrl.dato.controls.movimiento_articulos.controls[i].controls.inventarios.controls[x].controls)">
+                                                                <span class="icon is-small" *ngIf="stck.get('cantidad').hasError('required') ">
+                                                                    <i class="fa fa-warning"></i>
+                                                                </span>
+                                                            </p>
+                                                        </td>
+                                                        <td>
+                                                          <a *ngIf="!tieneid" style="float: right;" class="button is-warning" title="Quitar Inventario: {{stck.value.numero_inventario}}" (click)="ctrl.quitar_form_array(ctrl.dato.controls.movimiento_articulos.controls[i].controls.inventarios, x); calcular_importe_articulo();">
+                                                            <span class="icon is-small">
+                                                                <i class="fa fa-trash-o"></i>
+                                                            </span>
+                                                        </a>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </article>
+                        </div>
+                    </div>
+
+                </section>
+            </div>
+        </div>
+
+        <!-- datos del cliente y los importes -->
+        <div class="column is-one-quarter">
+
+            <div style="background: #FFF; border-radius: 1em; ">
+                <section class="hero is-primary">
+                    <h1 class="title" style="margin:0.5em; ">
+                        <span class="icon is-medium">
+                            <i class="fa fa-file-text"></i>
+                        </span> Datos de la Salida
+                    </h1>
+                    <div class="control is-grouped" style="padding:1em; z-index:99">
+                        <p class="control" >
+                            <a class="button is-primary tooltip" (click)="ctrl.regresar()">
+                                <span class="icon ">
+                                    <i class="fa fa-arrow-left"> </i>
+                                </span>
+                                <span class="tooltiptext">Regresar</span>
+                            </a>
+                        </p>
+                        <p class="control" *ngIf="ctrl.id">
+                            <a class="button is-primary tooltip" (click)="ctrl.cargarDatos()" id="cargar_datos_actualizar">
+                                <span class="icon ">
+                                    <i class="fa fa-refresh"></i>
+                                </span>
+                                <span class="tooltiptext">Actualizar</span>
+                            </a>
+                        </p>
+                        <p class="control" *ngIf="ctrl.id">
+                            <a  class="button is-primary tooltip"  routerLink="{{url_nuevo}}">
+                                <span class="icon ">
+                                    <i class="fa fa-file"></i>
+                                </span>
+                                <span class="tooltiptext">Nuevo</span>
+                            </a>
+                        </p>
+                        <p class="control" *ngIf="!tieneid">
+                            <button class="button is-primary tooltip" type="submit" [ngClass]="{'is-loading': ctrl.cargando}" [disabled]="ctrl.dato.invalid">
+                                <span class="icon ">
+                                    <i class="fa fa-save"> </i>
+                                </span>
+                                <span class="tooltiptext">Guardar</span>
+                            </button>
+                        </p>
+                        <p class="control" *ngIf="reimprimir">
+                            <button class="button is-primary tooltip" type="button" (click)="imprimir()">
+                                <span class="icon ">
+                                    <i class="fa fa-print"> </i>
+                                </span>
+                                <span class="tooltiptext">Reimprimir el ticket</span>
+                            </button>
+                        </p>
+                    </div>
+
+                </section>
+                <div style="padding: 1em;">
+
+                    <div class="field">
+                            <label class="label">Fecha:</label>
+                            <input *ngIf="!tieneid" id="fecha_movimiento"  class="input"   ngui-datetime-picker
+                            [readonly]="!tieneid"
+                            date-only="true"
+                            [ngClass]="{'is-danger': ctrl.dato.get('fecha_movimiento').hasError('required')}" formControlName="fecha_movimiento"
+                            placeholder="YYYY-MM-DD"
+                            readonly/>
+
+                            <input *ngIf="tieneid" id="fecha_movimiento"  class="input" formControlName="fecha_movimiento"
+                            [readonly]="tieneid"/>
+                    </div>
+                    <div class="field" formGroupName="movimiento_salida_metadatos_a_g">
+                        <label class="label">Unidad médica destino:</label>
+                        <label >{{ctrl.dato.get('movimiento_salida_metadatos_a_g').get('unidad_medica').get('nombre').value}}</label>
+                        <p class="control is-expanded  has-icon has-icon-right">
+                            <input #campoDr ngui-auto-complete
+                                [source]="clues_term"
+                                [list-formatter]="autocompleListFormatCLUES"
+                                display-property-name="clues"
+                                path-to-data=""
+                                loading-text="Cargando..."
+                                no-match-found-text="No hay resultados."
+                                (valueChanged)="select_clues_autocomplete($event)"
+                                min-chars="1" class="input"
+                                id="buscarMedico"
+                                value-property-name="clues"
+                                [ngClass]="{'is-disabled': tieneid, 'is-danger': ctrl.dato.get('movimiento_salida_metadatos_a_g').get('clues_destino').hasError('required') }"
+                                type="text"
+                                placeholder="CLUES"
+                                formControlName="clues_destino" autocomplete="off">
+
+                            <span class="icon is-small" *ngIf="ctrl.dato.get('movimiento_salida_metadatos_a_g').get('clues_destino').hasError('required')">
+                                <i class="fa fa-warning"></i>
+                            </span>
+                            <span class="help is-danger" *ngIf="ctrl.dato.get('movimiento_salida_metadatos_a_g').get('clues_destino').hasError('required')">Este campo es requerido.</span>
+                        </p>
+                    </div>
+
+                    <div class="field" formGroupName="movimiento_salida_metadatos_a_g">
+                        <label class="label">Persona que recibe:</label>
+                        <p class="control is-expanded  has-icon has-icon-right">
+                            <input class="input" type="text" [ngClass]="{'is-disabled': tieneid, 'is-danger': ctrl.dato.get('movimiento_salida_metadatos_a_g').get('persona_recibe').hasError('required')}"
+                                placeholder="Persona que recibe" formControlName="persona_recibe">
+                            <span class="icon is-small" *ngIf="ctrl.dato.get('movimiento_salida_metadatos_a_g').get('persona_recibe').hasError('required')">
+                                <i class="fa fa-warning"></i>
+                            </span>
+                            <span class="help is-danger" *ngIf="ctrl.dato.get('movimiento_salida_metadatos_a_g').get('persona_recibe').hasError('required')">Este campo es requerido.</span>
+                        </p>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">Comentarios:</label>
+                        <p class="control is-expanded  has-icon has-icon-right">
+                            <textarea class="textarea" type="text" rows="2"
+                            [readonly]="tieneid" placeholder="Comentarios" formControlName="observaciones"></textarea>
+                        </p>
+                    </div>
+
+
+                    <nav class="panel" style="font-size:1.5em">
+                        <p class="panel-heading">
+                            Total
+                        </p>
+                        <a class="panel-block">
+                            <span class="panel-icon">
+                            <i class="fa fa-money"></i>
+                            </span>
+                            <div class="columns" style="width:100%">
+                                <div class="column is-6">
+                                    Sub Total:
+                                </div>
+                                <div class="column is-6">
+                                    {{ctrl.dato.get('subtotal').value  | currency:'MXN':true}}
+                                </div>
+                            </div>
+                        </a>
+                        <a class="panel-block" *ngIf="ctrl.dato.get('iva').value > 0">
+                            <span class="panel-icon">
+                            <i class="fa fa-money"></i>
+                            </span>
+                            <div class="columns" style="width:100%">
+                                <div class="column is-6">
+                                    Iva:
+                                </div>
+                                <div class="column is-6">
+                                    {{ctrl.dato.get('iva').value  | currency:'MXN':true}}
+                                </div>
+                            </div>
+                        </a>
+                        <a class="panel-block">
+                            <span class="panel-icon">
+                            <i class="fa fa-money"></i>
+                            </span>
+                            <div class="columns" style="width:100%">
+                                <div class="column is-6">
+                                    Total:
+                                </div>
+                                <div class="column is-6">
+                                    {{ctrl.dato.get('total').value  | currency:'MXN':true}}
+                                </div>
+                            </div>
+                        </a>
+
+                    </nav>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</form>
+
+
+
+
+
+
+
+
+
+<!-- MODAL NUEVOS ARTICULOS AL MOVIMIENTO -->
+<div class="modal" id="inventarios">
+  <div class="modal-background"></div>
+  <div class="modal-card" style="width: 70%;">
+    <header class="modal-card-head">
+      <p class="modal-card-title"> <strong>{{this.dato.controls.temp_movimiento_articulos.value[0]?.articulos?.nombre}}</strong> | <i> {{this.dato.controls.temp_movimiento_articulos.value[0]?.articulos?.categoria?.nombre}} </i></p>
+      <button class="delete" aria-label="close" (click)="cancelarModal()"></button>
+    </header>
+    <section class="modal-card-body">
+
+      <div *ngIf="this.dato.controls.temp_movimiento_articulos[0]?.value.inventarios.length==0">
+        NODATA
+      </div>
+
+      <div [formGroup]="dato">
+          <div formArrayName="temp_movimiento_articulos" style="overflow:auto; display:block" [style.maxHeight.px]="tamano-285">
+              <div class="box" *ngFor="let val of ctrl.dato.controls.temp_movimiento_articulos.controls;  let i = index;" [ngStyle]="{'background': i%2 == 0 ? 'rgba(230, 230, 232, 0.44)' : 'rgba(237, 242, 243, 0.44)'}">
+                  <article class="media" [formGroupName]="i">
+                      <div class="media-content">
+                          <div class="content">
+                              <div class="columns">
+                                  <div class="column is-6">
+                                      <!-- <strong>{{val.get("articulos").value.nombre}} | </strong> {{val.get("articulos").value.categoria?.nombre}} -->
+                                      <small><i>{{val.get("articulos").value.descripcion}}</i></small>
+                                      <span *ngIf="val.get('articulos').value.es_activo_fijo==1" class="tag is-info is-small">Act. fijo</span>
+                                  </div>
+
+                                  <div class="column is-6">
+                                    <span *ngFor="let md of val.get('articulos').value.articulos_metadatos;">
+                                        <span *ngIf="md.requerido_inventario==0" class="tag is-warning is-small"><strong>{{md.campo}}</strong> : {{md.valor}}</span>
+                                    </span>
+                                  </div>
+                              </div>
+                              <div class="columns">
+                                  <table class="table is-narrow">
+                                      <thead>
+                                          <tr>
+                                              <th>N°</th>
+                                              <th>Inventario</th>
+                                              <th>Datos únicos</th>
+                                              <th>Programa</th>
+                                              <th>Lote</th>
+                                              <th>Caducidad</th>
+                                              <th>PU</th>
+                                              <th>Iva</th>
+                                              <th>Existencia</th>
+                                              <th>Cantidad sol.</th>
+                                          </tr>
+                                      </thead>
+                                      <tbody *ngIf="this.dato.controls.temp_movimiento_articulos.value[0]?.inventarios?.length==0">
+                                        <tr>
+                                          <td colspan="9" align="center">Agotado</td>
+                                        </tr>
+                                      </tbody>
+                                      <tbody *ngIf="this.dato.controls.temp_movimiento_articulos.value[0]?.inventarios?.length>0" formArrayName="inventarios">
+                                          <tr *ngFor="let stck of val.controls.inventarios.controls; let x = index;" [formGroupName]="x">
+                                              <td>
+                                                {{ x + 1 }}
+                                              </td>
+                                              <td>
+                                                <strong>{{stck.value.numero_inventario}}</strong>
+                                                <span *ngIf="stck.value.es_patrimonio==true" class="tag is-success">Patrimonio</span>
+                                                <span *ngIf="stck.value.es_patrimonio==false" class="tag is-warning">Dependencia</span>
+                                              </td>
+                                              <td>
+                                                  <span formArrayName="inventario_metadato_unico">
+                                                      <span *ngFor="let mu of stck.controls.inventario_metadato_unico.controls; let k = index;" [formGroupName]="k" class="tag is-medium is-info">{{mu.value.campo}} <strong>:  {{mu.value.valor}}</strong> </span>
+                                                  </span>
+                                              </td>
+                                              <td>
+                                                <p class="has-text-warning">{{stck.value.programa ? stck.value.programa.nombre : 'Sin programa'}}</p>
+                                              </td>
+                                              <td>
+                                                {{stck.value.lote}}
+                                              </td>
+                                              <td>
+                                                {{stck.value.caducidad}}
+                                              </td>
+                                              <td>
+                                                {{stck.value.precio_unitario | currency:'MXN':true}}
+                                              </td>
+                                              <td>
+                                                {{stck.value.iva | currency:'MXN':true}} | {{stck.value.iva_porcentaje}}%
+                                              </td>
+                                              <td>
+                                                <strong>{{stck.value.existencia}}</strong>
+                                              </td>
+                                              <td>
+                                                  <p class="control  has-icon has-icon-right">
+                                                      <input class="input" type="number" [ngClass]="{'is-danger': stck.get('cantidad').hasError('required') }"
+                                                          placeholder="Cantidad" formControlName="cantidad" min="0"
+                                                          (change)="cambio_cantidad(x, ctrl.dato.controls.temp_movimiento_articulos.controls[i].controls.inventarios.controls[x].controls)"
+                                                          (keyup)="cambio_cantidad_key($event, x, ctrl.dato.controls.temp_movimiento_articulos.controls[i].controls.inventarios.controls[x].controls)">
+                                                      <span class="icon is-small" *ngIf="stck.get('cantidad').hasError('required') ">
+                                                          <i class="fa fa-warning"></i>
+                                                      </span>
+                                                  </p>
+                                              </td>
+                                          </tr>
+                                      </tbody>
+                                  </table>
+                              </div>
+                          </div>
+                      </div>
+                  </article>
+              </div>
+          </div>
+        </div>
+
+
+    </section>
+    <footer class="modal-card-foot">
+      <a class="button is-success" (click)="cargarInventario()" >Continuar</a>
+      <a class="button" (click)="cancelarModal()" id="cerrar">Cancelar</a>
+    </footer>
+  </div>
+</div>

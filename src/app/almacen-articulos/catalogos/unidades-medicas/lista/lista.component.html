@@ -1,0 +1,54 @@
+<listar #ctrl URL="unidad-medica" titulo="UM / Catalogo"></listar>
+<articulos-catalogo-menu></articulos-catalogo-menu>
+<div style="height:50px;"></div>
+<div class="contenedor columns " style="height:100%; ">
+    <div class="column is-one-quarter is-hidden-mobile">
+        <panel-control-menu-aside></panel-control-menu-aside>
+    </div>
+    <div class="column" style="padding: 0em 2em 0em 0em">
+        <div style="background: #FFF; border-radius: 1em; ">
+
+            <!-- Opciones y busqueda -->
+            <tabla-opciones [ctrl]="ctrl" [nombre]="'Unidades medicas'"></tabla-opciones>
+
+            <table class="table" *ngIf="!ctrl.cargando">
+                <thead>
+                    <tr>
+                        <th>Clues</th>
+                        <th>Nombre</th>
+                        <th style="text-align:center;">Opciones</th>
+                    </tr>
+                </thead>
+                <tbody *ngIf="!ctrl.busquedaActivada">
+                    <tr *ngFor="let item of ctrl.dato; let i=index">
+                        <td style="vertical-align: middle;"><a routerLink="/catalogos/unidades-medicas/editar/{{item.clues}}">{{ item. clues }} </a></td>
+                        <td style="vertical-align: middle;"><a routerLink="/catalogos/unidades-medicas/editar/{{item.clues}}">{{ item.nombre }} </a></td>
+                        <td style="vertical-align: middle;" class="has-text-centered"><span class="icon " *ngIf="item.cargando"><i class="fa fa-circle-o-notch fa-spin"></i></span><a *ngIf="!item.cargando"
+                                class="is-danger" (click)="ctrl.eliminar(item, i)"><span class="icon"><i class="fa fa-trash-o"></i></span></a></td>
+
+                    </tr>
+                    <tr *ngIf="ctrl.dato.length == 0">
+                        <td colspan="5" style="vertical-align: middle; color:#888;">Esta lista está vacía.</td>
+                    </tr>
+                </tbody>
+                <tbody *ngIf="ctrl.busquedaActivada">
+                    <tr *ngFor="let item of ctrl.resultadosBusqueda; let i=index">
+                        <td style="vertical-align: middle;"><a routerLink="/catalogos/unidades-medicas/editar/{{item.clues}}">{{ item.clues }} </a></td>
+                        <td style="vertical-align: middle;"><a routerLink="/catalogos/unidades-medicas/editar/{{item.clues}}">{{ item.nombre }} </a></td>
+                        <td style="vertical-align: middle;" class="has-text-centered"><span class="icon " *ngIf="item.cargando"><i class="fa fa-circle-o-notch fa-spin"></i></span><a *ngIf="!item.cargando"
+                                class="is-danger" (click)="ctrl.eliminar(item, i)"><span class="icon"><i class="fa fa-trash-o"></i></span></a></td>
+
+                    </tr>
+
+                    <tr *ngIf="ctrl.resultadosBusqueda.length == 0 && ctrl.busquedaActivada">
+                        <td colspan="5" style="vertical-align: middle; color:#888;">No se encontraron resultados.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <!-- Paginación para la lista  -->
+            <paginacion [ctrl]="ctrl"></paginacion>
+
+        </div>
+
+    </div>
+</div>

@@ -1,0 +1,472 @@
+<listar #ctrl URL="entrada-almacen-standard?fecha_desde={{fecha_desde}}&fecha_hasta={{fecha_hasta}}&recibe={{recibe}}&estatus={{estatus}}" titulo="Entrada  de medicamentos"></listar>
+<app-menu-almacen-estandar [modulo]="'Entradas de insumos'" [icono]="'assets/hub-estandar.svg'" [url]="'/almacen-estandar/entradas'" (ayudaModal)="abrirModal('ayuda')"></app-menu-almacen-estandar>
+<div style="height:40px;"></div>
+<div class="contenedor columns " >
+    <div class="column" style="padding:2em;  z-index: initial; height:100%;">
+        <div style="background: #FFF;">
+            <section class="hero is-hidden-touch" [ngClass]=" {'is-dark': ctrl.busquedaActivada, 'is-primary': !ctrl.busquedaActivada}"
+                    style="min-height:200px; height: 25%">
+                <div class="hero-body" style="position:relative; height: 90%">
+                    <nav class="level">
+                        <div class="level-left"></div>
+                        <!-- Right side -->
+                        <div class="level-right">
+                            <p class="level-item"><a class="button is-dark is-medium" routerLink="nuevo" *ngIf="ctrl.busquedaActivada"><i class="fa fa-plus" aria-hidden="true"></i>&nbsp;<span>Nueva entrada</span></a></p>
+                            <p class="level-item"><a class="button is-primary is-medium" routerLink="nuevo" *ngIf="!ctrl.busquedaActivada"><i class="fa fa-plus" aria-hidden="true"></i>&nbsp;<span>Nueva entrada</span></a></p>
+                            <p class="level-item"><a class="button  is-dark" *ngIf="ctrl.busquedaActivada" (click)="ctrl.busquedaActivada=false;searchBox.value=''; ctrl.resultadosBusqueda=[]"><span class="icon "><i class="fa fa-close"></i></span></a></p>
+                            <p class="level-item"><a class="button  is-dark" *ngIf="ctrl.busquedaActivada" title="Actualizar" (click)="ctrl.listarBusqueda(searchBox.value,1)"><span class="icon "><i class="fa fa-refresh"></i></span></a></p>
+                            <p class="level-item"><a class="button  is-primary" *ngIf="!ctrl.busquedaActivada" title="Actualizar" (click)="ctrl.listar(1)"><span class="icon "><i class="fa fa-refresh"></i></span></a></p>
+
+                            <p class="level-item"><a class="button  is-dark" *ngIf="ctrl.busquedaActivada" title="PDF" (click)="imprimir()"><span class="icon "><i class="fa fa-file-pdf-o"></i></span></a></p>
+                            <p class="level-item"><a class="button  is-primary" *ngIf="!ctrl.busquedaActivada" title="PDF" (click)="imprimir()"><span class="icon "><i class="fa fa-file-pdf-o"></i></span></a></p>
+
+                            <p class="level-item"><a class="button  is-dark" *ngIf="ctrl.busquedaActivada" title="Excel" (click)="export_excel()"><span class="icon "><i class="fa fa-file-excel-o"></i></span></a></p>
+                            <p class="level-item"><a class="button  is-primary" *ngIf="!ctrl.busquedaActivada" title="Excel" (click)="export_excel()"><span class="icon "><i class="fa fa-file-excel-o"></i></span></a></p>
+                            <p class="level-item">&nbsp;</p>
+                        </div>
+                    </nav>               
+                    <div class="container is-fluid">
+                        <span></span>
+                        <div class="is-hidden-desktop">
+                            <h1 class="title" *ngIf="!ctrl.busquedaActivada">
+                                <span class="icon is-medium"><i class="fa fa-user"></i></span> Entradas  de medicamentos
+                            </h1>
+                        </div>
+                        <h1 class="title" *ngIf="ctrl.busquedaActivada">
+                            <span class="icon is-medium"><i class="fa fa-search"></i></span> Búsqueda
+                        </h1>
+                        <div class="control is-grouped">
+                            <div class="control" style="z-index: 1000;">
+                                <div class="field">   
+                                    <label class="label">Desde:</label>                         
+                                    <input  style="width: 150px; z-index: 1000;" class="input is-medium" [(ngModel)]='fecha_desde' ngui-datetime-picker date-only="true" placeholder="YYYY-MM-DD" />
+                                </div>
+                            </div>
+                            <div class="control is-expanded" style="z-index: 1000;">
+                                <div class="field">   
+                                    <label class="label">Hasta:</label>                         
+                                    <input readonly style="width: 150px; z-index: 1000;" class="input is-medium" [(ngModel)]='fecha_hasta' ngui-datetime-picker date-only="true" placeholder="YYYY-MM-DD" />
+                                </div>
+                            </div>
+                            <div class="control is-expanded">
+                                <div class="field">   
+                                    <label class="label">Entrega:</label>                         
+                                    <input class="input is-medium" type="text" placeholder="Persona que entrega" [(ngModel)]="recibe">
+                                </div>
+                            </div>
+                            <div class="control">
+                                <div class="field">  
+                                <label class="label">&nbsp;</label>
+                                <button class="button is-default is-medium" type="button" [ngClass]="{'is-loading': ctrl.cargando}" (click)="recibe='';fecha_desde=''; fecha_hasta='';" >Limpiar</button>
+                                </div>
+                            </div>
+                            <div class="control">
+                                <div class="field">  
+                                <label class="label">&nbsp;</label>
+                                <button class="button is-info is-medium" type="button" [ngClass]="{'is-loading': ctrl.cargando}" (click)="ctrl.listar(1)" >Filtrar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section><!-- 25/100% height -->
+            <section class="hero is-hidden-desktop" [ngClass]=" {'is-dark': ctrl.busquedaActivada, 'is-primary': !ctrl.busquedaActivada}">
+                <div class="hero-body" style="position:relative; height: 90%">
+                        <div class="is-hidden-desktop">
+                            <h1 class="title" *ngIf="!ctrl.busquedaActivada">
+                                <span class="icon is-medium"><i class="fa fa-user"></i></span> Entradas  de medicamentos
+                            </h1>
+                        </div>
+                    <nav class="level">
+                        <div class="level-left"></div>
+                        <!-- Right side -->
+                        <div class="level-right">
+                            <p class="level-item"><a class="button is-dark is-medium" routerLink="nuevo" *ngIf="ctrl.busquedaActivada"><i class="fa fa-plus" aria-hidden="true"></i>&nbsp;<span>Nueva entrada</span></a></p>
+                            <p class="level-item"><a class="button is-primary is-medium" routerLink="nuevo" *ngIf="!ctrl.busquedaActivada"><i class="fa fa-plus" aria-hidden="true"></i>&nbsp;<span>Nueva entrada</span></a></p>
+                            <p class="level-item"><a class="button  is-dark" *ngIf="ctrl.busquedaActivada" (click)="ctrl.busquedaActivada=false;searchBox.value=''; ctrl.resultadosBusqueda=[]"><span class="icon "><i class="fa fa-close"></i></span></a></p>
+                            <p class="level-item"><a class="button  is-dark" *ngIf="ctrl.busquedaActivada" title="Actualizar" (click)="ctrl.listarBusqueda(searchBox.value,1)"><span class="icon "><i class="fa fa-refresh"></i></span></a></p>
+                            <p class="level-item"><a class="button  is-primary" *ngIf="!ctrl.busquedaActivada" title="Actualizar" (click)="ctrl.listar(1)"><span class="icon "><i class="fa fa-refresh"></i></span></a></p>
+
+                            <p class="level-item"><a class="button  is-dark" *ngIf="ctrl.busquedaActivada" title="PDF" (click)="imprimir()"><span class="icon "><i class="fa fa-file-pdf-o"></i></span></a></p>
+                            <p class="level-item"><a class="button  is-primary" *ngIf="!ctrl.busquedaActivada" title="PDF" (click)="imprimir()"><span class="icon "><i class="fa fa-file-pdf-o"></i></span></a></p>
+
+                            <p class="level-item"><a class="button  is-dark" *ngIf="ctrl.busquedaActivada" title="Excel" (click)="export_excel()"><span class="icon "><i class="fa fa-file-excel-o"></i></span></a></p>
+                            <p class="level-item"><a class="button  is-primary" *ngIf="!ctrl.busquedaActivada" title="Excel" (click)="export_excel()"><span class="icon "><i class="fa fa-file-excel-o"></i></span></a></p>
+                            <p class="level-item">&nbsp;</p>
+                        </div>
+                    </nav>               
+                    <div class="container is-fluid">
+                        <span></span>
+                        <h1 class="title" *ngIf="ctrl.busquedaActivada">
+                            <span class="icon is-medium"><i class="fa fa-search"></i></span> Búsqueda
+                        </h1>
+                        <div class="control is-grouped">
+                            <div class="control" style="z-index: 1000;">
+                                <div class="field">   
+                                    <label class="label">Desde:</label>                         
+                                    <input  style="width: 150px; z-index: 1000;" class="input is-medium" [(ngModel)]='fecha_desde' ngui-datetime-picker date-only="true" placeholder="YYYY-MM-DD" />
+                                </div>
+                            </div>
+                            <div class="control is-expanded" style="z-index: 1000;">
+                                <div class="field">   
+                                    <label class="label">Hasta:</label>                         
+                                    <input style="width: 150px; z-index: 1000;" class="input is-medium" [(ngModel)]='fecha_hasta' ngui-datetime-picker date-only="true" placeholder="YYYY-MM-DD" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label class="label">Entrega:</label>
+                            <div class="control">
+                                <input class="input is-medium" type="text" placeholder="Persona que entrega" [(ngModel)]="recibe">
+                            </div>
+                        </div>
+                        <div class="control is-grouped">
+                            <div class="control is-expanded">
+                                <div class="field">  
+                                <label class="label">&nbsp;</label>
+                                <button class="button is-expanded is-default is-medium" type="button" [ngClass]="{'is-loading': ctrl.cargando}" (click)="recibe='';fecha_desde=''; fecha_hasta='';" >Limpiar</button>
+                                </div>
+                            </div>
+                            <div class="control">
+                                <div class="field">  
+                                <label class="label">&nbsp;</label>
+                                <button class="button is-info is-medium" type="button" [ngClass]="{'is-loading': ctrl.cargando}" (click)="ctrl.listar(1)" >Filtrar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+        <div class="is-fullwidth has-text-centered" *ngIf="ctrl.cargando" style="height:75%;"> <!-- 75/100% height -->
+            <br>
+            <span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span> &nbsp;<span>Cargando...</span></span>
+            <br>
+            <br>
+        </div>
+        <div id="exportable"><!-- 75/100% height -->
+            <div style="overflow:auto; display:block" [style.maxHeight.px]="ctrl.tamano-350">
+                <div class="is-fullwidth has-text-centered" *ngIf="cargandoPdf">
+                    <br>
+                    <span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span> &nbsp;<span>Generando PDF...</span></span>
+                    <br>
+                    <br>
+                </div>
+                <div style="overflow:auto; display:block">
+                    <table class="table" *ngIf="!ctrl.cargando && !cargandoPdf">
+                        <thead>
+                            <tr>
+                                <th style=" text-align: center;"><abbr title="Fecha">Fecha</abbr></th>
+                                <th style=" text-align: center;"><abbr title="Folio">Folio</abbr></th>
+                                <th>Insumos</th>
+                                <th>Entrega</th>
+                                <th>Usuario</th>
+                                <th>Estatus</th>
+                                <th>Donación</th>
+                                <th style=" text-align: center;">Capturado</th>
+                            </tr>
+                        </thead>
+                        <tbody *ngIf="!ctrl.busquedaActivada && ctrl.dato">
+                            <tr *ngFor="let item of ctrl.dato; let i=index">
+                                <th *ngIf="(i+1)<ctrl.dato.length" style="vertical-align: middle; text-align: center;">
+                                    <a *ngIf="item.estatus == 'FI'" routerLink="/almacen-estandar/entradas/ver/{{item.id}}">{{ item.fecha_movimiento }}</a>
+                                    <a *ngIf="item.estatus == 'BR'" routerLink="/almacen-estandar/entradas/editar/{{item.id}}">{{ item.fecha_movimiento }}</a>
+                                </th>
+                                <th *ngIf="(i+1)<ctrl.dato.length" style="vertical-align: middle; text-align: center;">
+                                    <a *ngIf="item.estatus == 'FI'" routerLink="/almacen-estandar/entradas/ver/{{item.id}}">{{ item.id }}</a>
+                                    <a *ngIf="item.estatus == 'BR'" routerLink="/almacen-estandar/entradas/editar/{{item.id}}">{{ item.id }}</a>
+                                </th>
+                                <td *ngIf="item.numero_claves && item.numero_insumos && (i+1)<ctrl.dato.length">
+                                    <a *ngIf="item.estatus == 'FI'" routerLink="/almacen-estandar/entradas/ver/{{item.id}}"> 
+                                        <p> Claves: {{item.numero_claves}}</p> <p> Insumos: {{item.numero_insumos}}</p>
+                                    </a>
+                                    <a *ngIf="item.estatus == 'BR'" routerLink="/almacen-estandar/entradas/editar/{{item.id}}"> 
+                                        <p> Claves: {{item.numero_claves}}</p> <p> Insumos: {{item.numero_insumos}}</p>
+                                    </a>
+                                </td>
+                                <td *ngIf="!item.numero_claves && !item.numero_insumos && (i+1)<ctrl.dato.length"> No disponible</td>
+                                <td *ngIf="item.movimiento_metadato && (i+1)<ctrl.dato.length" style="vertical-align: middle;" >
+                                    <a *ngIf="item.estatus == 'FI'" routerLink="/almacen-estandar/entradas/ver/{{item.id}}">{{ item.movimiento_metadato.persona_entrega }}</a>
+                                    <a *ngIf="item.estatus == 'BR'" routerLink="/almacen-estandar/entradas/editar/{{item.id}}">{{ item.movimiento_metadato.persona_entrega }}</a>
+                                </td>
+                                <td *ngIf="!item.movimiento_metadato && (i+1)<ctrl.dato.length" style="vertical-align: middle;" >No disponible</td>
+                                <td *ngIf="!item.movimiento_usuario && (i+1)<ctrl.dato.length" style="vertical-align: middle;" >No disponible</td>
+                                <td *ngIf="(i+1)<ctrl.dato.length" style="vertical-align: middle;">
+                                    <a *ngIf="item.estatus == 'FI'" routerLink="/almacen-estandar/entradas/ver/{{item.id}}">{{ item.movimiento_usuario.nombre }} {{ item.movimiento_usuario.apellidos }} </a>
+                                    <a *ngIf="item.estatus == 'BR'" routerLink="/almacen-estandar/entradas/editar/{{item.id}}">{{ item.movimiento_usuario.nombre }} {{ item.movimiento_usuario.apellidos }} </a>
+                                </td>                        
+                                <td *ngIf="(i+1)<ctrl.dato.length">
+                                    <a *ngIf="item.estatus == 'FI'" routerLink="/almacen-estandar/entradas/ver/{{item.id}}"><span class="tag is-success is-medium" *ngIf="item.estatus == 'FI'">Finalizado</span></a>
+                                    <a *ngIf="item.estatus == 'BR'" routerLink="/almacen-estandar/entradas/editar/{{item.id}}"><span class="tag is-warning is-medium" *ngIf="item.estatus == 'BR'">Borrador</span></a>
+                                </td>
+                                <td *ngIf="(i+1)<ctrl.dato.length">
+                                    <a *ngIf="item.estatus == 'FI'" routerLink="/almacen-estandar/entradas/ver/{{item.id}}"><span class="tag is-info is-medium" *ngIf="item.movimiento_metadato.donacion == '1' || item.movimiento_metadato.donacion == 1">Donación</span></a>
+                                </td>
+                                <td *ngIf="(i+1)<ctrl.dato.length" style="vertical-align: middle; text-align: center;">
+                                    <a *ngIf="item.estatus == 'FI'" routerLink="/almacen-estandar/entradas/ver/{{item.id}}">{{ item.created_at | date:'medium'}} </a>
+                                    <a *ngIf="item.estatus == 'BR'" routerLink="/almacen-estandar/entradas/editar/{{item.id}}">{{ item.created_at | date:'medium'}} </a>
+                                </td>
+                            </tr>
+                            <tr *ngIf="!ctrl.dato">
+                                <td colspan="6" style="vertical-align: middle; color:#888;">Esta lista está vacía.</td>
+                            </tr>
+                        </tbody>
+                        <tbody *ngIf="!ctrl.dato">
+                            <tr>
+                                <td colspan="6" style="vertical-align: middle; color:#888;">No se encontraron resultados.</td>
+                            </tr>
+                        </tbody>
+                        <tbody *ngIf="ctrl.busquedaActivada && ctrl.dato">
+                            <tr *ngFor="let item of ctrl.resultadosBusqueda; let i=index">
+                                <th style="vertical-align: middle; text-align: center;"><a routerLink="/almacen-estandar/entradas/ver/{{item.id}}">{{ item.id }}</a></th>
+                                <td style="vertical-align: middle;" *ngIf="item.movimiento_metadato"><a *ngIf="item.movimiento_metadato.servicio.nombre" routerLink="/almacen-estandar/entradas/ver/{{item.id}}">{{ item.movimiento_metadato.servicio.nombre }}</a></td>
+                                <td style="vertical-align: middle;" *ngIf="!item.movimiento_metadato">No disponible</td>
+                                <td style="vertical-align: middle;" *ngIf="item.movimiento_metadato"><a *ngIf="item.movimiento_metadato.turno.nombre" routerLink="/almacen-estandar/entradas/ver/{{item.id}}">{{ item.movimiento_metadato.turno.nombre }} </a></td>
+                                <td style="vertical-align: middle;" *ngIf="!item.movimiento_metadato">No disponible</td>
+                                <td style="vertical-align: middle;"><a routerLink="/almacen-estandar/entradas/ver/{{item.id}}">{{ item.movimiento_usuario.nombre }} {{ item.movimiento_usuario.apellidos }} </a></td>
+                                <td style="vertical-align: middle;"><a routerLink="/almacen-estandar/entradas/ver/{{item.id}}">{{ item.estatus }} </a></td>
+                                <td style="vertical-align: middle; text-align: center;"><a routerLink="/almacen-estandar/entradas/ver/{{item.id}}">{{ item.created_at | date}} </a></td>
+                                <td style="vertical-align: middle; text-align: center;"><a routerLink="/almacen-estandar/entradas/ver/{{item.id}}">{{ item.updated_at | date}} </a></td>
+                            </tr>
+
+                            <tr *ngIf="ctrl.resultadosBusqueda.length == 0 && ctrl.busquedaActivada">
+                                <td colspan="5" style="vertical-align: middle; color:#888;">No se encontraron resultados.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+            <!-- Paginación para la lista  -->
+            <paginacion [total]="ctrl.total" [paginasTotales]="ctrl.paginasTotales" [resultadosPorPagina]="ctrl.resultadosPorPagina"
+                [paginaActual]="ctrl.paginaActual" [indicePaginas]="ctrl.indicePaginas" (onSiguiente)="ctrl.paginaSiguiente()"
+                (onAnterior)="ctrl.paginaAnterior()" (onListar)="ctrl.listar($event)" *ngIf="ctrl.total>0 && ctrl.total > ctrl.resultadosPorPagina && !ctrl.busquedaActivada"></paginacion>
+            <!-- Paginación para la búsqueda  -->
+            <paginacion [total]="ctrl.totalBusqueda" [paginasTotales]="ctrl.paginasTotalesBusqueda" [resultadosPorPagina]="ctrl.resultadosPorPaginaBusqueda"
+                [paginaActual]="ctrl.paginaActualBusqueda" [indicePaginas]="ctrl.indicePaginasBusqueda" (onSiguiente)="ctrl.paginaSiguienteBusqueda(searchBox.value)"
+                (onAnterior)="ctrl.paginaAnteriorBusqueda(searchBox.value)" (onListar)="ctrl.listarBusqueda(searchBox.value,$event)"
+                *ngIf="ctrl.totalBusqueda > 0 && ctrl.totalBusqueda > ctrl.resultadosPorPaginaBusqueda && ctrl.busquedaActivada"></paginacion>
+
+
+
+        </div>
+
+    </div>
+</div>
+
+
+<!-- **************************************************************\ MODAL AYUDA /************************************************************ --> 
+
+<div class="modal" id="ayuda">
+        <div class="modal-background"></div>
+        <div class="modal-card" style="width: 80%">
+            <header class="modal-card-head">
+                <p class="modal-card-title"><i class="fa fa-warning"></i> &nbsp; Ayuda: Entrada de medicamentos</p>
+                <button class="delete" (click)="cancelarModal('ayuda')"></button>
+            </header>
+            <section class="modal-card-body">
+                <div class="content">
+                    <div class="columns">
+                        <div class="column is-3"> 
+                            <div class="control">
+                                <nav class="panel">
+                                    <div style="padding: 1em; overflow: scroll; overflow-x: hidden;" [style.height.px]="tamano-230">
+                                            <a class="panel-block is-active" [routerLink]="[enlaceAyuda]" fragment="entrada-de-insumos">Entrada de insumos</a>
+                                            <a class="panel-block is-active" [routerLink]="[enlaceAyuda]" fragment="lista-de-entradas-estandar-de-medicamentos">Lista de entradas estándar de medicamentos</a>
+                                            <a class="panel-block is-active" [routerLink]="[enlaceAyuda]" fragment="nueva-entrada-formulario-3">Nueva entrada: Formulario</a>
+                                            <a class="panel-block is-active" [routerLink]="[enlaceAyuda]" fragment="nueva-entrada-donacion">Nueva entrada: Donación</a>
+                                            <a class="panel-block is-active" [routerLink]="[enlaceAyuda]" fragment="nueva-entrada-busqueda-3">Nueva entrada: Búsqueda</a>
+                                            <a class="panel-block is-active" [routerLink]="[enlaceAyuda]" fragment="nueva-entrada-detalle-de-insumos-3">Nueva entrada: Detalle de insumos</a>
+                                            <a class="panel-block is-active" [routerLink]="[enlaceAyuda]" fragment="nueva-entrada-guardar-3">Nueva entrada: Guardar</a>
+                                            <a class="panel-block is-active" [routerLink]="[enlaceAyuda]" fragment="ver-entrada-de-medicamentos-2">Ver entrada de medicamentos</a>
+                                    </div>
+                                </nav>
+                            </div>
+                        </div>
+                        <div class="column">
+                            <div class="content" style="padding: 1em; overflow: scroll; overflow-x: hidden;" [style.height.px]="tamano-230"> 
+                            
+                                <div class="row"> 
+    
+                                        <div class="span9">
+                                                <h1 id="entrada-de-insumos">Entrada de insumos</h1>
+                                                <div class="figure" id="figure-17-1">
+                                            <img [src]="'assets/manual/almacen-estandar/entradas-estandar/modulo_entrada_almacen_estandar.svg'" alt="" />
+                                        
+                                        </div>
+                                        
+                                        
+                                        <h2 id="lista-de-entradas-estandar-de-medicamentos">Lista de entradas estándar de medicamentos</h2>
+                                        
+                                        <p>Vista donde se muestra el listado de las entradas estándar de medicamentos que se han hecho en el almacén. En esta vista se pueden filtrar la lista por periodo de tiempo y persona que entregó los medicamentos.</p>
+                                        
+                                        <div class="figure" id="figure-17-2">
+                                            <img [src]="'assets/manual/almacen-estandar/entradas-estandar/lista_entrada_medicamentos_estandar.svg'" alt="" />
+                                        
+                                        </div>
+                                        
+                                        
+                                        <ol>
+                                        <li><strong>Nueva entrada:</strong> Dar click al botón para crear una nueva entrada de medicamentos.</li>
+                                        <li><strong>(2) Actualizar:</strong> Botón para recargar el listado de la página.</li>
+                                        <li><strong>(3) PDF:</strong> Al dar clic se genera un archivo en formato PDF con la lista completa de entradas de medicamentos del almacén.</li>
+                                        <li><strong>(4) Excel:</strong> Al dar clic se genera un archivo en formato Excel con la lista completa de entradas de medicamentos del almacén.</li>
+                                        <li><strong>Desde:</strong> En este campo se ingresa la fecha inicial del periodo a consultar.</li>
+                                        <li><strong>Hasta:</strong> En este campo se ingresa la fecha final del periodo a consultar.</li>
+                                        <li><strong>Entrega:</strong> Se ingresa el nombre de la persona que recibe los medicamentos.</li>
+                                        <li><strong>(8) Limpiar:</strong> Al dar clic al botón se limpian los filtros de la lista.</li>
+                                        <li><strong>(9) Filtrar:</strong> Al dar clic al botón se muestra la lista con los filtros aplicados.</li>
+                                        <li><strong>Datos generales:</strong> Se muestran datos generales de las entradas de medicamentos como la fecha de la operación, el folio, entre otros; para tener información a grandes rasgos de la entrada. Si el usuario requiere de información más detallada, debe dar clic en alguno de los datos mostrados y abrirá una ventana con los datos específicos de la entrada estándar de medicamentos.</li>
+                                        </ol>
+                                        
+                                        <h2 id="nueva-entrada-formulario-3">Nueva entrada: Formulario</h2>
+                                        
+                                        <p>Vista del formulario para crear una nueva entrada de medicamentos.</p>
+                                        
+                                        <div class="figure" id="figure-17-3">
+                                            <img [src]="'assets/manual/almacen-estandar/entradas-estandar/nueva_entrada_estandar.svg'" alt="" />
+                                        
+                                        </div>
+                                        
+                                        
+                                        <p>Los campos y opciones contenidos en el formulario se describen a continuación:</p>
+                                        
+                                        <ol>
+                                        <li><strong>Subtotal, IVA y TOTAL:</strong> Contiene la cantidad de dinero que cuestan los medicamentos a los que se les dará entrada, se desglosa en un Subtotal sin iva, el IVA de los insumos correspondientes y se suman para generar el TOTAL.</li>
+                                        <li><strong>Fecha de referencia:</strong> Fecha que tiene la factura.</li>
+                                        <li><strong>Fecha del movimiento:</strong> Fecha en la que se realiza el movimiento.</li>
+                                        <li><strong>Donación:</strong> En caso de que la entrada sea por donación, debe activarse la casilla y llenar los datos correspondientes.</li>
+                                        <li><strong>Número de pedido:</strong> Debe capturarse el número de pedido al que corresponde la entrada.</li>
+                                        <li><strong>Folio de la factura:</strong> Capturar el folio de la factura que se está recibiendo en este campo.</li>
+                                        <li><strong>Proveedor:</strong> Debe seleccionar el proveedor que surte la entrada de medicamentos.</li>
+                                        <li><strong>Programa:</strong> Se selecciona el <em>Programa</em> al que corresponden los insumos de la entrada. Esta opción es opcional.</li>
+                                        <li><strong>Persona que entrega:</strong> Nombre de la persona que hace la entrega de medicamentos al almcacén.</li>
+                                        <li><strong>Observaciones:</strong> Si hay alguna observación de la entrada de medicamentos, debe capturarse en este campo.</li>
+                                        <li><strong>(11) Regresar:</strong> Al dar clic al botón nos regresa a la lista de entradas de medicamentos.</li>
+                                        <li><strong>(12) Finalizar entrada:</strong> Al dar clic en la opción se guarda la captura de la entrada, afecta el inventario y no se puede modificar posteriormente. El botón se activa cuando se han llenado los campos requeridos.</li>
+                                        <li><strong>(13) Guardar avance:</strong> Al dar clic se guardan los cambios realizados en la entrada que pueden modificarse posteriormente, y no hay cambio en el inventario.</li>
+                                        <li><strong>(14) Actualizar:</strong> Botón para recargar la página.</li>
+                                        <li><strong>Búsqueda:</strong> En este campo debe ingresar la clave o nombre del medicamento para buscarlo en el catálogo. Una vez ingresado el nombre o clave del insumo médico puede usar el botón buscar para activar la búsqueda. También puede usar la tecla <em>Enter</em> para activar la búsqueda.</li>
+                                        </ol>
+                                        
+                                        <h2 id="nueva-entrada-donacion">Nueva entrada: Donación</h2>
+                                        
+                                        <p>Vista del formulario para crear una nueva entrada de medicamentos.</p>
+                                        
+                                        <p>Cuando la entrada de medicamentos es por donación, se debe activar la casilla <em>donación</em> y capturar el nombre de la asociación o persona donante.</p>
+                                        
+                                        <div class="figure" id="figure-17-4">
+                                            <img [src]="'assets/manual/almacen-estandar/entradas-estandar/nueva_entrada_donacion.svg'" alt="" />
+                                        
+                                        </div>
+                                        
+                                        
+                                        <p>Los campos y opciones contenidos en el formulario se describen a continuación:</p>
+                                        
+                                        <ol>
+                                        <li><strong>Donación:</strong> En caso de que la entrada sea por donación, debe activarse la casilla.</li>
+                                        <li><strong>Donante:</strong> Debe capturar el nombre de la asociación o persona donante.</li>
+                                        </ol>
+                                        
+                                        <h2 id="nueva-entrada-busqueda-3">Nueva entrada: Búsqueda</h2>
+                                        
+                                        <p>Parte del formulario donde se buscan los insumos que se van a agregar a la entrada.</p>
+                                        
+                                        <div class="figure" id="figure-17-5">
+                                            <img [src]="'assets/manual/almacen-estandar/entradas-estandar/nueva_entrada_busqueda.svg'" alt="" />
+                                        
+                                        </div>
+                                        
+                                        
+                                        <ol>
+                                        <li><strong>(1) Consulta:</strong> Escriba la clave o el nombre del insumo.</li>
+                                        <li><strong>(2) Buscar:</strong> Una vez ingresado el nombre o clave del insumo médico puede usar el botón buscar para activar la búsqueda. También puede usar la tecla <em>Enter</em> para activar la búsqueda.</li>
+                                        <li><strong>(3) Borrar:</strong> Al dar clic al botón, borramos la búsqueda y sus resultados.</li>
+                                        <li><strong>Resultados:</strong> Se muestran los resultados que coinciden con la búsqueda.</li>
+                                        </ol>
+                                        
+                                        <h2 id="nueva-entrada-detalle-de-insumos-3">Nueva entrada: Detalle de insumos</h2>
+                                        
+                                        <p>Parte del formulario donde se capturan los datos del insumo médico para agregar a la entrada.</p>
+                                        
+                                        <div class="figure" id="figure-17-6">
+                                            <img [src]="'assets/manual/almacen-estandar/entradas-estandar/nueva_entrada_estandar_detalle_med.svg'" alt="" />
+                                        
+                                        </div>
+                                        
+                                        
+                                        <p>Deben capturarse los datos del insumo médico que se agrega a la entrada.</p>
+                                        
+                                        <ol>
+                                        <li><strong>Datos de insumo:</strong> Se muestran la clave y descripción del insumo médico.</li>
+                                        <li><strong>Importe:</strong> Se muestra la cantidad del importe que tiene ese lote de medicamento.</li>
+                                        <li><strong>(3) +Agregar:</strong> El botón se activa cuando se ha terminado de capturar el insumo médico. Al dar clic en el botón se agrega al formulario el mismo insumo médico pero con sus campos vacíos para capturar los insumos médicos con diferente lote, caducidad y/o código de barras.</li>
+                                        <li><strong>(4) Eliminar:</strong>  Al dar clic al botón se elimina el insumo médico correspondiente.</li>
+                                        <li><strong>(5) Exclusivo:</strong> Debe activarse la casilla cuando el insumo al que se le está dando entrada es de uso exclusivo de un programa determinado. Si el insumo es exclusivo solo puede manejarse con el programa al que pertenece, es decir, únicamente puede dársele salida a través del programa al que pertenece.</li>
+                                        <li><strong>Lote:</strong> Se captura el lote perteneciente al insumo médico.</li>
+                                        <li><strong>Caducidad:</strong> Se ingresa la fecha de caducidad del medicamento.</li>
+                                        <li><strong>Código de barras:</strong> Si el medicamento cuenta con código de barras debe capturarse en este campo.</li>
+                                        <li><strong>Cantidad:</strong> En este campo se ingresa el número de insumos médicos con el mismo lote, fecha de caducidad y código de barras que entrará al almacén.</li>
+                                        <li><strong>Precio unitario:</strong> Cuando el medicamento tiene un precio predeterminado en la base de datos, el precio se muestra en este campo y no puede editarse. En caso de que el medicamento no tenga un precio en la base de datos, el campo puede editarse y debe capturar el precio del insumo médico.</li>
+                                        </ol>
+                                        
+                                        <h2 id="nueva-entrada-guardar-3">Nueva entrada: Guardar</h2>
+                                        
+                                        <div class="figure" id="figure-17-7">
+                                            <img [src]="'assets/manual/almacen-estandar/entradas-estandar/nueva_entrada_estandar_guardar.svg'" alt="" />
+                                        
+                                        </div>
+                                        
+                                        
+                                        <ol>
+                                        <li><strong>Finalizar entrada:</strong> Al dar clic en la opción se guarda la entrada y no se puede editar posteriormente.</li>
+                                        <li><strong>Guardar avance:</strong> Al dar clic en la opción se guarda el avance de la captura y se puede editar posteriormente.</li>
+                                        </ol>
+                                        
+                                        <p>Si se dio clic en <strong>Finalizar entrada</strong> el usuario debe confirmar que quiere finalizar la entrada debido a la restricción de los cambios posteriores.</p>
+                                        
+                                        <div class="figure" id="figure-17-8">
+                                            <img [src]="'assets/manual/almacen-estandar/entradas-estandar/nueva_entrada_estandar_confirm.svg'" alt="" />
+                                        
+                                        </div>
+                                        
+                                        
+                                        <ol>
+                                        <li><strong>Continuar:</strong> Si el usuario está seguro de finalizar la entrada, debe dar clic en el botón continuar.</li>
+                                        <li><strong>Cancelar:</strong> Dar clic sobre el botón <em>Cancelar</em>  si el usuario no está seguro de haber concluído con la entrada de medicamentos.</li>
+                                        </ol>
+                                        
+                                        <h2 id="ver-entrada-de-medicamentos-2">Ver entrada de medicamentos</h2>
+                                        
+                                        <p>Cuando una entrada de medicamentos ha sido finalizada se pueden consultar los detalles de la misma</p>
+                                        
+                                        <div class="figure" id="figure-17-9">
+                                            <img [src]="'assets/manual/almacen-estandar/entradas-estandar/ver_entrada_estandar.svg'" alt="" />
+                                        
+                                        </div>
+                                        
+                                        
+                                        <ol>
+                                        <li><strong>(1) Folio:</strong> Se muestra el Folio de la entrada correspondiente.</li>
+                                        <li><strong>(2) Regresar:</strong> Al dar clic al botón nos regresa a la lista de entradas de medicamentos.</li>
+                                        <li><strong>(3) Nueva entrada:</strong> Dar click al botón para crear una nueva entrada de medicamentos.</li>
+                                        <li><strong>(4) Imprimir:</strong> Al dar clic a este botón se genera un archivo en formato PDF de la entrada que puede imprimir o guardar en la PC.</li>
+                                        <li><strong>(5) Actualizar:</strong> Botón para recargar la página.</li>
+                                        <li><strong>(6) Lista de insumos:</strong> Se muestran los insumos médicos capturados en la entrada estándar de medicamentos.</li>
+                                        <li><strong>(7) Datos generales de la entrada:</strong> Se muestran los datos generales capturados de la entrada.</li>
+                                        </ol>
+                                        
+                                            </div>
+                                
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <footer class="modal-card-foot">
+                <!-- <a class="button is-success" (click)="quitar_form_array(form_dato.insumos, index_borrar); cancelarModal('ayuda');">Continuar</a> -->
+                <a class="button" (click)="cancelarModal('ayuda')">Cancelar</a>
+            </footer>
+        </div>
+    </div>

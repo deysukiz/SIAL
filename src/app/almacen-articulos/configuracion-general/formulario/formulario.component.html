@@ -1,0 +1,128 @@
+<formulario #ctrl URL="configuracion-general" titulo="Configuración" [dato]="dato"></formulario>
+<app-menu-catalogo></app-menu-catalogo>
+<div style="height:50px;"></div>
+<div class="contenedor columns"  style="height:90%;  padding-top: 1em;">
+    <div class="column is-one-quarter is-hidden-mobile">
+        <panel-control-menu-aside></panel-control-menu-aside>
+    </div>
+    <div class="column" style="padding: 0em 2em 0em 0em">
+        <div style="background: #FFF; overflow: hidden;">
+            <!-- formulario -->
+            <form name="form" novalidate [formGroup]="dato" (ngSubmit)="ctrl.enviar();">
+                <section class="hero is-primary">
+                    <div class="hero-body">
+                        <div class="control is-grouped" style="position:absolute; top:8em; right:3em;">
+                            <p class="control" >
+                                <a class="button is-primary tooltip" (click)="ctrl.regresar()">
+                                    <span class="icon ">
+                                        <i class="fa fa-arrow-left"> </i>
+                                    </span>
+                                    <span class="tooltiptext">Regresar</span>
+                                </a>
+                            </p>
+                            
+                            <p class="control" *ngIf="ctrl.id">
+                                <a class="button is-primary tooltip"  (click)="ctrl.cargarDatos()" id="cargar_datos_actualizar">
+                                    <span class="icon ">
+                                        <i class="fa fa-refresh"></i>
+                                    </span>
+                                    <span class="tooltiptext">Actualizar</span>
+                                </a>
+                            </p>
+                        
+                            <p class="control" >
+                                <button class="button is-primary tooltip" type="submit" [ngClass]="{'is-loading': ctrl.cargando}" [disabled]="ctrl.dato.invalid">
+                                    <span class="icon ">
+                                        <i class="fa fa-save"> </i>
+                                    </span>
+                                    <span class="tooltiptext">Guardar</span>
+                                </button>                        
+                            </p>
+                        </div>
+                        <div class="container is-fluid">
+                            <h1 class="title">
+                                <span *ngIf="!ctrl.cargando" class="icon is-medium"><i class="fa fa-edit"></i></span>
+                                <span *ngIf="ctrl.cargando" class="icon is-medium"><i class="fa fa-refresh fa-spin"></i></span>
+                                {{ctrl.moduloTitulo}} Parámetros globales
+                            </h1>
+
+                        </div>
+
+                    </div>
+                </section>
+
+                <section class="section" style="padding: 2rem 2rem !important; overflow:auto;" [style.height.px]="ctrl.tamano-175" formGroupName="configuracion">
+
+                   
+                    <div class="tabs is-boxed">
+                        <ul>
+                            <li [ngClass]="{ 'is-active' : tab == 1}">
+                                <a (click)="tab=1">
+                                    <span class="icon ">
+                                        <i class="fa fa-home"></i>
+                                    </span>
+                                    <span>General</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <a id="catalogos" (click)="ctrl.cargarCatalogo('tipos_personal', 'tipo-personal'); "></a>
+                    <!-- general -->
+                    <div [ngClass]="{ 'is-hidden': tab != 1}">
+                        <div class="columns">
+                            <div class="column is-6">
+                                <div class="field">
+                                    <label class="label">Iva:</label>
+                                    <div class="control is-expanded  has-icon has-icon-right">
+                                        <input class="input" type="text" placeholder="% iva" formControlName="iva" [ngClass]="{'is-danger': ctrl.dato.get('configuracion').get('iva').hasError('required')}">    
+                                        <span class="icon is-small" *ngIf="ctrl.dato.get('configuracion').get('iva').hasError('required')">
+                                            <i class="fa fa-warning"></i>
+                                        </span>
+                                        <span class="help is-danger" *ngIf="ctrl.dato.get('configuracion').get('iva').hasError('required')">Este campo es requerido.</span>                               
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="column is-6">
+                                <div class="field">
+                                    <label class="label">Fecha de inicio de operación:</label>
+                                    <div class="control is-expanded  has-icon has-icon-right">
+                                        <input id="fio"  class="input"   ngui-datetime-picker
+                                        [ngClass]="{'is-danger': ctrl.dato.get('configuracion').get('fio').hasError('required')}" formControlName="fio"
+                                        placeholder="YYYY-MM-DD HH:MM" /> 
+                                        <span class="icon is-small" *ngIf="ctrl.dato.get('configuracion').get('fio').hasError('required')">
+                                            <i class="fa fa-warning"></i>
+                                        </span>
+                                        <span class="help is-danger" *ngIf="ctrl.dato.get('configuracion').get('fio').hasError('required')">Este campo es requerido.</span>      
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="columns">
+                            <div class="column is-6">
+                                <div class="field">
+                                    <label class="label">Seleccione el nombre de personal medico de la lista:</label>
+                                    <div class="control is-expanded  has-icon has-icon-right">
+                                        <div class="select">
+                                            <select class="select" formControlName="personal_medico" [ngClass]="{'is-danger': ctrl.dato.get('configuracion').get('personal_medico').hasError('required')}">                                                
+                                                <option *ngFor="let item of ctrl.tipos_personal" value="{{item.id}}" >{{item.nombre}}</option>                                                
+                                            </select>
+                                        </div>
+
+                                        <span class="icon is-small" *ngIf="ctrl.dato.get('configuracion').get('personal_medico').hasError('required')">
+                                            <i class="fa fa-warning"></i>
+                                        </span>
+                                        <span class="help is-danger" *ngIf="ctrl.dato.get('configuracion').get('personal_medico').hasError('required')">Este campo es requerido.</span>                                        
+                                    </div>
+                                </div>
+                            </div>                            
+                        </div>
+                    </div>
+
+
+                </section>
+            </form>
+        </div>
+    </div>
+</div>

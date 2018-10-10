@@ -1,0 +1,21 @@
+.top-bar {
+    padding: 1em ; 
+    font-size: 1.2em; 
+    background: #FFF;    
+    color: #333;
+    position: relative;
+}
+.top-bar.is-primary {
+    background: #00d1b2;
+    color:#FFF;
+}
+.top-bar.is-primary h1 { color: #FFF; }
+.top-bar.is-danger {
+    background: #ff3860;
+    color:#FFF;
+}
+.top-bar.is-dark {
+    background: #333;
+    color:#FFF
+}
+.top-bar.is-dark h1 { color: #FFF;}

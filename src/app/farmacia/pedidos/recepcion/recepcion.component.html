@@ -1,0 +1,350 @@
+<menu-farmacia [modulo]="'Pedidos'" [icono]="'assets/icono-pedidos.svg'" [url]="'/almacen/pedidos/por-surtir'"></menu-farmacia>
+
+<div class="is-fullwidth has-text-centered" style="padding-top:70px;" *ngIf="cargando">
+  <br>
+  <span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span> &nbsp;<span>Cargando...</span></span>
+  <br>
+  <br>
+</div>
+
+<div style="position:relative; padding-top:70px; margin-left: 1.5%; display:block; width:97%; height:100% !important;" *ngIf="pedido">    
+  <div class="tile is-ancestor is-vertical" style="height:100% !important; max-height:100% !important;">
+    <div class="tile is-parent is-12 ">
+      <div class="tile is-child notification is-dark">
+        <div class="columns">
+          <div class="column" >
+            <div style="padding:1em;">
+              Folio: <a style="color:#FFFFFF !important; font-weight:bold;" routerLink="{{'/almacen/pedidos/ver/'+id}}">{{ folio }}</a>
+               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Claves Recibidas: {{ lotesSurtidos.length  }}<!-- / {{ pedido.lista.length }}-->
+               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span *ngIf="statusRecepcion == 'BR'"><strong style="color:#FFF;">Recepción inciada</strong></span>
+               <span *ngIf="statusRecepcion == 'FI'"><strong style="color:#FFF;">Recepción concluida</strong></span>
+            </div>
+          </div>
+          <div class="column is-4" style="text-align:right; " *ngIf="statusRecepcion != 'FI'">
+            <div style="margin:1em;">
+            <a *ngIf="!guardando && statusRecepcion == 'BR' && !soloLectura" class="button is-primary" style="width:45%; margin-right:5%;" (click)="finalizar()"> <span class="icon"><i class="fa fa-check"></i></span> <span>Concluir</span></a>
+            <a *ngIf="!soloLectura" class="button is-white"  style="width:45%"  [ngClass]="{ 'is-loading': guardando }"  (click)="guardar()"> <span class="icon"><i class="fa fa-save"></i></span> <span>Guardar</span></a>
+            </div>
+          </div>
+        </div>       
+      </div>
+    </div>
+    <div class="tile">
+      <div class="tile is-parent ">
+        <div class="tile is-child notification is-white" >
+          <div class="contenedor-tabla" >          
+            
+            <table class="table is-unselectable" *ngIf="!cargando" style="font-size: 0.8em; ">
+              <thead>
+                  <tr  [ngClass]="{ 'filtro': pedido.filtro.activo}">
+                    <th style="width:41px;vertical-align: middle;" class="has-text-centered" >Lote</th>
+                    <th>
+                      <p class="control is-expanded">
+                        <input type="hidden" #searchBoxDescripcionClavePrevia >
+                        <!--input class="input is-small" type="text" placeholder="Clave o Descripción" #searchBoxDescripcionClave id="search-box-descripcion-clave-{{indexPedido}}" (keyup)="buscar($event,searchBoxDescripcionClave,searchBoxDescripcionClavePrevia,[{ input: searchBoxDescripcionClave, campos: ['clave','generico_nombre','informacion.concentracion','informacion.presentacion']}])"-->
+                        <input class="input is-small" type="text" placeholder="Clave o Descripción" #searchBoxDescripcionClave id="search-box-descripcion-clave" (keyup)="buscar($event,searchBoxDescripcionClave,searchBoxDescripcionClavePrevia,[{ input: searchBoxDescripcionClave, campos: ['clave','descripcion']}])">
+                      </p>
+                    </th>  
+                    
+                    <th style="width:78px !important;text-align: center; vertical-align: middle;"><abbr title="Cantidad">Cantidad</abbr></th>
+                    <th style="width:78px !important;text-align: center; vertical-align: middle;"><abbr title="Surtido">Lotes</abbr></th>
+                    <th  style="width:21px !important; text-align: center; vertical-align: middle;">Surtido</th>
+                  </tr>
+              </thead>
+              <tbody *ngIf="!pedido.filtro.activo">
+
+                <tr class="item" *ngFor="let item of pedido.paginacion.lista; let i = index;" (click)="seleccionarItem(item)" [ngClass]="{ 'seleccionado': item == itemSeleccionado}">
+                  <td class="has-text-centered">{{ item.lote }}</td>
+                  <td >
+                    <small >{{ item.clave }} <br></small>
+                      <div style="line-height:1em;">
+                        <small>{{ item.descripcion }}</small>
+                      </div>
+                    <!--b>{{ item.generico_nombre }}</b> <small *ngIf="(item.tipo == 'ME' && item.informacion)"><b>{{ item.informacion.concentracion }}</b></small><br-->
+                    <div class="item-detalle">
+                      <!--div   *ngIf="(item.tipo == 'ME' && item.informacion)" style="line-height:1em;">
+                        <small><i>{{ item.informacion.presentacion_nombre }}</i></small><br>
+                        <small><i>{{ item.informacion.contenido }} </i></small>
+                      </div>
+                      <div *ngIf="item.tipo != 'ME'" style="line-height:1em;">
+                        <small>{{ item.descripcion }}</small>
+                      </div-->
+                      
+
+                      <div  style="padding: 0.5em 0 0.5em 0; ">
+                        <span *ngIf="(item.es_causes && item.tipo == 'ME')" class="tag is-success" [ngClass]="{'is-dark': item == insumoSeleccionado}" style="font-size: 0.7em !important;">CAUSES</span>
+                        <span *ngIf="(!item.es_causes && item.tipo == 'ME')" class="tag is-danger" style="font-size: 0.7em !important;">NO CAUSES</span>
+                        <span *ngIf="item.tipo == 'MC'" class="tag is-warning" style="font-size: 0.7em !important;">MATERIAL CURACIÓN</span>
+                        <span *ngIf="item.es_cuadro_basico" class="tag is-light" [ngClass]="{'is-dark': item == insumoSeleccionado}" style="font-size: 0.7em !important;">Cuadro básico</span>
+                        
+                        <span *ngIf="(item.tipo == 'ME' && item.informacion)">
+                          <span *ngIf="item.informacion.es_controlado" class="tag is-warning" style="font-size: 0.7em">Controlado</span>
+                          <span *ngIf="item.informacion.es_surfactante" class="tag is-warning" style="font-size: 0.7em">Surfactante</span>  
+                        </span>
+                        
+                      </div>
+                    </div>
+                  </td> 
+                  <td style="width:78px !important; text-align:center;">{{ item.totalStockAsignado || 0 }} / {{ item.cantidad }}</td>     
+                  <th style="width:78px !important; text-align:center;">{{ (item.listaStockAsignado)?item.listaStockAsignado.length:0 }}</th>
+                  <td style="width:21px !important; text-align:center;">
+                    <span class="icon" style="color:gray;" *ngIf="item.totalStockAsignado == 0 || item.totalStockAsignado == null"><i class="fa fa-circle-thin"></i></span>
+                    <span class="icon" style="color:orange;" *ngIf="item.totalStockAsignado > 0 && item.totalStockAsignado < item.cantidad"><i class="fa fa-minus-circle"></i></span>
+                    <span class="icon" style="color:green;" *ngIf="item.totalStockAsignado == item.cantidad"><i class="fa fa-check-circle"></i></span>
+                  </td>
+                </tr>      
+              </tbody>
+              <tbody *ngIf="pedido.filtro.activo">
+                <tr class="item"  *ngFor="let item of pedido.filtro.paginacion.lista; let i = index;" (click)="seleccionarItem(item)" [ngClass]="{ 'seleccionado': item == itemSeleccionado}">
+                  <td class="has-text-centered">{{ item.lote }}</td>
+                  <td >
+                    <small >{{ item.clave }} <br></small>
+                    <!--b>{{ item.generico_nombre }}</b> <small *ngIf="(item.tipo == 'ME' && item.informacion)"><b>{{ item.informacion.concentracion }}</b></small><br-->
+                    <div class="item-detalle">
+                      <!--div   *ngIf="(item.tipo == 'ME' && item.informacion)" style="line-height:1em;">
+                        <small><i>{{ item.informacion.presentacion_nombre }}</i></small><br>
+                        <small><i>{{ item.informacion.contenido }} </i></small>
+                      </div>
+                      <div   *ngIf="item.tipo != 'ME'" style="line-height:1em;">
+                        <small>{{ item.descripcion }}</small>
+                      </div-->
+
+                      <div style="line-height:1em;">
+                        <small>{{ item.descripcion }}</small>
+                      </div>
+                    
+                      <div  style="padding: 0.5em 0 0.5em 0; ">
+                        <span *ngIf="(item.es_causes && item.tipo == 'ME')" class="tag is-success" [ngClass]="{'is-dark': item == insumoSeleccionado}" style="font-size: 0.7em !important;">CAUSES</span>
+                        <span *ngIf="(!item.es_causes && item.tipo == 'ME')" class="tag is-danger" style="font-size: 0.7em !important;">NO CAUSES</span>
+                        <span *ngIf="item.tipo == 'MC'" class="tag is-warning" style="font-size: 0.7em !important;">MATERIAL CURACIÓN</span>
+                        <span *ngIf="item.es_cuadro_basico" class="tag is-light" [ngClass]="{'is-dark': item == insumoSeleccionado}" style="font-size: 0.7em !important;">Cuadro básico</span>
+                        
+                        <span *ngIf="(item.tipo == 'ME' && item.informacion)">
+                          <span *ngIf="item.informacion.es_controlado" class="tag is-warning" style="font-size: 0.7em">Controlado</span>
+                          <span *ngIf="item.informacion.es_surfactante" class="tag is-warning" style="font-size: 0.7em">Surfactante</span>  
+                        </span>
+                        
+                      </div>
+                    </div>
+                  </td> 
+                  <td style="width:78px !important; text-align:center;">{{ item.totalStockAsignado || 0 }} / {{ item.cantidad }}</td>     
+                  <th style="width:78px !important; text-align:center;">{{ (item.listaStockAsignado)?item.listaStockAsignado.length:0 }}</th>
+                  <td style="width:21px !important; text-align:center;">
+                    <span class="icon" style="color:gray;" *ngIf="item.totalStockAsignado == 0 || item.totalStockAsignado == null"><i class="fa fa-circle-thin"></i></span>
+                    <span class="icon" style="color:orange;" *ngIf="item.totalStockAsignado > 0 && item.totalStockAsignado < item.cantidad"><i class="fa fa-minus-circle"></i></span>
+                    <span class="icon" style="color:green;" *ngIf="item.totalStockAsignado == item.cantidad"><i class="fa fa-check-circle"></i></span>
+                  </td>
+                </tr>   
+              </tbody>              
+            </table>
+            <paginacion style=" width:100%; height:auto; bottom:0; left:0px; background:#FFF;"
+                [total]="pedido.lista.length" 
+                [paginasTotales]="pedido.paginacion.totalPaginas" 
+                [resultadosPorPagina]="pedido.paginacion.resultadosPorPagina" 
+                [paginaActual]="pedido.paginacion.paginaActual" 
+                [indicePaginas]="pedido.paginacion.indice"
+                (onSiguiente)="pedido.paginaSiguiente(); limpiarStock();" 
+                (onAnterior)="pedido.paginaAnterior(); limpiarStock();" 
+                (onListar)="pedido.listar($event);limpiarStock();" 
+                *ngIf="pedido.lista.length > 0 && pedido.lista.length > pedido.paginacion.resultadosPorPagina && !pedido.filtro.activo"></paginacion>
+
+            <paginacion 
+                [total]="pedido.filtro.lista.length" 
+                [paginasTotales]="pedido.filtro.paginacion.totalPaginas" 
+                [resultadosPorPagina]="pedido.filtro.paginacion.resultadosPorPagina" 
+                [paginaActual]="pedido.filtro.paginacion.paginaActual" 
+                [indicePaginas]="pedido.filtro.paginacion.indice"
+                (onSiguiente)="pedido.filtro.paginaSiguiente(); limpiarStock();" 
+                (onAnterior)="pedido.filtro.paginaAnterior();  limpiarStock();" 
+                (onListar)="pedido.filtro.listar($event); limpiarStock();" 
+                *ngIf="pedido.filtro.lista.length > 0 && pedido.filtro.lista.length > pedido.filtro.paginacion.resultadosPorPagina && pedido.filtro.activo"></paginacion>
+          </div>
+        </div>
+      </div>
+      <div class="tile is-parent is-vertical ">
+        <div *ngIf="(capturarStock && (itemSeleccionado.cantidad_recibida < itemSeleccionado.cantidad)) && pedido.datosImprimir.tipo_pedido_id != 'PEA' && statusRecepcion != 'FI'" class="tile is-child notification" style="font-size: 0.8em;">
+          <div class="control is-grouped">
+            <p class="control is-expanded  has-icon has-icon-right">
+              <label class="label">Código de Barras</label>
+              <input class="input" autofocus type="text" placeholder="Código de Barras" [(ngModel)]="formStock.codigo_barras">
+            </p>
+            <!--p class="control has-icon has-icon-right">
+              <label class="label">Marca</label>
+              <span class="select is-expanded">
+                <select [(ngModel)]="formStock.marca">
+                  <option *ngFor="let item of marcas" [ngValue]="item">{{ item.nombre }}</option>
+                </select>
+              </span>
+            </p-->
+          </div>
+
+          <div class="control is-grouped">
+            <p class="control is-expanded  has-icon has-icon-right">
+              <label class="label">Lote</label>
+              <input class="input" autofocus type="text" placeholder="Lote" [(ngModel)]="formStock.lote">
+              <span *ngIf="erroresFormularioStock.lote.error" class="icon is-small" >
+                <i class="fa fa-warning"></i>
+              </span>
+              <span *ngIf="erroresFormularioStock.lote.error" class="help is-danger">{{erroresFormularioStock.lote.texto}}</span>
+            </p>
+            <p class="control is-expanded has-icon has-icon-right">
+              <label class="label">Caducidad (aaaa-mm-dd)</label>
+              <!--input class="input" type="text" placeholder="aaaa-mm-dd" [(ngModel)]="formStock.fecha_caducidad"-->
+              <input class="input" [(ngModel)]='formStock.fecha_caducidad' ngui-datetime-picker [min-date]="minDate" date-only="true" placeholder="aaaa-mm-dd" />
+              <span *ngIf="erroresFormularioStock.fecha_caducidad.error" class="icon is-small" >
+                <i class="fa fa-warning"></i>
+              </span>
+              <span *ngIf="erroresFormularioStock.fecha_caducidad.error" class="help is-danger">{{erroresFormularioStock.fecha_caducidad.texto}}</span>
+            </p>
+            <p class="control is-expanded has-icon has-icon-right">
+              <label class="label">Cantidad</label>
+              <input class="input" type="number" placeholder="Cantidad" [(ngModel)]="formStock.cantidad">
+              <span *ngIf="erroresFormularioStock.cantidad.error" class="icon is-small" >
+                <i class="fa fa-warning"></i>
+              </span>
+              <span *ngIf="erroresFormularioStock.cantidad.error" class="help is-danger">{{erroresFormularioStock.cantidad.texto}}</span>
+            </p>
+          </div>
+
+          <div class="control is-grouped is-pulled-right " >
+            <p class="control is-expanded">
+            </p>
+            <p class="control">
+                <button class="button is-medium is-primary " (click)="asignarStock()">
+                  <span class="icon"><i class="fa fa-plus"></i></span><span>Agregar</span>
+                </button>
+            </p>
+            <p class="control">
+                <button class="button is-medium "  (click)="cancelarCapturaStock()">
+                  <span>Cancelar</span>
+                </button>
+            </p>
+          </div>
+        </div>
+        
+        <div class="tile is-child  notification is-white">
+          <div class="contenedor-tabla">
+            <table class="table" *ngIf="!cargando && itemSeleccionado != null" style="font-size: 0.8em;" >
+              <thead>
+                  <tr style="background: #00d1b2;">
+                    <th style="color:#FFF !important;">Código</th>
+                    <!--th style="color:#FFF !important;">Marca</th-->
+                    <th style="color:#FFF !important;">Lote</th>
+                    <th style="color:#FFF !important;">Caducidad</th>
+                    <th *ngIf="pedido.tipo_pedido == 'PEA'" style="color:#FFF !important;"><abbr title="Cantidad Eviada">Enviado</abbr></th>
+                    <th style="color:#FFF !important;"><abbr title="Cantidad Recibida">Recibido</abbr></th>
+                    <th></th>              
+                  </tr>
+              </thead>
+              <tfoot>
+                <tr>
+                  <th colspan="4" style="text-align:right">
+                    <span *ngIf="itemSeleccionado.totalStockAsignado == itemSeleccionado.cantidad"><span class="icon is-small" ><i class="fa fa-check-circle"></i></span> <span>Completo &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Total </span>
+                  </th>
+                  <td style="text-align:center">{{ itemSeleccionado.totalStockAsignado || 0 }} / {{ itemSeleccionado.cantidad }}</td>
+                </tr>
+              </tfoot>
+              <tbody>
+                  <tr  class="is-unselectable" *ngFor="let item of itemSeleccionado.listaStockAsignado">
+                    <td>{{ item.codigo_barras}}</td>
+                    <!--td>{{ item.marca.nombre }}</td-->
+                    <td>{{ item.lote }}</td>
+                    <td>{{ item.fecha_caducidad | date:'dd/MM/y' }}</td>
+                    <td *ngIf="pedido.tipo_pedido == 'PEA'" style="width:150px !important;">
+                      {{ item.cantidad_recibida | number }} / {{ item.cantidad_enviada | number }}
+                    </td> 
+                    <td style="width:150px !important;">
+                        <p class="control is-expanded">
+                        <input *ngIf="pedido.tipo_pedido != 'PEA'" class="input is-small has-text-centered"  type="number" min="1" max="{{item.existencia}}" placeholder="Cant" [(ngModel)]="item.cantidad" (change)="validarItemStock(item, true)" (keyup)="validarItemStock(item)">
+                        <input *ngIf="pedido.tipo_pedido == 'PEA'" class="input is-small has-text-centered"  type="number" min="0" max="{{item.cantidad_enviada}}" placeholder="Cant" [(ngModel)]="item.cantidad_recibida" (change)="validarItemStock(item, true)" (keyup)="validarItemStock(item)">
+                        </p>
+                    </td> 
+                    <td style="vertical-align: middle;" class="has-text-centered"><a  *ngIf="puedeEliminarStock" class="is-danger" (click)="eliminarStock(item)"><span class="icon"><i class="fa fa-trash-o"></i></span></a></td>
+                  </tr>
+              </tbody>  
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+</div>
+  
+
+
+<div class="notification is-danger" style="position:fixed; left:1em;  bottom:1em;" *ngIf="mensajeError.mostrar">
+    <button class="delete" (click)="mensajeError.mostrar = false"></button>        
+    <b>Error:</b> {{ mensajeError.texto }}<br><br>
+    <!--p style="text-align:center" ><a  class="button is-danger is-inverted" (click)="ultimaPeticion(); mensajeError.mostrar = false"> <span class="icon"><i class="fa fa-refresh"></i></span> <span>Volver a intentar</span></a></p-->
+</div>
+
+<div class="notification is-success" style="position:fixed; left:1em;  bottom:1em; width: auto" *ngIf="mensajeExito.mostrar">       
+    <button class="delete" (click)="mensajeExito.mostrar = false"></button>
+    <p><span class="icon" style="margin-right: 0.5em;"><i class="fa fa-check-circle"></i></span> <span>{{ mensajeExito.texto }}</span></p>
+    <br>
+    <p style="text-align: center;"><small >Este mensaje desaparecerá en {{ mensajeExito.cuentaAtras }} segundos.</small></p>       
+</div>
+
+
+<div class="modal is-active" [ngClass]="{'is-active': mostrarDialogo}">
+  <div class="modal-background" (click)="cerrarDialogo()"></div>
+  <div class="modal-card" style="width:60%; height: 90%;">
+    <header class="modal-card-head" style="background: #00d1b2;">
+      <div class="container is-fluid"  style="width:100%;">
+          <h1 class="title" style="color:#FFF;">
+            <span class="icon is-medium"><i class="fa fa-check"></i></span> Finalizar Recepción 
+          </h1>
+      </div>            
+      <a class="button  is-primary" style="position:absolute; top:1em; right:1em;" (click)="cerrarDialogo()"><span class="icon "><i class="fa fa-close"></i></span></a>
+    </header>
+    <section class="modal-card-body" style="padding:0px;" >
+      <div style="padding: 1em;">
+        <form name="form" novalidate [formGroup]="formularioRecepcion">
+          <label class="label">Nombre de quien entrega:</label>
+          <p class="control is-expanded  has-icon has-icon-right">
+            <input type="text" class="input is-fullwidth" [ngClass]="{'is-danger': formularioTieneError('entrega','required')}" formControlName="entrega"/>
+            <span class="icon is-small" *ngIf="formularioTieneError('entrega','required')">
+              <i class="fa fa-warning"></i>
+            </span>
+            <span class="help is-danger" *ngIf="formularioTieneError('entrega','required')">Este campo es requerido.</span>
+          </p>
+
+          <label class="label">Nombre de quien recibe:</label>
+          <p class="control is-expanded  has-icon has-icon-right">
+            <input type="text" class="input is-fullwidth" [ngClass]="{'is-danger': formularioTieneError('recibe','required')}" formControlName="recibe"/>
+            <span class="icon is-small" *ngIf="formularioTieneError('recibe','required')">
+              <i class="fa fa-warning"></i>
+            </span>
+            <span class="help is-danger" *ngIf="formularioTieneError('recibe','required')">Este campo es requerido.</span>
+          </p>
+
+          <label class="label">Fecha de la remisión (aaaa-mm-dd):</label>
+          <p class="control is-expanded  has-icon has-icon-right">
+            <!--input type="text" class="input is-fullwidth" placeholder="aaaa-mm-dd" [ngClass]="{'is-danger': formularioTieneError('fecha_movimiento','required')}" formControlName="fecha_movimiento" /-->
+            <input class="input is-fullwidth" formControlName="fecha_movimiento" ngui-datetime-picker [max-date]="maxDate" date-only="true" [ngClass]="{'is-danger': formularioTieneError('fecha_movimiento','required')}" placeholder="aaaa-mm-dd" />
+            <span class="icon is-small" *ngIf="formularioTieneError('fecha_movimiento','required')">
+              <i class="fa fa-warning"></i>
+            </span>
+            <span class="help is-danger" *ngIf="formularioTieneError('fecha_movimiento','required')">Este campo es requerido.</span>
+          </p>
+          
+          <div class="control">
+            <textarea name="observaciones" class="textarea" placeholder="Observaciones"  formControlName="observaciones" rows="15" style="height:auto;"></textarea>
+          </div>
+        </form>
+      </div>
+    </section>
+    <footer class="" style="position:relative; padding:1em;background: #FFF; border-top:1px solid #EEE; border-radius:0 0 0.8em 0.8em " >
+      <div class="columns">
+          <div class="column" ></div>
+          <div class="column is-4" style="text-align:right; " *ngIf="statusRecepcion != 'FI'">
+            <div style="margin:1em;">
+            <a  class="button is-primary" style="margin-right:5%;" [ngClass]="{ 'is-loading': guardando }"   (click)="guardar(true)"> <span class="icon"><i class="fa fa-check"></i></span> <span>Concluir</span></a>
+            </div>
+          </div>
+        </div> 
+    </footer>
+  </div>
+</div>
+

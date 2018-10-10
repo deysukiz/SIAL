@@ -1,0 +1,71 @@
+<panel-control-menu></panel-control-menu>
+<div style="height:50px;"></div>
+<div class="contenedor columns " style="height:100%">
+    <div class="column is-one-quarter is-hidden-mobile">
+        <panel-control-menu-aside></panel-control-menu-aside>
+    </div>
+    <div class="column" style="padding:2em; overflow: auto;">
+        <div style="background: #FFF; border-radius: 1em;">
+            <section class="hero is-primary">
+                <div class="hero-body">
+                    <div class="container is-fluid">
+                        <h1 class="title">
+                            <span  *ngIf="!cargando" class="icon is-medium"><i class="fa fa-edit"></i></span>
+                            <span  *ngIf="cargando" class="icon is-medium"><i class="fa fa-refresh fa-spin"></i></span> 
+                            Editar usuario
+                        </h1>
+                        
+                    </div>
+                </div>
+            </section>
+            <div class="is-fullwidth has-text-centered" *ngIf="!datosCargados">
+                <br>
+                <span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span> &nbsp;<span>Cargando...</span></span>
+            </div>
+            <section class="section">
+            <panel-control-usuarios-form *ngIf="datosCargados"
+                [mostrarCambiarPassword]="true"
+                [usuario]="usuario"             
+                [roles]="roles" 
+                [medicos]="medicos" 
+                [proveedores]="proveedores"
+                [unidadesMedicasEdicion] = "unidadesMedicasEdicion"
+                [unidadesMedicas]="unidadesMedicas" 
+                [usuarioRepetido]="usuarioRepetido"
+                [usuarioInvalido]="usuarioInvalido"
+                [respuestaRequerida]="respuestaRequerida"
+                [cargando]="cargando"
+                [cargandoRoles]="cargandoRoles"
+                [cargandoMedicos]="cargandoMedicos"
+                (onEnviar)="enviar()"
+                (onRegresar)="regresar()"
+                (onToggleCambiarPassword)="toggleCambiarPassword()"
+                (onCargarRoles)="cargarRoles()"
+                (onCargarMedicos)="cargarMedicos()"
+                (onCargarProveedores)="cargarProveedores()"
+            ></panel-control-usuarios-form>
+            </section>
+        </div>
+    </div>
+</div>
+
+<div class="notification is-danger" style="position:fixed; left:1em;  bottom:1em;" *ngIf="mensajeError.mostrar">
+    <button class="delete" (click)="mensajeError.mostrar = false"></button>        
+    <p><b>Error:</b> {{ mensajeError.texto }}<br></p>
+    <p style="text-align: center;"><small >Este mensaje desaparecerá en {{ mensajeError.cuentaAtras }} segundos.</small></p>       
+</div>
+
+<div class="notification is-warning" style="position:fixed; left:1em;  bottom:1em;" *ngIf="mensajeAdvertencia.mostrar">
+    <button class="delete" (click)="mensajeAdvertencia.mostrar = false"></button>        
+    <p><span class="icon" style="margin-right: 0.5em;"><i class="fa fa-warning"></i></span> <span>{{ mensajeAdvertencia.texto }}</span></p>
+    
+    <br>
+    <p style="text-align: center;"><small >Este mensaje desaparecerá en {{ mensajeAdvertencia.cuentaAtras }} segundos.</small></p>       
+</div>
+
+<div class="notification is-success" style="position:fixed; left:1em;  bottom:1em; width: auto" *ngIf="mensajeExito.mostrar">       
+    <button class="delete" (click)="mensajeExito.mostrar = false"></button>
+    <p><span class="icon" style="margin-right: 0.5em;"><i class="fa fa-check-circle"></i></span> <span>{{ mensajeExito.texto }}</span></p>
+    <br>
+    <p style="text-align: center;"><small >Este mensaje desaparecerá en {{ mensajeExito.cuentaAtras }} segundos.</small></p>       
+</div>

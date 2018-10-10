@@ -1,0 +1,276 @@
+<listar #ctrl URL="inventario-insumos?buscar_en={{buscar_en}}&seleccionar={{seleccionar}}&tipo={{tipo}}&clave_insumo={{clave_insumo}}" titulo="Inventario"></listar>
+<app-menu-inventario [modulo]="'Existencia de insumos médicos'" [icono]="'assets/icono-salidas.svg'" [url]="'/inventario'"></app-menu-inventario>
+<div style="height:50px;"></div>
+<div class="contenedor columns " style="height:100%;">
+    <div class="column" style="padding:2em; overflow: auto;">
+        <div style="background: #FFF; border-radius: 1em;">
+            <section class="hero" [ngClass]=" {'is-dark': ctrl.busquedaActivada, 'is-primary': !ctrl.busquedaActivada } ">
+
+                <div class="hero-body" style="position:relative;">
+                     <nav class="level">
+                        <div class="level-left">
+                            <div class="level-item is-hidden-desktop">
+                                <h1 class="title" *ngIf="!ctrl.busquedaActivada">
+                                    <span class="icon is-medium"><i class="fa fa-user"></i></span> Inventario
+                                </h1>
+                            </div>
+                        </div>
+                        <!-- Right side -->
+                        <div class="level-right">
+                            <p class="level-item"><a class="button  is-dark" *ngIf="ctrl.busquedaActivada" (click)="ctrl.busquedaActivada=false;searchBox.value=''; ctrl.resultadosBusqueda=[]"><span class="icon "><i class="fa fa-close"></i></span></a></p>
+                            <p class="level-item"><a class="button  is-dark" *ngIf="ctrl.busquedaActivada" title="Actualizar" (click)="ctrl.listarBusqueda(searchBox.value,1)"><span class="icon "><i class="fa fa-refresh"></i></span></a></p>
+                            <p class="level-item"><a class="button  is-primary" *ngIf="!ctrl.busquedaActivada" title="Actualizar" (click)="ctrl.listar(1)"><span class="icon "><i class="fa fa-refresh"></i></span></a></p>
+                            
+                            <p class="level-item"><a class="button  is-dark" *ngIf="ctrl.busquedaActivada" title="PDF" (click)="dato = ctrl.dato; imprimir();"><span class="icon "><i class="fa fa-file-pdf-o"></i></span></a></p>
+                            <p class="level-item"><a class="button  is-primary" *ngIf="!ctrl.busquedaActivada" title="PDF" (click)="dato = ctrl.dato; imprimir()"><span class="icon "><i class="fa fa-file-pdf-o"></i></span></a></p>
+                            <p class="level-item"><a class="button  is-dark" *ngIf="ctrl.busquedaActivada" title="Excel" (click)="imprimirExcel()"><span class="icon "><i class="fa fa-file-excel-o"></i></span></a></p>
+                            <p class="level-item"><a class="button  is-primary" *ngIf="!ctrl.busquedaActivada" title="Excel" (click)="imprimirExcel()"><span class="icon "><i class="fa fa-file-excel-o"></i></span></a></p>
+                            <p class="level-item">&nbsp;</p>
+                        </div>
+                    </nav>
+                    <nav class="level">
+                        <div class="level-left">
+                            <p class="level-item">&nbsp;</p>
+                            <p class="level-item b-checkbox is-info is-circular">
+                                <input class="styled" type="radio" id="buscar_en_mis_claves" #claves [checked]="buscar_en == 'MIS_CLAVES'" (click)="buscar_en = 'MIS_CLAVES'" [value]="'MIS_CLAVES'" name="buscar_en">                                    
+                                <label for="buscar_en_mis_claves">
+                                    Mis claves <!--span class="tag is-medium" [ngClass]="{'is-dark':buscar_en == 'MIS_CLAVES'}">Mis claves</span-->
+                                </label> 
+                            </p>
+                            <p class="level-item  b-checkbox is-circular">
+                                <input class="styled" type="radio" id="buscar_en_todas_claves" #claves [checked]="buscar_en == 'TODAS_LAS_CLAVES'" (click)="buscar_en = 'TODAS_LAS_CLAVES'" [value]="'TODAS_LAS_CLAVES'" name="buscar_en">                                    
+                                <label for="buscar_en_todas_claves">
+                                    Todas las claves <!--span class="tag is-medium" [ngClass]="{'is-dark':buscar_en == 'TODAS_LAS_CLAVES'}">Todas las claves</span-->
+                                </label>    
+                            </p>
+                        </div>
+                    </nav>
+                    <nav class="level">
+                        <div class="level-left">
+                            <p class="level-item">&nbsp;</p>
+                            <p class="level-item field">
+                                <span class="control">
+                                    <span class="select is-medium">
+                                        <select name="seleccion" #s (change)="seleccionar = s.value">
+                                            <option value="TODO" selected>Todo</option>
+                                            <option value="EXISTENTE">Existentes</option>
+                                            <option value="NO_EXISTENTE">No existentes</option>
+                                        </select>
+                                    </span>
+                                </span>
+                            </p>
+                            <p class="level-item field">
+                                <span class="control">
+                                    <span class="select is-medium">
+                                        <select name="tipo" #t (change)="tipo = t.value">
+                                            <option value="TODO" selected>Todos los insumos</option>
+                                            <option value="CAUSES">Causes</option>
+                                            <option value="NO_CAUSES">No Causes</option>
+                                            <option value="MC">Material de curación</option>
+                                            <option value="CONTROLADO">Controlado</option>
+                                        </select>
+                                    </span>
+                                </span>
+                            </p>
+                            <p class="level-item">&nbsp;</p>
+                            <p class="level-item">
+                                <span class="field">     
+                                    <!--
+                                        <p class="control" style="color:black">
+                                            <input ngui-auto-complete [source]="insumos_term" [list-formatter]="autocompleListFormatter" 
+                                            id="buscarInsumo" value-property-name="clave" display-property-name="clave" path-to-data="" 
+                                            loading-text="Cargando..." no-match-found-text="No hay resultados." (valueChanged)="select_insumo_autocomplete($event)" 
+                                            min-chars="1" class="input is-medium" type="text" [ngClass]="{'is-loading': ctrl.cargando}"
+                                            placeholder="Escanea el codigo de barra, o empieza escribir el nombre del producto" [(ngModel)]='clave_insumo'>
+                                        </p> 
+                                    -->
+                                    <p class="control">
+                                        <input class="input is-medium" type="text" placeholder="Insumo" [(ngModel)]='clave_insumo'>
+                                    </p> 
+                                </span>
+                            </p>
+                            <p class="level-item">
+                                <button class="button is-default is-medium" type="button" [ngClass]="{'is-loading': ctrl.cargando}" 
+                                (click)="buscar_en='TODAS_LAS_CLAVES'; seleccionar='TODO'; s.value=seleccionar; tipo='TODO'; t.value=tipo; clave.value=''; clave_insumo=''" >Limpiar</button>
+                                
+                            </p>
+                            <p class="level-item">
+                                <button class="button is-medium" (click)="ctrl.listar(1)"><span class="icon"><i class="fa fa-filter"></i></span> <span>Filtrar</span></button>
+                            </p> 
+                        </div>
+                    </nav>
+                    <div class="container is-fluid" id="titulo">
+                        <span></span>
+                        <div class="is-hidden-desktop">
+                            <h1 class="title" *ngIf="!ctrl.busquedaActivada">
+                                <span class="icon is-medium"><i class="fa fa-user"></i></span> Correcciones de movimiento
+                            </h1>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <div class="is-fullwidth has-text-centered" *ngIf="ctrl.cargando">
+                <br>
+                <span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span> &nbsp;<span>Cargando...</span></span>
+                <br>
+                <br>
+            </div>
+            <span id="exportable">
+                <div style="overflow: scroll; height: 630px;">
+                    <div class="is-fullwidth has-text-centered" *ngIf="cargandoPdf">
+                        <br>
+                        <span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span> &nbsp;<span>Generando PDF...</span></span>
+                        <br>
+                        <br>
+                    </div>
+                    <table class="table" *ngIf="!ctrl.cargando && !cargandoPdf" style="min-width:100%; font-size:1.2em;">
+                        <thead>
+                            <tr>
+                                <th style="text-align: center;">Clave</th>
+                                <th>Descripción</th>
+                                <th title="Consumo Promedio del Día">C.P.D.</th>
+                                <th title="Consumo Promedio Semanal">C.P.S.</th>
+                                <th title="Consumo Promedio Mensual">C.P.M.</th>
+                                <th style="text-align: right;">Existencia</th>
+                                <th style="text-align: right;">Existencia Unidosis</th>
+                                <th style="text-align: center;">Valor</th>
+                                <th style="text-align: center;">Actualizado</th>
+                            </tr>
+                        </thead>
+                        <tbody *ngIf="!ctrl.busquedaActivada">
+                            <tr *ngFor="let item of ctrl.dato; let i=index" style="border: 1px">
+                                <th style="vertical-align: middle; text-align: center;"><a (click)="select_insumo_autocomplete(item)">{{ item.clave_insumo_medico }}</a></th>
+                                <td style="vertical-align: middle;">
+                                    <a (click)="select_insumo_autocomplete(item)">
+                                        <p class="title is-5"> <small>{{ item.descripcion }} </small></p>
+                                            <p class="subtitle is-6">
+                                                <label *ngIf="item.es_causes==1" class="tag is-success" ><strong>Causes </strong></label>
+                                                <label *ngIf="item.es_causes==0" class="tag" style="background: #B8FB7E; border-color: #B8FB7E; color: rgba(0,0,0,0.7);">
+                                                    <strong>No Causes </strong> 
+                                                </label>
+                                                <label *ngIf="item.tipo=='MC'" class="tag is-info" ><strong title="Material de curación">Mat. Curación </strong></label>
+                                                <label *ngIf="item.es_unidosis==1" class="tag is-warning" ><strong>Unidosis</strong></label>
+                                            </p>
+                                    </a>
+                                </td>
+                                <td>--</td>
+                                <td>--</td>
+                                <td>--</td>
+                                <td style="vertical-align: middle; text-align: center;"><a (click)="select_insumo_autocomplete(item)" style="font-size:1.2em;" class="help" [ngClass]="{'is-danger': item.existencia == 0}">{{ item.existencia }} </a></td>
+                                <td style="vertical-align: middle; text-align: center;"><a (click)="select_insumo_autocomplete(item)" style="font-size:1.2em;" class="help" [ngClass]="{'is-danger': item.existencia_unidosis == 0}">{{ item.existencia_unidosis}} </a></td>
+                                <td style="vertical-align: middle; text-align: right;"><a (click)="select_insumo_autocomplete(item)" style="font-size:1.2em;" class="help" [ngClass]="{'is-danger': item.existencia == 0}">{{ item.importe_con_iva  | currency:''}} </a></td>
+                                <td style="vertical-align: middle; text-align: center;"><a (click)="select_insumo_autocomplete(item)">{{ item.updated_at | date}} </a></td>
+                            </tr>
+                            <tr *ngIf="ctrl.dato.length == 0">
+                                <td colspan="5" style="vertical-align: middle; color:#888;">Esta lista está vacía.</td>
+                            </tr>
+                        </tbody>
+                        <tbody *ngIf="ctrl.busquedaActivada">
+                            <tr *ngFor="let item of ctrl.resultadosBusqueda; let i=index">
+                                <th style="vertical-align: middle; text-align: center;"><a (click)="select_insumo_autocomplete(item)">{{ item.clave_insumo_medico }}</a></th>
+                                <td style="vertical-align: middle;">
+                                    <a (click)="select_insumo_autocomplete(item)">
+                                        <p class="title is-5"> <small>{{ item.descripcion }} </small></p>
+                                            <p class="subtitle is-6">
+                                                <label *ngIf="item.es_causes==1" class="tag is-success" ><strong>Causes </strong></label>
+                                                <label *ngIf="item.es_causes==0" class="tag" style="background: #B8FB7E; border-color: #B8FB7E; color: rgba(0,0,0,0.7);">
+                                                    <strong>No Causes </strong> 
+                                                </label>
+                                                <label *ngIf="item.es_unidosis==1" class="tag is-warning" ><strong>Unidosis</strong></label>
+                                            </p>
+                                    </a>
+                                </td>
+                                <td>--</td>
+                                <td>--</td>
+                                <td>--</td>
+                                <td style="vertical-align: middle; text-align: center;"><a (click)="select_insumo_autocomplete(item)" style="font-size:1.2em;" class="help" [ngClass]="{'is-danger': item.existencia == 0}">{{ item.existencia }} </a></td>
+                                <td style="vertical-align: middle; text-align: center;"><a (click)="select_insumo_autocomplete(item)" style="font-size:1.2em;" class="help" [ngClass]="{'is-danger': item.existencia_unidosis == 0}">{{ item.existencia_unidosis }} </a></td>
+                                <td style="vertical-align: middle; text-align: center;"><a (click)="select_insumo_autocomplete(item)">{{ item.updated_at | date}} </a></td>
+                            </tr>
+                            <tr *ngIf="ctrl.resultadosBusqueda.length == 0 && ctrl.busquedaActivada">
+                                <td colspan="5" style="vertical-align: middle; color:#888;">No se encontraron resultados.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </span>
+            <!-- Paginación para la lista  -->
+            <paginacion [total]="ctrl.total" [paginasTotales]="ctrl.paginasTotales" [resultadosPorPagina]="ctrl.resultadosPorPagina"
+                [paginaActual]="ctrl.paginaActual" [indicePaginas]="ctrl.indicePaginas" (onSiguiente)="ctrl.paginaSiguiente()"
+                (onAnterior)="ctrl.paginaAnterior()" (onListar)="ctrl.listar($event)" *ngIf="ctrl.total>0 && ctrl.total > ctrl.resultadosPorPagina && !ctrl.busquedaActivada"></paginacion>
+            <!-- Paginación para la búsqueda  -->
+            <paginacion [total]="ctrl.totalBusqueda" [paginasTotales]="ctrl.paginasTotalesBusqueda" [resultadosPorPagina]="ctrl.resultadosPorPaginaBusqueda"
+                [paginaActual]="ctrl.paginaActualBusqueda" [indicePaginas]="ctrl.indicePaginasBusqueda" (onSiguiente)="ctrl.paginaSiguienteBusqueda(searchBox.value)"
+                (onAnterior)="ctrl.paginaAnteriorBusqueda(searchBox.value)" (onListar)="ctrl.listarBusqueda(searchBox.value,$event)"
+                *ngIf="ctrl.totalBusqueda > 0 && ctrl.totalBusqueda > ctrl.resultadosPorPaginaBusqueda && ctrl.busquedaActivada"></paginacion>
+
+        </div>
+    </div>
+</div>
+
+
+<div class="modal" id="verLotes">
+    <div class="modal-background"></div>
+    <div class="modal-card" style="width: 60%;">
+        <header class="modal-card-head" style="background: #00d1b2;">
+            <p class="modal-card-title" style="width: 200px; color:#FFF;">
+                <span class="icon is-medium"><i class="fa fa-medkit"></i></span> &nbsp; 
+                <span class="title" style="color:#FFF;">Insumo médico</span> 
+            </p>
+            <button type="button" class="delete" (click)="cancelarModal('verLotes');"></button>
+        </header>
+        <header class="modal-card-head">
+            <p class="modal-card-title" id="tituloModal" style="width: 200px"> </p>
+        <!--     <button type="button" class="delete" (click)="cancelarModal('verLotes');"></button> -->
+        </header>
+        <section class="modal-card-body">
+            <label class="label">Lotes disponibles:</label>
+            <table class="table is-narrow is-bordered is-striped">
+                <thead>
+                    <tr>
+                        <th>Lote</th>
+                        <th>Caducidad</th>
+                        <th>Código de barras</th>
+                        <th>Existencia</th>
+                        <th>Existencia Unidosis</th> 
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let item of lotes_insumo;  let i = index;">
+                        <td>{{item.lote}}</td>
+                        <td>{{item.fecha_caducidad}}</td>
+                        <td>{{item.codigo_barras}}</td>
+                        <td>{{item.existencia}}</td>
+                        <td>{{item.existencia_unidosis}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+        <footer class="modal-card-foot">
+            <a class="button is-success" (click)="cancelarModal('verLotes');">Aceptar</a>
+            <a class="button" (click)="cancelarModal('verLotes');">Cancelar</a>
+        </footer>
+    </div>
+</div>
+
+<div class="modal" id="imprimirModal">
+    <div class="modal-background"></div>
+    <div class="modal-card" style="width: 60%;">
+        <header class="modal-card-head" style="background: #00d1b2;">
+            <p class="modal-card-title" style="width: 200px; color:#FFF;">
+                <span class="icon is-medium"><i class="fa fa-medkit"></i></span> &nbsp; 
+                <span class="title" style="color:#FFF;">Imprimir</span> 
+            </p>
+            <button type="button" class="delete" (click)="cancelarModal('imprimirModal');"></button>
+        </header>
+        <header class="modal-card-head">
+        </header>
+        <section class="modal-card-body">
+           
+        </section>
+        <footer class="modal-card-foot">
+            <a class="button is-success" (click)="cancelarModal('imprimirModal');">Aceptar</a>
+            <a class="button" (click)="cancelarModal('imprimirModal');">Cancelar</a>
+        </footer>
+    </div>
+</div>

@@ -1,0 +1,56 @@
+
+    <p class="control" >
+        <a class="button is-primary tooltip" (click)="ctrl.regresar()">
+            <span class="icon ">
+                <i class="fa fa-arrow-left"> </i>
+            </span>
+            <span class="tooltiptext">Regresar</span>
+        </a>
+    </p>
+    
+    <p class="control" *ngIf="ctrl.id">
+        <a class="button is-primary tooltip"  (click)="ctrl.cargarDatos()" id="cargar_datos_actualizar">
+            <span class="icon ">
+                <i class="fa fa-refresh"></i>
+            </span>
+            <span class="tooltiptext">Actualizar</span>
+        </a>
+    </p>
+
+    <p class="control" *ngIf="ctrl.id">
+        <a  class="button is-primary tooltip"  routerLink="{{url_nuevo}}">
+            <span class="icon ">
+                <i class="fa fa-file"></i>
+            </span>
+            <span class="tooltiptext">Nuevo</span>
+        </a>
+    </p>
+
+    <p class="control" *ngIf="ctrl.id">
+        <a class="button is-primary tooltip"  (click)="ctrl.imprimir()">
+            <span class="icon ">
+                <i class="fa fa-print"></i>
+            </span>
+            <span class="tooltiptext">Imprimir</span>
+        </a>
+    </p>
+
+    <p class="control" >
+        <button class="button is-primary tooltip" type="submit" [ngClass]="{'is-loading': ctrl.cargando}" [disabled]="ctrl.dato.invalid">
+            <span class="icon ">
+                <i class="fa fa-save"> </i>
+            </span>
+            <span class="tooltiptext">Guardar</span>
+        </button>
+
+    </p>
+
+
+    <p class="control" *ngIf="ctrl.id">
+        <button class="button is-danger tooltip" type="button" [ngClass]="{'is-loading': ctrl.cargando}" (click)="ctrl.eliminar(ctrl.id)">
+            <span class="icon ">
+                <i class="fa fa-trash"> </i>
+            </span>
+            <span class="tooltiptext">Eliminar</span>
+        </button>        
+    </p>

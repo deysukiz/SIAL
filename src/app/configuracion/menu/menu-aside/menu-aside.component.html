@@ -1,0 +1,13 @@
+<aside class="menu" style="padding: 1em;">
+    <div *ngFor="let item of menuAutorizado">
+        <p class="menu-label">{{ item.titulo }}</p>
+        <ul class="menu-list">
+            <li *ngFor="let modulo of item.modulos">
+                <a routerLink="{{ modulo.url }}" routerLinkActive="is-active">
+                    <span class="icon" ><i class="fa {{ modulo.icono }}"></i></span>&nbsp;&nbsp;<span>{{ modulo.titulo }}</span>
+                </a>
+            </li>    
+        </ul>
+    </div>
+        
+</aside>

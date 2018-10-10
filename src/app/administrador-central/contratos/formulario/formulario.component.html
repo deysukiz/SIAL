@@ -1,0 +1,252 @@
+<administrador-central-menu></administrador-central-menu>
+<div style="height:50px;"></div>
+<div class="contenedor columns " style="height:100%; ">
+  <div class="column is-narrow is-hidden-mobile">
+    <administrador-central-menu-lateral></administrador-central-menu-lateral>
+  </div>
+  <div class="column" style="overflow: scroll;">
+    <div style="background: #FFF; border-radius: 1em;  margin:20px">
+      <div class="top-bar is-primary" [ngClass]=" {'is-dark': busquedaActivada, 'is-primary': !busquedaActivada } ">
+        <h1 class="title" style="margin-bottom:0px" *ngIf="esEditar">
+          <span class="icon is-medium">
+            <i class="fa fa-edit"></i>
+          </span> Editar contrato
+        </h1>
+        <h1 class="title" style="margin-bottom:0px" *ngIf="!esEditar">
+          <span class="icon is-medium">
+            <i class="fa fa-file-text-o"></i>
+          </span> Nuevo contrato
+        </h1>
+        <a class="button  is-primary" routerLink="/administrador-central/contratos/" style="position:absolute; top:1em; right:9em;">
+          <span class="icon">
+              <i class="fa fa-arrow-left"></i>
+            </span>
+            <span>Regresar</span>
+        </a>
+        <a class="button  is-primary is-inverted" (click)="guardar()"  style="position:absolute; top:1em; right:1em;">
+            <span class="icon">
+              <i class="fa fa-save"></i>
+            </span>
+            <span>Guardar</span>
+          </a>
+
+      </div>
+      <div class="is-fullwidth has-text-centered" *ngIf="cargando">
+        <br>
+        <span class="tag is-primary is-large ">
+          <span class="icon">
+            <i class="fa fa-refresh fa-spin"></i>
+          </span> &nbsp;
+          <span>Cargando...</span>
+        </span>
+        <br>
+        <br>
+      </div>
+      <div class="tabs is-boxed is-centered" style="margin-top:0.5em;"  *ngIf="esEditar &&!cargando">
+          <ul>
+            <li [ngClass]="{'is-active': tabInformacion }"><a  (click)="tabInformacion = true; tabLista = false;">Datos generales</a></li>
+            <li [ngClass]="{'is-active': tabLista }"><a  (click)="tabInformacion = false; tabLista = true;">Lista de precios ({{ contrato.precios.length }})</a></li>
+          </ul>
+        </div>
+      <section style="padding:1em;" *ngIf="!cargando && tabInformacion">
+        <div class="field">
+          <label class="label">Proveedor:</label>
+
+          <p class="control is-expanded">
+            <span class="select is-fullwidth">
+              <select (change)="seleccionarProveedor($event.target.value)" [ngClass]="{'is-danger': errores.proveedor_id, 'is-disabled': guardando}">
+                <option value="">Selecciona un proveedor</option>
+                <option *ngFor="let item of proveedores" value="{{ item.id }}" [selected]="contrato.proveedor_id == item.id">{{ item.nombre }}</option>
+              </select>
+            </span>
+            <span class="help is-danger" *ngIf="errores.proveedor_id == 'required'">Este campo es requerido.</span>
+          </p>
+        </div>
+        <br>
+        <div class="columns" style="font-size: 0.8em">
+          <div class="column">
+            <div class="field">
+              <label class="label">Monto mínimo:</label>
+              <p class="control is-expanded  has-icon has-icon-right">
+                <input class="input" autofocus type="text" [ngClass]="{'is-danger': errores.monto_minimo != null, 'is-disabled': guardando}"
+                  placeholder="$ 0.00" [(ngModel)]="contrato.monto_minimo">
+                <span class="icon is-small" *ngIf="false">
+                  <i class="fa fa-warning"></i>
+                </span>
+                <span class="help is-danger" *ngIf="errores.monto_minimo == 'required'">Este campo es requerido.</span>
+                <span class="help is-danger" *ngIf="errores.monto_minimo == 'numeric'">Debe ser de tipo numérico.</span>
+                <span class="help is-danger" *ngIf="errores.monto_minimo == 'smaller_than'">Debe ser menor o igual al monto máximo.</span>
+              </p>
+            </div>
+          </div>
+          <div class="column">
+            <div class="field">
+              <label class="label">Monto máximo:</label>
+              <p class="control is-expanded  has-icon has-icon-right">
+                <input class="input" autofocus type="text" [ngClass]="{'is-danger': errores.monto_maximo != null, 'is-disabled': guardando}"
+                  placeholder="$ 0.00" [(ngModel)]="contrato.monto_maximo">
+                <span class="icon is-small" *ngIf="false">
+                  <i class="fa fa-warning"></i>
+                </span>
+                <span class="help is-danger" *ngIf="errores.monto_maximo == 'required'">Este campo es requerido.</span>
+                <span class="help is-danger" *ngIf="errores.monto_maximo == 'numeric'">Debe ser de tipo numérico.</span>
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="columns" style="font-size: 0.8em">
+          <div class="column">
+            <div class="field">
+              <label class="label">Fecha inicio:</label>
+              <p class="control is-expanded  has-icon has-icon-right">
+                <input class="input" autofocus type="date" [ngClass]="{'is-danger': errores.fecha_inicio != null, 'is-disabled': guardando}"
+                  [(ngModel)]="contrato.fecha_inicio">
+                <span class="icon is-small" *ngIf="false">
+                  <i class="fa fa-warning"></i>
+                </span>
+                <span class="help is-danger" *ngIf="errores.fecha_inicio == 'required'">Este campo es requerido.</span>
+                <span class="help is-danger" *ngIf="errores.fecha_inicio == 'date'">Debe ser de tipo fecha.</span>
+                <span class="help is-danger" *ngIf="errores.fecha_inicio == 'smaller_than'">Debe ser menor o igual a la fecha de fin.</span>
+              </p>
+            </div>
+          </div>
+          <div class="column">
+            <div class="field">
+              <label class="label">Fecha fin:</label>
+              <p class="control is-expanded  has-icon has-icon-right">
+                <input class="input" autofocus type="date" [ngClass]="{'is-danger': errores.fecha_fin != null, 'is-disabled': guardando}"
+                  [(ngModel)]="contrato.fecha_fin">
+                <span class="icon is-small" *ngIf="false">
+                  <i class="fa fa-warning"></i>
+                </span>
+                <span class="help is-danger" *ngIf="errores.fecha_fin == 'required'">Este campo es requerido.</span>
+                <span class="help is-danger" *ngIf="errores.fecha_fin == 'date'">Debe ser de tipo fecha.</span>
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="columns">
+          <div class="column">
+            <div class="field">
+              <p class="control">
+                <label class="checkbox" [ngClass]="{ 'is-disabled': guardando}">
+                  <input type="checkbox" (change)="contrato.activo = !contrato.activo" [checked]="contrato.activo">
+                  <strong>Contrato activo del proveedor</strong>
+                </label>
+              </p>
+            </div>
+          </div>
+        </div>
+
+      </section>
+      <section style="padding:1em;" *ngIf="!cargando && tabLista">
+        <table class="table" style="font-size: 0.8em">
+          <thead>
+            <tr>
+              <th>Clave</th>
+              <th>Tipo</th>
+              <th>Descripcion</th>
+              <th  style="width: 100px">Precio</th>
+              <td style="width: 100px">
+                <a class="button  is-primary is-outlined is-small " (click)="mostrarModalInsumos = true;">
+                  <span class="icon is-small">
+                    <i class="fa fa-plus"></i>
+                  </span>
+                  <span>Agregar</span>
+                </a>
+              </td>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of pagedItems; let i=index;" >
+              <td>{{ item.insumo_medico_clave }}</td>
+              <td>{{ item.descripcion_tipo_insumo }}</td>
+              <td>{{ item.descripcion }}</td>
+              <td> <p class="control is-expanded"><input class="input" type="text" [(ngModel)]="item.precio" placeholder="0.00"></p></td>
+              <td>
+                  <span class="icon " *ngIf="item.cargando">
+                    <i class="fa fa-circle-o-notch fa-spin"></i>
+                  </span>
+                  <a *ngIf="!item.cargando" class="button is-white is-small" (click)="eliminar(item, i)">
+                    <span class="icon is-small">
+                      <i class="fa fa-trash-o"></i>
+                    </span>
+                  </a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <ul class="pagination-list" *ngIf="pager.pages && pager.pages.length">
+            <li [ngClass]="{disabled:pager.currentPage === 1}">
+                <a class="pagination-link"  (click)="setPage(1)">Primera</a>
+            </li>
+            <li [ngClass]="{disabled:pager.currentPage === 1}">
+                <a class="pagination-link"  (click)="setPage(pager.currentPage - 1)">
+                    <span class="icon">
+                        <i class="fa fa-chevron-left"></i>
+                      </span>
+                </a>
+            </li>
+            <li *ngFor="let page of pager.pages" [ngClass]="{active:pager.currentPage === page}">
+                <a class="pagination-link"  (click)="setPage(page)">{{page}}</a>
+            </li>
+            <li [ngClass]="{disabled:pager.currentPage === pager.totalPages}">
+                <a class="pagination-link"  (click)="setPage(pager.currentPage + 1)">
+                  <span class="icon">
+                    <i class="fa fa-chevron-right"></i>
+                  </span>
+                </a>
+            </li>
+            <li [ngClass]="{disabled:pager.currentPage === pager.totalPages}">
+                <a class="pagination-link"  (click)="setPage(pager.totalPages)">Última</a>
+            </li>
+        </ul>
+      </section>
+
+    </div>
+
+  </div>
+</div>
+
+<div class="notification is-danger" style="position:fixed; left:1em;  bottom:1em;" *ngIf="mensajeError.mostrar">
+  <button class="delete" (click)="mensajeError.mostrar = false"></button>
+  <b>Error:</b> {{ mensajeError.texto }}
+  <br>
+  <br>
+  <p style="text-align:center">
+    <a class="button is-danger is-inverted" (click)="ultimaPeticion(); mensajeError.mostrar = false">
+      <span class="icon">
+        <i class="fa fa-refresh"></i>
+      </span>
+      <span>Volver a intentar</span>
+    </a>
+  </p>
+</div>
+
+<div class="notification is-success" style="position:fixed; left:1em;  bottom:1em; width: auto" *ngIf="mensajeExito.mostrar">
+  <button class="delete" (click)="mensajeExito.mostrar = false"></button>
+  <p>
+    <span class="icon" style="margin-right: 0.5em;">
+      <i class="fa fa-check-circle"></i>
+    </span>
+    <span>{{ mensajeExito.texto }}</span>
+  </p>
+  <br>
+  <p style="text-align: center;">
+    <small>Este mensaje desaparecerá en {{ mensajeExito.cuentaAtras }} segundos.</small>
+  </p>
+</div>
+
+<buscar-insumos 
+    *ngIf="mostrarModalInsumos" 
+    (onCerrar)="mostrarModalInsumos = false" 
+    (onEnviar)="agregarItem($event)" 
+    [listaAgregados]="listaClavesAgregadas" 
+    [listaAgregadosConClues]="listaClavesAgregadas" 
+    [conPrecios]="false"
+    [conCantidad]="false"
+    [establecerPrecio]="true"
+    [conTipoInsumo]="true"
+    [disponiblePedidos]="false"
+    [conClues]="false"></buscar-insumos>

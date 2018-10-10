@@ -1,0 +1,21 @@
+<div class="menu" style="padding: 1em; padding-bottom:0;">
+    <ul class="menu-list">
+        <li>
+            <a (click)="toggleMinimizado = !toggleMinimizado">
+                <span class="icon" ><i class="fa {{(toggleMinimizado)?'fa-chevron-right':'fa-chevron-left'}}"></i></span>
+            </a>
+        </li>    
+    </ul>
+</div>
+<aside class="menu" style="padding: 1em;">
+    <div *ngFor="let item of menuAutorizado">
+        <p *ngIf="!toggleMinimizado" class="menu-label">{{ item.titulo }}</p>
+        <ul class="menu-list">
+            <li *ngFor="let modulo of item.modulos">
+                <a routerLink="{{ modulo.url }}" routerLinkActive="is-active">
+                    <span class="icon" ><i class="fa {{ modulo.icono }}"></i></span><span *ngIf="!toggleMinimizado">&nbsp;&nbsp;{{ modulo.titulo }}</span>
+                </a>
+            </li>    
+        </ul>
+    </div>    
+</aside>

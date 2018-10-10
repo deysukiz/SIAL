@@ -1,0 +1,172 @@
+<admision-menu></admision-menu>
+<div style="height:50px;"></div>
+<div class="contenedor columns " style="height:100%; ">
+    <div class="column is-one-quarter is-hidden-mobile">
+        <admision-menu-lateral></admision-menu-lateral>
+    </div>
+    <div class="column" style="padding:2em;">
+        <div style="background: #FFF; border-radius: 1em; overflow: hidden;">
+            <section class="hero" [ngClass] = " 'is-primary' " >
+                
+                <div class="hero-body" style="position:relative;">
+                    
+                    <div class="container is-fluid">
+                        
+                        <h1 class="title">
+                            <span class="icon is-medium"><i class="fa fa-user"></i></span> Ingreso Paciente
+                        </h1>
+                        
+                    </div>
+                </div>
+            </section>
+            <div class="is-fullwidth has-text-centered" *ngIf="cargando">
+                <br>
+                <span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span> &nbsp;<span>Cargando...</span></span>
+                <br>
+                <br>
+            </div>
+             <section class="section">
+                <form name="form" novalidate [formGroup]="pacienteIngreso"  (ngSubmit)="enviar()">     
+                  <section class="section" style="background-color: #00d1b2;">
+                    <div class="container">
+                      <div class="heading">
+                        <h1 class="title" style="color: #FFF">Datos del Paciente</h1>
+                        <h2 class="subtitle" style="color: #FFF">
+                          ID: {{ id_paciente }}<BR>
+                          NOMBRE: {{ nombre_paciente }} <BR>
+                          LOCALIDAD: {{ localidad_paciente }}<BR>
+
+                        </h2>
+                      </div>
+                    </div>
+                  </section>
+                   <br>    
+                  <div class="control is-grouped">
+                    <p class="control is-expanded  has-icon has-icon-right">
+                        <label class="label">Referido</label>
+                      	<span class="select is-fullwidth">
+    		                	<select  formControlName="referido" name="referido" #referido (change)="valida_referido(referido.value)">
+    		                		<option value="1" selected="selected">SI</option>
+    		                		<option value="2">NO</option>
+    		                	</select>
+		                    </span>	
+
+	                 	<span class="icon is-small" *ngIf="pacienteIngreso.get('referido').hasError('required') && pacienteIngreso.get('referido').touched">
+	                     	<i class="fa fa-warning"></i>
+	                    </span>
+	                    <span class="help is-danger" *ngIf="pacienteIngreso.get('referido').hasError('required') && pacienteIngreso.get('referido').touched">Este campo es requerido.</span>                     
+                    </p>
+                    <p class="control is-expanded  has-icon has-icon-right"  [hidden]="!nombre_conocido">
+                        <label class="label">Unidad Referida</label>
+                      	<span class="select is-fullwidth">
+                          <select  formControlName="unidad_referido" name="unidad_referido">
+                              <option *ngFor="let item of UnidadesMedicas" value="{{item.clues}}">{{ item.nombre }} - {{ item.clues }}</option>
+                          </select>
+                        </span>
+    	                  <span class="icon is-small" *ngIf="pacienteIngreso.get('unidad_referido').hasError('required') && pacienteIngreso.get('unidad_referido').touched">
+    	                    <i class="fa fa-warning"></i>
+    	                  </span>
+    	                  <span class="help is-danger" *ngIf="pacienteIngreso.get('unidad_referido').hasError('required') && pacienteIngreso.get('unidad_referido').touched">Este campo es requerido.</span>
+                    </p>    
+	                </div>
+
+                  <div class="control is-grouped">
+                    <p class="control is-expanded  has-icon has-icon-right">
+                        <label class="label">Urgencia Calificada</label>
+                        <span class="select is-fullwidth">
+                          <select  formControlName="urgencia_calificada" name="urgencia_calificada" (change)="bloquea_formulario()" >
+                            <option value="1" selected="selected">SI</option>
+                            <option value="2">NO</option>
+                          </select>
+                        </span> 
+                    <span class="icon is-small" *ngIf="pacienteIngreso.get('urgencia_calificada').hasError('required') && pacienteIngreso.get('urgencia_calificada').touched">
+                        <i class="fa fa-warning"></i>
+                      </span>
+                      <span class="help is-danger" *ngIf="pacienteIngreso.get('urgencia_calificada').hasError('required') && pacienteIngreso.get('urgencia_calificada').touched">Este campo es requerido.</span>                     
+                    </p>
+
+                    <p class="control is-expanded  has-icon has-icon-right" [hidden]="verForm">
+                        <label class="label">Triage Obstetrico</label>
+                        <span class="select is-fullwidth">
+                          <select  formControlName="registro_triage" name="registro_triage" #registro_triage >
+                            <option value="1" selected="selected">SI</option>
+                            <option value="2">NO</option>
+                          </select>
+                        </span> 
+                    <span class="icon is-small" *ngIf="pacienteIngreso.get('registro_triage').hasError('required') && pacienteIngreso.get('registro_triage').touched">
+                        <i class="fa fa-warning"></i>
+                      </span>
+                      <span class="help is-danger" *ngIf="pacienteIngreso.get('registro_triage').hasError('required') && pacienteIngreso.get('registro_triage').touched">Este campo es requerido.</span>                     
+                    </p>
+                    <p class="control is-expanded  has-icon has-icon-right" [hidden]="verForm">
+                        <label class="label">Lugar donde se encuentra</label>
+                        <span class="select is-fullwidth">
+                          <select  formControlName="estado_triage_id" name="estado_triage_id">
+                            <option *ngFor="let item of Triage" value="{{item.id}}">{{ item.id }} {{ item.descripcion }}</option>
+                          </select>
+                        </span> 
+                    <span class="icon is-small" *ngIf="pacienteIngreso.get('estado_triage_id').hasError('required') && pacienteIngreso.get('estado_triage_id').touched">
+                        <i class="fa fa-warning"></i>
+                      </span>
+                      <span class="help is-danger" *ngIf="pacienteIngreso.get('estado_triage_id').hasError('required') && pacienteIngreso.get('estado_triage_id').touched">Este campo es requerido.</span>                     
+                    </p>
+                     <p class="control is-expanded  has-icon has-icon-right" [hidden]="verForm">
+                        <label class="label">Grado de Lesión</label>
+                        <span class="select is-fullwidth">
+                          <select  formControlName="grado_lesion_id" name="grado_lesion_id" >
+                              <option *ngFor="let item of GradoLesion" value="{{item.id}}">{{ item.descripcion }}</option>
+                          </select>
+                        </span> 
+                    <span class="icon is-small" *ngIf="pacienteIngreso.get('grado_lesion_id').hasError('required') && pacienteIngreso.get('grado_lesion_id').touched">
+                        <i class="fa fa-warning"></i>
+                      </span>
+                      <span class="help is-danger" *ngIf="pacienteIngreso.get('grado_lesion_id').hasError('required') && pacienteIngreso.get('grado_lesion_id').touched">Este campo es requerido.</span>                     
+                    </p>
+                    <p class="control is-expanded  has-icon has-icon-right" [hidden]="verForm">
+                        <label class="label">Fecha de ingreso</label>
+                        <input class="input"  type="text" name="fecha_ingreso" formControlName="fecha_ingreso" placeholder="aaaa-mm-dd" readonly="readonly">
+                          <span class="icon is-small" *ngIf="pacienteIngreso.get('fecha_ingreso').hasError('required') && pacienteIngreso.get('fecha_ingreso').touched">
+                            <i class="fa fa-warning"></i>
+                          </span>
+                          <span class="help is-danger" *ngIf="pacienteIngreso.get('fecha_ingreso').hasError('required') && pacienteIngreso.get('fecha_ingreso').touched">Este campo es requerido.</span>
+                         
+                    </p>
+                    <p class="control is-expanded  has-icon has-icon-right" [hidden]="verForm">
+                        <label class="label">Hora de ingreso</label>
+                        <input class="input"  type="text" name="hora_ingreso" formControlName="hora_ingreso" placeholder="HH:mm" readonly="readonly">
+                          <span class="icon is-small" *ngIf="pacienteIngreso.get('hora_ingreso').hasError('required') && pacienteIngreso.get('hora_ingreso').touched">
+                            <i class="fa fa-warning"></i>
+                          </span>
+                          <span class="help is-danger" *ngIf="pacienteIngreso.get('hora_ingreso').hasError('required') && pacienteIngreso.get('hora_ingreso').touched">Este campo es requerido.</span>
+                         
+                    </p>
+                  </div>
+                  <br><br>
+                  <div class="control is-grouped">
+                    <p class="control" *ngIf="permiso_guardar">
+                      <button class="button is-primary" type="submit" [ngClass]="{'is-loading': cargando}" [disabled]="pacienteIngreso.invalid">Guardar</button>
+                    </p>
+                    
+                    <p class="control">
+                      <a class="button is-white" (click)="regresar()" >Regresar</a>
+                    </p>
+                  </div>
+
+              </form>
+            </section>  
+        </div>
+    </div>    
+</div>
+
+<div class="notification is-danger" style="position:fixed; left:1em;  bottom:1em;" *ngIf="mensajeError.mostrar">
+    <button class="delete" (click)="mensajeError.mostrar = false"></button>        
+    <b>Error:</b> {{ mensajeError.texto }}<br><br>
+    <p style="text-align:center" ><a  class="button is-danger is-inverted" (click)="ultimaPeticion(); mensajeError.mostrar = false"> <span class="icon"><i class="fa fa-refresh"></i></span> <span>Volver a intentar</span></a></p>        
+</div>
+
+<div class="notification is-success" style="position:fixed; left:1em;  bottom:1em; width: auto" *ngIf="mensajeExito.mostrar">       
+    <button class="delete" (click)="mensajeExito.mostrar = false"></button>
+    <p><span class="icon" style="margin-right: 0.5em;"><i class="fa fa-check-circle"></i></span> <span>{{ mensajeExito.texto }}</span></p>
+    <br>
+    <p style="text-align: center;"><small >Este mensaje desaparecerá en {{ mensajeExito.cuentaAtras }} segundos.</small></p>       
+</div>

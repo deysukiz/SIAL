@@ -1,0 +1,19 @@
+.estatus-rojo{
+    color:red !important;
+}
+.estatus-amarillo{
+    color:orange !important;
+}
+.estatus-verde{
+    color:#23d160;
+}
+.estatus-azul{
+    color:#3273dc;
+}
+.estatus-normal{
+    color:#555555;
+}
+
+.is-primary.is-inverted.is-loading {
+    background: #00947E;
+}

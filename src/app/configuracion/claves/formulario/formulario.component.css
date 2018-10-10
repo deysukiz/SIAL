@@ -1,0 +1,9 @@
+    
+div.scroll {
+    background-color: #FFFFFF;
+    height: 450px;
+    overflow: auto;
+}      
+div.hidden {
+    display: none;
+}

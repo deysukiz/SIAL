@@ -1,0 +1,21 @@
+td.aceptados {
+    background-color: #EFFBF5;
+}
+
+td.ignorados {
+    background-color: #FBFBEF;
+}
+
+.cancelado{
+    color:red;
+}
+
+.descargado
+{
+	background-color: #00d1b2;
+}
+
+.color_tag_descargas
+{
+	background-color: #FFFFFF;
+}

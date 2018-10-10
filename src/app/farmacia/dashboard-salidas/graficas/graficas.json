@@ -1,0 +1,71 @@
+{
+  "claves": [
+    {
+      "fecha": "xxxx-xx-xx",
+      "causes": 150,
+      "no_causes": 200,
+      "mat_curacion": 50,
+      "total": 320
+    },
+    {
+      "fecha": "xxxx-xx-xx",
+      "causes": 500,
+      "no_causes": 300,
+      "mat_curacion": 800,
+      "total": 320
+    },
+    {
+      "fecha": "xxxx-xx-xx",
+      "causes": 900,
+      "no_causes": 500,
+      "mat_curacion": 1300,
+      "total": 320
+    }
+  ],
+  "insumos": [
+    {
+      "fecha": "xxxx-xx-xx",
+      "causes": 150,
+      "no_causes": 200,
+      "mat_curacion": 50,
+      "total": 320
+    },
+    {
+      "fecha": "xxxx-xx-xx",
+      "causes": 500,
+      "no_causes": 300,
+      "mat_curacion": 800,
+      "total": 320
+    },
+    {
+      "fecha": "xxxx-xx-xx",
+      "causes": 900,
+      "no_causes": 500,
+      "mat_curacion": 1300,
+      "total": 320
+    }
+  ],
+  "montos": [
+    {
+      "fecha": "xxxx-xx-xx",
+      "causes": 150,
+      "no_causes": 200,
+      "mat_curacion": 50,
+      "total": 320
+    },
+    {
+      "fecha": "xxxx-xx-xx",
+      "causes": 500,
+      "no_causes": 300,
+      "mat_curacion": 800,
+      "total": 320
+    },
+    {
+      "fecha": "xxxx-xx-xx",
+      "causes": 900,
+      "no_causes": 500,
+      "mat_curacion": 1300,
+      "total": 320
+    }
+  ]
+}

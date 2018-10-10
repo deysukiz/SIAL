@@ -1,0 +1,44 @@
+<app-menu-dam></app-menu-dam>
+
+<div style="height:50px;"></div>
+<section style="padding: 1em;">
+  <div class="control is-grouped">
+    <p class="control is-expanded">
+        <input class="input is-medium" type="text" placeholder="Buscar" [(ngModel)] = "busqueda" id="search-box">
+    </p>
+    <p class="control">
+        <a class="button is-medium is-primary is-inverted" [ngClass]="{ 'is-disabled': busqueda==''}" (click)="busqueda=''">
+        <span class="icon"><i class="fa fa-close"></i></span>
+        </a>
+    </p>
+  </div>
+
+</section>
+<section style="padding: 1em;">
+    <section class="contenedor columns is-multiline is-mobile">
+        <div class="column is-1-desktop is-2-tablet is-3-mobile" *ngFor="let item of accesosDirectosAutorizados | buscarModulo: busqueda">
+            <a href="#" title="{{ item.titulo}}" class="item" routerLink="{{item.url}}"  routerLinkActive="active">
+                <figure class="image " style="height: auto; width: 100%; ">
+                    <img src="{{ item.icono }}" alt="{{item.titulo}}">                            
+                </figure>
+                <span class="is-hidden-mobile">{{ item.titulo}}</span>
+                <span class="is-hidden-tablet is-hidden-desktop"><small>{{ item.titulo}}</small></span>
+            </a>
+        </div>
+    </section>
+    <hr>
+    <section class="contenedor columns is-multiline is-mobile">
+        <div class="column is-1-desktop is-2-tablet is-3-mobile" *ngFor="let item of modulosAutorizados | buscarModulo: busqueda">
+            <a href="#" title="{{ item.titulo}}" style="position: relative;" class="item" routerLink="{{item.url}}" routerLinkActive="active">
+                
+                <figure class="image " style="height: auto; width: 100%; ">
+                    <img src="{{ item.icono }}" alt="{{item.titulo}}">                            
+                </figure>
+                <span class="is-hidden-mobile">{{ item.titulo}}</span>
+                <span class="is-hidden-tablet is-hidden-desktop"><small>{{ item.titulo}}</small></span>
+                <span *ngIf="item.badge>0" class="tag is-danger" style="position:absolute; top:0px; right:0px;">{{ item.badge }}</span>
+            </a>
+        </div>
+    </section>
+</section>
+

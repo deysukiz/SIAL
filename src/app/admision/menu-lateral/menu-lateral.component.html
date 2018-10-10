@@ -1,0 +1,31 @@
+<aside class="menu" style="padding: 1em;">
+    <p class="menu-label">
+        Admisión
+    </p>
+    
+    <a routerLink="/pacientes/modulo/verificacion" routerLinkActive="is-active" class="button is-primary is-inverted is-medium is-fullwidth" ><span class="icon"  ><i class="fa fa-plus"></i></span> <span>Nuevo Ingreso</span></a>
+    <br>
+
+    <ul class="menu-list">  
+        <li>
+            <a routerLinkActive="is-active" routerLink="/paciente/">
+                <span class="icon" ><i class="fa fa-user"></i></span> Pacientes
+                <span class="icon is-pulled-right" *ngIf="cargando"><i class="fa fa-circle-o-notch fa-spin"></i></span>
+                
+            </a>
+        </li>        
+        <li>
+            <a routerLinkActive="is-active" routerLink="/pacientes/modulo/verificacion">
+                <span class="icon" ><i class="fa fa-hospital-o"></i></span> Ingresos
+                <span class="icon is-pulled-right" *ngIf="cargando"><i class="fa fa-circle-o-notch fa-spin"></i></span>
+               
+            </a>
+        </li>        
+        <li>
+            <a  routerLinkActive="is-active" routerLink="/pacientes/modulo/egreso">
+                <span class="icon"  ><i class="fa fa-arrow-right"></i></span> Egresos 
+                <span class="icon is-pulled-right" *ngIf="cargando"><i class="fa fa-circle-o-notch fa-spin"></i></span>
+            </a>
+        </li>
+    </ul>        
+</aside>

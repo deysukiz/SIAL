@@ -1,0 +1,746 @@
+<menu-farmacia [modulo]="'Dashboard salidas'" [icono]="'assets/icono-dashboard.svg'"
+  [url]="'/almacen/dashboard-salidas'"></menu-farmacia>
+<div style="height:50px;"></div>
+
+<div class="box" style="margin: 20px;">
+      <div class="columns">
+        <div class="column is-half">
+          <section class="section">
+                  <div class="heading">
+                    <h1 class="title">{{usuario.almacen_activo.nombre}}</h1>
+                    <h2 class="subtitle">
+                      {{usuario.clues_activa.clues}} <strong>{{usuario.clues_activa.nombre}}</strong>
+                    </h2>
+                  </div>
+          </section>
+        </div>
+        <div class="column">
+          <div class="field">
+            <label class="label">Fecha inicial:</label>
+            <p class="control is-expanded  has-icon has-icon-right">
+              <input class="input" [value]="fecha_inicial_actual" formControlName="fecha_inicial" [(ngModel)]="fecha_inicial" ngui-datetime-picker
+                  [min-date]="MinDate" [max-date]="MaxDate" date-only="true" 
+                  placeholder="YYYY-MM-DD" />
+            </p>
+          </div>
+          <div class="field">
+            <label class="label">Fecha final:</label>
+            <p class="control is-expanded  has-icon has-icon-right">
+              <input class="input" [value]="fecha_actual" formControlName="fecha_final" [(ngModel)]="fecha_final" ngui-datetime-picker
+                  [min-date]="MinDate" [max-date]="MaxDate" date-only="true" 
+                  placeholder="YYYY-MM-DD" />
+            </p>
+          </div>
+
+        </div>
+      </div>
+<div style="overflow:auto; display:block" [style.maxHeight.px]="tamano-300">
+  <div class="card" style="margin: 20px; padding-left: 30px; padding-right: 70px">
+    <table class="table" style="margin:5px;">
+      <tbody>
+        <tr>
+          <th>Presupuesto Anual Causes:</th>
+          <th>
+            <div class="columns">
+              <div class="column">
+                <span class="tag is-primary is-medium">Autorizado: $ {{ presupuesto.causes_modificado | number:'1.2-2' }}</span>
+              </div>
+              <div class="column">
+                <span class="tag is-warning is-medium">Comprometido: $ {{ presupuesto.causes_comprometido | number:'1.2-2' }}</span>
+              </div>
+              <div class="column">
+                <span class="tag is-danger is-medium">Devengado: $ {{ presupuesto.causes_devengado | number:'1.2-2' }}</span>
+              </div>
+              <div class="column">
+                <span class="tag is-success is-medium">Disponible: $ {{ presupuesto.causes_disponible | number:'1.2-2' }}</span>
+              </div>
+            </div>
+          </th>
+        </tr>
+        <tr>
+          <th>Presupuesto Anual No Causes:</th>
+          <th>
+            <div class="columns">
+              <div class="column">
+                <span class="tag is-primary is-medium">Autorizado: $ {{ presupuesto.no_causes_modificado | number:'1.2-2' }}</span>
+              </div>
+              <div class="column">
+                <span class="tag is-warning is-medium">Comprometido: $ {{ presupuesto.no_causes_comprometido | number:'1.2-2' }}</span>
+              </div>
+              <div class="column">
+                <span class="tag is-danger is-medium">Devengado: $ {{ presupuesto.no_causes_devengado | number:'1.2-2' }}</span>
+              </div>
+              <div class="column">
+                <span class="tag is-success is-medium">Disponible: $ {{ presupuesto.no_causes_disponible | number:'1.2-2' }}</span>
+              </div>
+            </div>
+          </th>
+        </tr>
+        <tr>
+          <th>Presupuesto Anual Material de Curación:</th>
+          <th>
+            <div class="columns">
+              <div class="column">
+                <span class="tag is-primary is-medium">Autorizado: $ {{ presupuesto.material_curacion_modificado | number:'1.2-2' }}</span>
+              </div>
+              <div class="column">
+                <span class="tag is-warning is-medium">Comprometido: $ {{ presupuesto.material_curacion_comprometido | number:'1.2-2' }}</span>
+              </div>
+              <div class="column">
+                <span class="tag is-danger is-medium">Devengado: $ {{ presupuesto.material_curacion_devengado | number:'1.2-2' }}</span>
+              </div>
+              <div class="column">
+                <span class="tag is-success is-medium">Disponible: $ {{ presupuesto.material_curacion_disponible | number:'1.2-2' }}</span>
+              </div>
+            </div>
+          </th>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  
+  <!-- Primera parte -->
+  <div class="columns">
+    <!-- Mes y total de recetas -->
+    <div class="column is-half" style="margin: 10px; padding-left: 20px; padding-right: 60px">
+      <div class="card">
+        <div class="card-content">
+          <div class="content">
+            <div class="label" style="text-align: center">
+              Mes:
+            </div>
+            <div class="label" style="text-align: center">
+              Total de recetas:
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- % surtido -->
+    <div class="column is-half" style="margin: 10px; padding-left: 20px; padding-right: 60px">
+      <!-- % Surtido por claves -->
+      <div class="card" [ngClass]="{'is-hidden': surtido == 2 || surtido == 3}">
+        <header class="card-header is-primary">
+          <p class="card-header-title">
+            Porcentaje de surtimiento
+          </p>
+            <div class="level-right">
+              <a (click)="cambiarSurtido(1)">
+                <div class="tag is-primary">Claves </div>
+              </a>
+              <a (click)="cambiarSurtido(2)">
+                <div class="tag">Insumos </div>
+              </a>
+              <a (click)="cambiarSurtido(3)">
+                <div class="tag">Monto </div>
+              </a>
+            </div>
+        </header>
+        <div class="card-content">
+          <div class="content scroll">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>No.</th>
+                  <th><abbr title="Cantidad solicitada">Solicitado</abbr></th>
+                  <th><abbr title="Cantidad surtida">Surtido</abbr></th>
+                  <th><abbr title="Porcentaje">%</abbr></th>
+                </tr>
+              </thead>
+              <tfoot>
+                <tr>
+                  <th>No.</th>
+                  <th><abbr title="Cantidad solicitada">Solicitado</abbr></th>
+                  <th><abbr title="Cantidad surtida">Surtido</abbr></th>
+                  <th><abbr title="Porcentaje">%</abbr></th>
+                </tr>
+              </tfoot>
+              <tbody>
+                <tr>
+                  <th>1</th>
+                  <td>500</td>
+                  <td>250</td>
+                  <td>50</td>
+                </tr>
+                <tr>
+                  <th>2</th>
+                  <td>500</td>
+                  <td>250</td>
+                  <td>50</td>
+                </tr>
+                <tr>
+                  <th>3</th>
+                  <td>500</td>
+                  <td>250</td>
+                  <td>50</td>
+                </tr>
+                <tr>
+                  <th>4</th>
+                  <td>500</td>
+                  <td>250</td>
+                  <td>50</td>
+                </tr>
+                <tr>
+                  <th>5</th>
+                  <td>500</td>
+                  <td>250</td>
+                  <td>50</td>
+                </tr>
+                <tr>
+                  <th>6</th>
+                  <td>550</td>
+                  <td>250</td>
+                  <td>50</td>
+                </tr>
+                <tr>
+                  <th>7</th>
+                  <td>450</td>
+                  <td>250</td>
+                  <td>50</td>
+                </tr>
+                <tr>
+                  <th>8</th>
+                  <td>400</td>
+                  <td>250</td>
+                  <td>50</td>
+                </tr>
+                <tr>
+                  <th>9</th>
+                  <td>350</td>
+                  <td>250</td>
+                  <td>50</td>
+                </tr>
+                <tr>
+                  <th>10</th>
+                  <td>300</td>
+                  <td>250</td>
+                  <td>50</td>
+                </tr>
+                <tr>
+                  <th>11</th>
+                  <td>250</td>
+                  <td>250</td>
+                  <td>50</td>
+                </tr>
+                <tr>
+                  <th>12</th>
+                  <td>500</td>
+                  <td>250</td>
+                  <td>50</td>
+                </tr>
+                <tr>
+                  <th>13</th>
+                  <td>500</td>
+                  <td>250</td>
+                  <td>50</td>
+                </tr>
+                <tr>
+                  <th>14</th>
+                  <td>500</td>
+                  <td>250</td>
+                  <td>50</td>
+                </tr>
+                <tr>
+                  <th>15</th>
+                  <td>500</td>
+                  <td>250</td>
+                  <td>50</td>
+                </tr>
+                <tr>
+                  <th>16</th>
+                  <td>500</td>
+                  <td>250</td>
+                  <td>50</td>
+                </tr>
+                <tr>
+                  <th>17</th>
+                  <td>500</td>
+                  <td>250</td>
+                  <td>50</td>
+                </tr>
+                <tr>
+                  <th>18</th>
+                  <td>500</td>
+                  <td>250</td>
+                  <td>50</td>
+                </tr>
+                <tr>
+                  <th>19</th>
+                  <td>500</td>
+                  <td>250</td>
+                  <td>50</td>
+                </tr>
+                <tr>
+                  <th>20</th>
+                  <td>500</td>
+                  <td>250</td>
+                  <td>50</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <!-- % Surtido por insumos -->
+      <div class="card" [ngClass]="{'is-hidden': surtido == 1 || surtido == 3 }">
+        <header class="card-header is-primary">
+          <p class="card-header-title">
+            Porcentaje de surtimiento
+          </p>
+          <div class="level-right">
+              <a (click)="cambiarSurtido(1)">
+                <div class="tag">Claves</div>
+              </a>
+              <a (click)="cambiarSurtido(2)">
+                <div class="tag is-primary">Insumos</div>
+              </a>
+              <a (click)="cambiarSurtido(3)">
+                <div class="tag">Monto</div>
+              </a>
+            </div>
+        </header>
+        <div class="card-content">
+          <div class="content scroll">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>No.</th>
+                  <th><abbr title="Cantidad solicitada">Solicitado</abbr></th>
+                  <th><abbr title="Cantidad surtida">Surtido</abbr></th>
+                  <th><abbr title="Porcentaje">%</abbr></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th>1</th>
+                  <td>500</td>
+                  <td>250</td>
+                  <td>50</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <!-- % Surtido por monto -->
+      <div class="card" [ngClass]="{'is-hidden': surtido == 1 || surtido == 2}">
+        <header class="card-header is-primary">
+          <p class="card-header-title">
+            Porcentaje de surtimiento
+          </p>
+        </header>
+        <div class="card-content">
+          <div class="content">
+            <div class="level-right">
+              <a (click)="cambiarSurtido(1)">
+                <div class="tag">Claves</div>
+              </a>
+              <a (click)="cambiarSurtido(2)">
+                <div class="tag">Insumos</div>
+              </a>
+              <a (click)="cambiarSurtido(3)">
+                <div class="tag is-primary">Monto</div>
+              </a>
+            </div>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>No.</th>
+                  <th><abbr title="Cantidad solicitada">Solicitado</abbr></th>
+                  <th><abbr title="Cantidad surtida">Surtido</abbr></th>
+                  <th><abbr title="Porcentaje">%</abbr></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th>1</th>
+                  <td>$ 500.00</td>
+                  <td>$ 250.00</td>
+                  <td>50</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!--  -->
+  <div class="columns">
+
+    <!-- Claves negadas -->
+    <div class="column is-half" style="margin: 10px; padding-left: 20px; padding-right: 60px">
+      <div class="card">
+        <header class="card-header">
+          <p class="card-header-title">
+            TOP - Claves negadas
+          </p>
+        </header>
+        <div class="card-content">
+          <div class="content scroll">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>No.</th>
+                  <th><abbr title="Clave">Clave</abbr></th>
+                  <th>Nombre</th>
+                  <th><abbr title="Cantidad">Cant.</abbr></th>
+                  <th><abbr title="Existencia">Exist.</abbr></th>
+                  <th><abbr title="Periodo de negacion">Negacion</abbr></th>
+                </tr>
+              </thead>
+              <tfoot>
+                <tr>
+                  <th>No.</th>
+                  <th><abbr title="Clave">Clave</abbr></th>
+                  <th>Nombre</th>
+                  <th><abbr title="Cantidad">Cant.</abbr></th>
+                  <th><abbr title="Existencia">Exist.</abbr></th>
+                  <th><abbr title="Periodo de negacion">Negacion</abbr></th>
+                </tr>
+              </tfoot>
+              <tbody>
+                <tr>
+                  <th>1</th>
+                  <td>010.000.0104.00</td>
+                  <td>PARACETAMOL</td>
+                  <td>100</td>
+                  <td>50</td>
+                  <td>2017-04-10</td>
+                </tr>
+                <tr>
+                  <th>2</th>
+                  <td>010.000.0104.00</td>
+                  <td>PARACETAMOL</td>
+                  <td>100</td>
+                  <td>50</td>
+                  <td>2017-04-10</td>
+                </tr>
+                <tr>
+                  <th>3</th>
+                  <td>010.000.0104.00</td>
+                  <td>PARACETAMOL</td>
+                  <td>100</td>
+                  <td>50</td>
+                  <td>2017-04-10</td>
+                </tr>
+                <tr>
+                  <th>4</th>
+                  <td>010.000.0104.00</td>
+                  <td>PARACETAMOL</td>
+                  <td>100</td>
+                  <td>50</td>
+                  <td>2017-04-10</td>
+                </tr>
+                <tr>
+                  <th>5</th>
+                  <td>010.000.0104.00</td>
+                  <td>PARACETAMOL</td>
+                  <td>100</td>
+                  <td>50</td>
+                  <td>2017-04-10</td>
+                </tr>
+                <tr>
+                  <th>6</th>
+                  <td>010.000.0104.00</td>
+                  <td>PARACETAMOL</td>
+                  <td>100</td>
+                  <td>50</td>
+                  <td>2017-04-10</td>
+                </tr>
+                <tr>
+                  <th>8</th>
+                  <td>010.000.0104.00</td>
+                  <td>PARACETAMOL</td>
+                  <td>100</td>
+                  <td>50</td>
+                  <td>2017-04-10</td>
+                </tr>
+                <tr>
+                  <th>9</th>
+                  <td>010.000.0104.00</td>
+                  <td>PARACETAMOL</td>
+                  <td>100</td>
+                  <td>50</td>
+                  <td>2017-04-10</td>
+                </tr>
+                <tr>
+                  <th>10</th>
+                  <td>010.000.0104.00</td>
+                  <td>PARACETAMOL</td>
+                  <td>100</td>
+                  <td>50</td>
+                  <td>2017-04-10</td>
+                </tr>
+                <tr>
+                  <th>11</th>
+                  <td>010.000.0104.00</td>
+                  <td>PARACETAMOL</td>
+                  <td>100</td>
+                  <td>50</td>
+                  <td>2017-04-10</td>
+                </tr>
+                <tr>
+                  <th>12</th>
+                  <td>010.000.0104.00</td>
+                  <td>PARACETAMOL</td>
+                  <td>100</td>
+                  <td>50</td>
+                  <td>2017-04-10</td>
+                </tr>
+                <tr>
+                  <th>13</th>
+                  <td>010.000.0104.00</td>
+                  <td>PARACETAMOL</td>
+                  <td>100</td>
+                  <td>50</td>
+                  <td>2017-04-10</td>
+                </tr>
+                <tr>
+                  <th>14</th>
+                  <td>010.000.0104.00</td>
+                  <td>PARACETAMOL</td>
+                  <td>100</td>
+                  <td>50</td>
+                  <td>2017-04-10</td>
+                </tr>
+                <tr>
+                  <th>15</th>
+                  <td>010.000.0104.00</td>
+                  <td>PARACETAMOL</td>
+                  <td>100</td>
+                  <td>50</td>
+                  <td>2017-04-10</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Claves de mayor movimiento -->
+    <div class="column is-half" style="margin: 10px; padding-left: 20px; padding-right: 60px">
+      <div class="card">
+        <header class="card-header is-primary">
+          <p class="card-header-title">
+            TOP - Claves de mayor movimiento
+          </p>
+        </header>
+        <div class="card-content">
+          <div class="content scroll">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>No.</th>
+                  <th><abbr title="Clave">Clave</abbr></th>
+                  <th>Nombre</th>
+                  <th><abbr title="Consumo promedio mensual">CPM</abbr></th>
+                  <th><abbr title="Existencia actual">Exist.</abbr></th>
+                </tr>
+              </thead>
+              <tfoot>
+                <tr>
+                  <th>No.</th>
+                  <th><abbr title="Clave">Clave</abbr></th>
+                  <th>Nombre</th>
+                  <th><abbr title="Consumo promedio mensual">CPM</abbr></th>
+                  <th><abbr title="Existencia actual">Exist.</abbr></th>
+                </tr>
+              </tfoot>
+              <tbody>
+                <tr>
+                  <th>1</th>
+                  <td>010.000.0104.00</td>
+                  <td>PARACETAMOL</td>
+                  <td>100</td>
+                  <td>50</td>
+                </tr>
+                <tr>
+                  <th>2</th>
+                  <td>010.000.0104.00</td>
+                  <td>PARACETAMOL</td>
+                  <td>100</td>
+                  <td>50</td>
+                </tr>
+                <tr>
+                  <th>3</th>
+                  <td>010.000.0104.00</td>
+                  <td>PARACETAMOL</td>
+                  <td>100</td>
+                  <td>50</td>
+                </tr>
+                <tr>
+                  <th>4</th>
+                  <td>010.000.0104.00</td>
+                  <td>PARACETAMOL</td>
+                  <td>100</td>
+                  <td>50</td>
+                </tr>
+                <tr>
+                  <th>5</th>
+                  <td>010.000.0104.00</td>
+                  <td>PARACETAMOL</td>
+                  <td>100</td>
+                  <td>50</td>
+                </tr>
+                <tr>
+                  <th>6</th>
+                  <td>010.000.0104.00</td>
+                  <td>PARACETAMOL</td>
+                  <td>100</td>
+                  <td>50</td>
+                </tr>
+                <tr>
+                  <th>7</th>
+                  <td>010.000.0104.00</td>
+                  <td>PARACETAMOL</td>
+                  <td>100</td>
+                  <td>50</td>
+                </tr>
+                <tr>
+                  <th>8</th>
+                  <td>010.000.0104.00</td>
+                  <td>PARACETAMOL</td>
+                  <td>100</td>
+                  <td>50</td>
+                </tr>
+                <tr>
+                  <th>9</th>
+                  <td>010.000.0104.00</td>
+                  <td>PARACETAMOL</td>
+                  <td>100</td>
+                  <td>50</td>
+                </tr>
+                <tr>
+                  <th>10</th>
+                  <td>010.000.0104.00</td>
+                  <td>PARACETAMOL</td>
+                  <td>100</td>
+                  <td>50</td>
+                </tr>
+                <tr>
+                  <th>11</th>
+                  <td>010.000.0104.00</td>
+                  <td>PARACETAMOL</td>
+                  <td>100</td>
+                  <td>50</td>
+                </tr>
+                <tr>
+                  <th>12</th>
+                  <td>010.000.0104.00</td>
+                  <td>PARACETAMOL</td>
+                  <td>100</td>
+                  <td>50</td>
+                </tr>
+                <tr>
+                  <th>13</th>
+                  <td>010.000.0104.00</td>
+                  <td>PARACETAMOL</td>
+                  <td>100</td>
+                  <td>50</td>
+                </tr>
+                <tr>
+                  <th>14</th>
+                  <td>010.000.0104.00</td>
+                  <td>PARACETAMOL</td>
+                  <td>100</td>
+                  <td>50</td>
+                </tr>
+                <tr>
+                  <th>15</th>
+                  <td>010.000.0104.00</td>
+                  <td>PARACETAMOL</td>
+                  <td>100</td>
+                  <td>50</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gráficas 
+    <div class="columns">
+        <div class="column is-half" style="margin: 10px; padding-left: 20px; padding-right: 60px">
+        </div>
+        <div class="column is-half" style="margin: 10px; padding-left: 20px; padding-right: 70px">
+            <div class="card" style="align-items: center; align-content: center; align-self: center">
+                        <chart [options]="grafica_opciones"></chart>
+            </div>
+        </div>
+    </div>
+    -->
+    
+  <!-- Claves -->
+  <div class="card" [ngClass]="{'is-hidden': grafica == 2 || grafica == 3}">
+    <div class="card-content">
+      <div class="content">
+        <div class="level-right">
+          <a (click)="cambiarGrafica(1)">
+            <div class="tag is-primary">Claves</div>
+          </a>
+          <a (click)="cambiarGrafica(2)">
+            <div class="tag">Insumos</div>
+          </a>
+          <a (click)="cambiarGrafica(3)">
+            <div class="tag">Monto</div>
+          </a>
+        </div>
+        <!-- Gráfica CLAVES -->
+        <div class="panel">
+          <chart [options]="claves"></chart>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Insumos -->
+  <div class="card" [ngClass]="{'is-hidden': grafica == 1 || grafica == 3}">
+    <div class="card-content">
+      <div class="content">
+        <div class="level-right">
+          <a (click)="cambiarGrafica(1)">
+            <div class="tag">Claves</div>
+          </a>
+          <a (click)="cambiarGrafica(2)">
+            <div class="tag is-primary">Insumos</div>
+          </a>
+          <a (click)="cambiarGrafica(3)">
+            <div class="tag">Monto</div>
+          </a>
+        </div>
+        <!-- Gráfica INSUMOS -->
+        <div class="panel">
+          <chart [options]="insumos"></chart>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Monto -->
+  <div class="card" [ngClass]="{'is-hidden': grafica == 1 || grafica == 2}">
+    <div class="card-content">
+      <div class="content">
+        <div class="level-right">
+          <a (click)="cambiarGrafica(1)">
+            <div class="tag">Claves</div>
+          </a>
+          <a (click)="cambiarGrafica(2)">
+            <div class="tag">Insumos</div>
+          </a>
+          <a (click)="cambiarGrafica(3)">
+            <div class="tag is-primary">Monto</div>
+          </a>
+        </div>
+        <!-- Gráfica MONTO -->
+        <div class="panel">
+          <chart [options]="monto"></chart>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>

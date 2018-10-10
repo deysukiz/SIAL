@@ -1,0 +1,142 @@
+<menu-farmacia [modulo]="'Pedidos'" [icono]="'assets/icono-pedidos.svg'" [url]="'/almacen/pedidos'"></menu-farmacia>
+
+<div style="height:50px;"></div>
+<div class="contenedor columns " style="height:100%; ">
+    <div class="column is-one-quarter is-hidden-mobile">
+      <menu-lateral></menu-lateral>
+    </div>
+    <div class="column" style="padding:2em;">
+        <div style="background: #FFF; overflow:hidden; border-radius:1em; width:100%;margin-bottom:1em;">
+            <table  class="table" style="min-width:100%; font-size:0.8em; margin-bottom:0.2em;margin-top:0.2em;">
+                <thead>
+                    <tr>
+                        <th>Presupuesto anual</th>
+                        <th style="text-align:center">Autorizado</th>
+                        <th style="text-align:center">Comprometido</th>
+                        <th style="text-align:center">Devengado</th>
+                        <th style="text-align:center">Disponible</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngIf="!presupuesto">
+                        <th colspan="5" style="text-align:center"><span class="icon"><i class="fa fa-refresh fa-spin"></i></span>&nbsp;Cargando Presupuesto...</th>
+                    </tr>
+                    <tr *ngIf="presupuesto">
+                        <th>Causes y Material de Curación</th>
+                        <td style="text-align:center"><span class="tag is-primary">$ {{ (presupuesto.causes_modificado + presupuesto.material_curacion_modificado) | number:'1.2-2' }}</span></td>
+                        <td style="text-align:center"><span class="tag is-warning">$ {{ (presupuesto.causes_comprometido + presupuesto.material_curacion_comprometido) | number:'1.2-2' }}</span></td>
+                        <td style="text-align:center"><span class="tag is-danger">$ {{ (presupuesto.causes_devengado + presupuesto.material_curacion_devengado) | number:'1.2-2' }}</span></td>
+                        <td style="text-align:center"><span class="tag is-success">$ {{ (presupuesto.causes_disponible + presupuesto.material_curacion_disponible) | number:'1.2-2' }}</span></td>
+                    </tr>
+                    <tr *ngIf="presupuesto">
+                        <th>No causes</th>
+                        <td style="text-align:center"><span class="tag is-primary">$ {{ presupuesto.no_causes_modificado | number:'1.2-2' }}</span></td>
+                        <td style="text-align:center"><span class="tag is-warning">$ {{ presupuesto.no_causes_comprometido | number:'1.2-2' }}</span></td>
+                        <td style="text-align:center"><span class="tag is-danger">$ {{ presupuesto.no_causes_devengado | number:'1.2-2' }}</span></td>
+                        <td style="text-align:center"><span class="tag is-success">$ {{ presupuesto.no_causes_disponible | number:'1.2-2' }}</span></td>
+                    </tr>
+                    <tr *ngIf="presupuesto">
+                        <th>Total</th>
+                        <td style="text-align:center"><span class="tag is-primary">$ {{ ( presupuesto.no_causes_modificado + presupuesto.causes_modificado + presupuesto.material_curacion_modificado) | number:'1.2-2' }}</span></td>
+                        <td style="text-align:center"><span class="tag is-warning">$ {{ ( presupuesto.no_causes_comprometido + presupuesto.causes_comprometido + presupuesto.material_curacion_comprometido) | number:'1.2-2' }}</span></td>
+                        <td style="text-align:center"><span class="tag is-danger">$ {{ ( presupuesto.no_causes_devengado + presupuesto.causes_devengado + presupuesto.material_curacion_devengado) | number:'1.2-2' }}</span></td>
+                        <td style="text-align:center"><span class="tag is-success">$ {{ ( presupuesto.no_causes_disponible + presupuesto.causes_disponible + presupuesto.material_curacion_disponible) | number:'1.2-2' }}</span></td>
+                    </tr>
+                </tbody>
+            </table>
+         </div>
+
+        <div style="background: #FFF; border-radius: 1em; overflow: hidden;">
+            <section *ngIf="!cargando" class="hero" [ngClass] = " {'is-dark': busquedaActivada, 'is-primary': !busquedaActivada } " >
+                
+                <div class="hero-body" style="position:relative;">
+                    <a class="button  is-primary"style="position:absolute; top:1em; right:9em;" routerLink="/almacen/pedidos/actas/"><span class="icon "><i class="fa fa-arrow-left"></i></span></a>                    
+                    <a class="button  is-primary is-inverted" style="position:absolute; top:1em; right:1em;" [ngClass]="{ 'is-loading': cargandoActa }" (click)="imprimir()"><span class="icon "><i class="fa fa-print"></i></span> <span>Imprimir</span></a>                    
+                    
+                    <div class="container is-fluid">
+                        
+                        <h1 class="title">
+                            <span class="icon is-medium"><i class="fa fa-gavel"></i></span> Acta No. {{ acta.folio }}
+                        </h1>
+                    </div>
+                </div>
+            </section>
+            <div class="is-fullwidth has-text-centered" *ngIf="cargando">
+                <br>
+                <span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span> &nbsp;<span>Cargando...</span></span>
+                <br>
+                <br>
+            </div>
+            <table class="table" *ngIf="!cargando">
+                <tbody>
+                    <tr>
+                        <th>Nombre</th>
+                        <td colspan="5">{{acta.nombre}}</td>
+                    </tr>
+                    <tr>
+                        <th>Lugar reunión</th>
+                        <td colspan="5">{{acta.lugar_reunion}}</td>
+                    </tr>
+                    <tr>
+                        <th>Ciudad</th>
+                        <td colspan="5">{{acta.ciudad}}</td>
+                    </tr>
+                    <tr>
+                        <th>Fecha</th>
+                        <td>{{acta.fecha | date:'y-MM-dd' }}</td>
+                        <th>Hora inicio</th>
+                        <td>{{acta.hora_inicio}}</td>
+                        <th>Hora termino</th>
+                        <td>{{acta.hora_termino}}</td>
+                    </tr>
+                    <tr>
+                        <th>Proveedor</th>
+                        <td colspan="5">{{acta.proveedor.nombre}}</td>
+                    </tr>
+                    <tr>
+                        <th>Pedido original</th>
+                        <td colspan="5"><a routerLink="/almacen/pedidos/ver/{{pedido_original.id}}" >{{pedido_original.folio}}</a></td>
+                    </tr>
+                    
+                </tbody>
+            </table>
+            <hr *ngIf="!cargando">
+            <table  *ngIf="!cargando" class="table" style="font-size:0.8em;">
+                <thead>
+                    <tr>
+                        <th colspan="6"><h1 class="title">Pedidos alternos</h1></th>
+                    </tr>
+                    <tr>
+                        <th>Folio</th>
+                        <th>Nombre</th>
+                        <th>Fecha</th>
+                        <th>Claves</th>
+                        <th>Cantidad</th>
+                        <th>Monto</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let item of pedidos_alternos">
+                        <th style="vertical-align: middle;"><a routerLink="/almacen/pedidos/ver/{{item.id}}" >
+                            {{ item.folio?item.folio:'S/F' }}</a>
+                        </th>
+                        <td style="vertical-align: middle;"><a routerLink="/almacen/pedidos/ver/{{item.id}}" >{{ item.descripcion }}</a></td>
+                        <td style="vertical-align: middle;"><a [ngClass]="{'estatus-rojo':(item.status == 'PS' && item.expira_en_dias <= 0),'estatus-amarillo':(item.status == 'PS' && (item.expira_en_dias > 0 && item.expira_en_dias <= 5))}" routerLink="/almacen/pedidos/ver/{{item.id}}" >{{ item.fecha | date:'y-MM-dd' }} <span *ngIf="item.status == 'PS'">({{item.expira_en_dias?item.expira_en_dias:'hoy'}})</span></a></td>
+                        <td style="vertical-align: middle;"><a routerLink="/almacen/pedidos/ver/{{item.id}}"> 
+                            {{ (item.total_claves_recibidas || 0) | number }} / {{ item.total_claves_solicitadas | number }} [{{(item.total_claves_recibidas/item.total_claves_solicitadas)*100 | number:'1.0-2'}}%]
+                        </a></td>
+                        <td style="vertical-align: middle;"><a routerLink="/almacen/pedidos/ver/{{item.id}}"> 
+                            {{ (item.total_cantidad_recibida || 0) | number }} / {{ item.total_cantidad_solicitada | number }} [{{(item.total_cantidad_recibida/item.total_cantidad_solicitada)*100 | number:'1.0-2'}}%]
+                        </a></td>
+                        <td style="vertical-align: middle;"><a routerLink="/almacen/pedidos/ver/{{item.id}}">
+                            $ {{ (item.total_monto_recibido || 0) | number:'1.2-2' }} / $ {{ item.total_monto_solicitado | number:'1.2-2' }} [{{(item.total_monto_recibido/item.total_monto_solicitado)*100 | number:'1.0-2'}}%]
+                        </a></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            
+
+        </div>
+    </div>
+</div>

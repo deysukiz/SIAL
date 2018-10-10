@@ -1,0 +1,83 @@
+<administrador-central-menu></administrador-central-menu>
+<div style="height:50px;"></div>
+<div class="contenedor columns " style="height:100%; ">
+    <div class="column is-narrow is-hidden-mobile">
+        <administrador-central-menu-lateral></administrador-central-menu-lateral>
+    </div>
+    <div class="column" style="overflow: scroll;">
+        <br>
+        <nav class="level">
+            <div class="level-left">
+                <div class="level-item">
+                    <h1 class="title">
+                        <span class="icon is-medium"><i class="fa fa-thumbs-up"></i></span> Cumplimiento de proveedores
+                    </h1>
+                </div>
+            </div>
+
+        </nav>
+        <div class="is-fullwidth has-text-centered" *ngIf="cargandoEstadisticasGlobales">
+            <div class="notification is-white">
+                <span class="icon"><i class="fa fa-refresh fa-spin"></i></span> &nbsp;<span>Cargando estadisticas globales...</span>
+            </div>
+        </div>
+        <div class="columns is-multiline "  *ngIf="!cargandoEstadisticasGlobales">
+            <div class="column is-4" *ngFor="let item of estadisticasGlobales">
+                <div class="notification is-white">
+                    <h1 class="title" style="font-size:1.2em;  margin-bottom:0.2em;color:#00d1b2">${{ item.total_monto_solicitado | number:'1.2-2' }}</h1>
+                    <h1 class="title" style="font-size:0.8em; margin-bottom:0.2em;">{{ item.proveedor }}</h1>
+                    <hr style="margin: 0.2em 0">
+                    <nav class="level"><div class="level-left">Entregado</div><div class="level-right"><b>{{ item.porcentaje_entregado | number:'1.2-2' }}%</b></div></nav>
+                   
+                   
+                </div>
+            </div>
+        </div>
+
+        <div class="columns is-multiline"  *ngIf="!cargandoEstadisticasGlobales">
+            <div class="column is-12" *ngFor="let item of listaEstadisticasProveedores; let  i = index">
+                
+                <div style="display:block; background:white; border-radius:0.2em; padding: 0.5em 0; min-height:471px" *ngIf="!item.cargando && item.options">
+                    <nav class="level" style="margin:1em;">
+                        <div class="level-left">
+                      <!--      <p><b>{{ item.proveedor }}</b> <small style="color:gray;">Estadística mensual</small></p>-->
+                        </div>
+                        <div class="level-right">
+                            <div>
+                                
+                                <span class="tag " style="cursor:pointer" [ngClass]="{ 'is-primary': item.tipoDatos == 'monto' }" (click)="item.tipoDatos = 'monto'; renderGrafica(i)">$ Monto</span>
+                                <span class="tag " style="cursor:pointer" [ngClass]="{ 'is-primary': item.tipoDatos == 'claves' }" (click)="item.tipoDatos = 'claves'; renderGrafica(i)">Claves</span> 
+                                <span class="tag " style="cursor:pointer" [ngClass]="{ 'is-primary': item.tipoDatos == 'insumos' }" (click)="item.tipoDatos = 'insumos'; renderGrafica(i)">Insumos</span> 
+                            </div>
+                            
+                        </div>
+                    </nav>
+                    <hr style="margin:0">
+                    <chart *ngIf="mostrarGraficas" [options]="item.options" style="display:block;"></chart>
+                </div>
+
+                <div class="is-fullwidth has-text-centered"  *ngIf="item.cargando ">
+                    <div class="notification is-white">
+                        <span class="icon"><i class="fa fa-refresh fa-spin"></i></span> &nbsp;<span>Cargando estadísticas diarias de: <b>{{item.proveedor}}</b>...</span>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+
+        
+    </div>
+</div>
+
+<div class="notification is-danger" style="position:fixed; left:1em;  bottom:1em;" *ngIf="mensajeError.mostrar">
+    <button class="delete" (click)="mensajeError.mostrar = false"></button>        
+    <b>Error:</b> {{ mensajeError.texto }}<br><br>
+    <p style="text-align:center" ><a  class="button is-danger is-inverted" (click)="ultimaPeticion(); mensajeError.mostrar = false"> <span class="icon"><i class="fa fa-refresh"></i></span> <span>Volver a intentar</span></a></p>        
+</div>
+
+<div class="notification is-success" style="position:fixed; left:1em;  bottom:1em; width: auto" *ngIf="mensajeExito.mostrar">       
+    <button class="delete" (click)="mensajeExito.mostrar = false"></button>
+    <p><span class="icon" style="margin-right: 0.5em;"><i class="fa fa-check-circle"></i></span> <span>{{ mensajeExito.texto }}</span></p>
+    <br>
+    <p style="text-align: center;"><small >Este mensaje desaparecerá en {{ mensajeExito.cuentaAtras }} segundos.</small></p>       
+</div>

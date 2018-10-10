@@ -1,0 +1,48 @@
+<section  class="top-nav">
+            
+    <nav class="nav">
+        <a title="Equipamiento" class="nav-item pull-left nav-hub-active"  routerLink="/equipamiento">
+            
+            <img src="assets/hub-equipamiento.svg" alt="icono">
+        
+        </a>
+        <div class="nav-left is-hidden-touch">
+            
+            <span *ngIf="!modulo" class="nav-item">
+                <h1 class="title">&nbsp;Equipamiento</h1>
+            </span>
+            <a *ngIf="modulo" class="nav-item" routerLink="{{ url }}" >
+            
+            <!-- <img src="{{ icono }}" alt="icono">-->
+                <h1 class="title">&nbsp;{{ modulo }}</h1>                     
+            </a>
+        </div>
+
+        <div class="nav-center">
+            <span *ngIf="usuario.almacen_activo" class="nav-item is-small">
+                <span>{{usuario.clues_activa.clues}}&nbsp;-&nbsp;</span><span class="is-hidden-mobile">{{usuario.clues_activa.nombre}}&nbsp;-&nbsp;</span><span>{{usuario.almacen_activo.nombre}}</span>
+            </span>
+        </div>
+
+        <a class="nav-item"  (click)="hub.toggle()">
+            <span class="icon">
+                <i class="fa fa-th"></i>
+            </span>
+        </a>
+
+        <a class="nav-item is-hidden-mobile" (click)="perfil.toggle()">                    
+            <figure class="image" style="width:26px;"><img src="assets/{{ usuario.avatar || 'avatar-unknow' }}.svg" alt="avatar"></figure>
+            &nbsp;
+            <span>{{ usuario.nombre }} {{ usuario.apellidos }}</span>
+        </a>
+        <a class="nav-item is-hidden-tablet" (click)="perfil.toggle()">
+            
+            <figure class="image" style="width:26px;"><img src="assets/{{ usuario.avatar || 'avatar-unknow' }}.svg" alt="avatar"></figure>
+        </a>
+        
+        
+    </nav>
+</section>
+
+<app-hub #hub></app-hub>
+<app-perfil #perfil></app-perfil>

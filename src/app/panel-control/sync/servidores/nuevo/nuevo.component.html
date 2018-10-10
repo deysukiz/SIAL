@@ -1,0 +1,153 @@
+<panel-control-menu></panel-control-menu>
+<div style="height:50px;"></div>
+<div class="contenedor columns " style="height:100%; ">
+    <div class="column is-one-quarter is-hidden-mobile">
+        <panel-control-menu-aside></panel-control-menu-aside>
+    </div>
+    <div class="column" >
+        <div style="background: #FFF; border-radius: 1em; overflow: hidden; margin:2em;">
+            <section class="hero is-primary">
+                <div class="hero-body">
+                    <div class="container is-fluid">
+                        <h1 class="title">
+                            <span  *ngIf="!cargando" class="icon is-medium"><i class="fa fa-plus"></i></span>
+                            <span  *ngIf="cargando" class="icon is-medium"><i class="fa fa-refresh fa-spin"></i></span> 
+                            Nuevo servidor
+                        </h1>
+                        
+                    </div>
+                </div>
+            </section>
+            <section class="section">
+                <div class="control is-grouped">
+                    <p class="control is-expanded  has-icon has-icon-right">
+                        <input class="input is-medium" [(ngModel)]="servidor.id"  [ngClass]="{ 'is-danger': errores.id != null}"  type="text" placeholder="ID" >
+                        
+                        <span class="icon is-small" *ngIf="errores.id == 'required' || errores.id == 'unique'">
+                        <i class="fa fa-warning"></i>
+                        </span>
+                        <span class="help is-danger" *ngIf="errores.id == 'required'">Por favor especifique el ID del servidor.</span>
+                        <span class="help is-danger" *ngIf="errores.id == 'unique'">Este ID ya fue utilizado, por favor elija otro.</span>              
+                    </p>
+                    <p class="control is-expanded  has-icon has-icon-right">
+                        <input class="input is-medium" [(ngModel)]="servidor.nombre"  [ngClass]="{ 'is-danger': errores.nombre != null}"  type="text" placeholder="Nombre" >
+                        
+                        <span class="icon is-small" *ngIf="errores.nombre == 'required'">
+                        <i class="fa fa-warning"></i>
+                        </span>
+                        <span class="help is-danger" *ngIf="errores.nombre == 'required'">Por favor especifique el nombre del servidor.</span>
+                    </p>
+                </div>
+                <div class="control is-grouped">
+                   <!-- <div class="field has-addons">
+                            <p class="control">
+                                <input class="input" type="text" placeholder="Amount of money">
+                            </p>
+                            <p class="control">
+                                <a class="button is-primary">
+                                Transfer
+                                </a>
+                            </p>
+                    </div>-->
+                    <p class="control is-expanded  has-icon has-icon-right">
+                        <input class="input is-medium" [(ngModel)]="servidor.secret_key"  [ngClass]="{ 'is-danger': errores.secret_key != null}"  type="text" placeholder="Secret key" >
+                        
+                        <span class="icon is-small" *ngIf="errores.secret_key == 'required'">
+                        <i class="fa fa-warning"></i>
+                        </span>
+                        <span class="help is-danger" *ngIf="errores.secret_key == 'required'">Por favor especifique el Secret Key del servidor.</span>                            
+                    </p>
+                    <p class="control">
+                        <a class="button  is-medium is-primary" (click)="generarSecretKey()">
+                        <span class="icon"><i class="fa fa-key"></i></span>
+                        </a>
+                    </p>
+                    <p class="control is-expanded  has-icon has-icon-right">
+                        <input class="input is-medium" [(ngModel)]="servidor.periodo_sincronizacion"  [ngClass]="{ 'is-danger': errores.periodo_sincronizacion != null}"  type="text" placeholder="Periodo de sincronización (Horas)" >
+                        
+                        <span class="icon is-small" *ngIf="errores.periodo_sincronizacion == 'required' || errores.periodo_sincronizacion == 'integer'">
+                        <i class="fa fa-warning"></i>
+                        </span>
+                        <span class="help is-danger" *ngIf="errores.periodo_sincronizacion == 'required'">Por favor especifique el periodo de sincronización.</span>                            
+                        <span class="help is-danger" *ngIf="errores.periodo_sincronizacion == 'integer'">Por favor el periodo de sincronizacion debe estar expresado en horas y en números enteros. Por ejemplo: 24.</span>                            
+                    </p>
+                </div>
+
+                <div class="control is-grouped">
+                    
+                    <p class="control is-expanded">
+                        <span class="select is-fullwidth is-medium ">
+                        <select #clues [(ngModel)]="servidor.clues">
+                            <!--option [ngValue]="{clues:''}" [selected]="true">Elija una unidad médica</option-->
+                            <option *ngFor="let item of listaClues" [ngValue]="item.clues">{{ item.clues }} - {{ item.nombre }}</option>
+                        </select>
+                        </span>
+                        <span class="help is-danger" *ngIf="errores.clues == 'required'">Por favor especifique la clues del servidor.</span>   
+                    </p> 
+                   <!-- <p class="control is-expanded  has-icon has-icon-right">
+                        <input class="input is-medium" [(ngModel)]="servidor.clues"  [ngClass]="{ 'is-danger': errores.clues != null}"  type="text" placeholder="CLUES" >
+                        
+                        <span class="icon is-small" *ngIf="errores.clues == 'required'">
+                        <i class="fa fa-warning"></i>
+                        </span>
+                        <span class="help is-danger" *ngIf="errores.clues == 'required'">Por favor especifique la clues del servidor.</span>                            
+                    </p>-->
+                    <p class="control is-expanded  has-icon has-icon-right">
+                        <input class="input is-medium" [(ngModel)]="servidor.ip"  [ngClass]="{ 'is-danger': errores.ip != null}"  type="text" placeholder="Dirección IP" >
+                        
+                        <span class="icon is-small" *ngIf="errores.ip == 'required'">
+                        <i class="fa fa-warning"></i>
+                        </span>
+                        <span class="help is-danger" *ngIf="errores.ip == 'required'">Por favor especifique la dirección ip.</span>                                                    
+                    </p>
+                </div>
+                
+                <div class="field">
+                    <div class="control  ">
+                        <label class="checkbox">
+                        <input type="checkbox" [(ngModel)]="servidor.tiene_internet">
+                        Tiene internet
+                        </label> &nbsp; 
+                        <label class="checkbox">
+                        <input type="checkbox" [(ngModel)]="servidor.principal">
+                        Es el principal
+                        </label>
+                    </div>
+                </div>   
+                <br>
+                    
+                <div class="control is-grouped">
+                    
+                    <p class="control">
+                        <a class="button is-medium is-primary " [ngClass]="{ 'is-loading': enviando}" (click)="guardar()" >
+                        <span class="icon"><i class="fa fa-save"></i></span><span>Guardar</span>
+                        </a>
+                    </p><p class="control">
+                        <a class="button is-medium is-white " [ngClass]="{ 'is-disabled': enviando}" routerLink="/panel-control/sync/servidores">Cancelar</a>
+                    </p>                    
+                </div>
+                           
+              
+              <br>
+              
+
+
+            </section>
+            
+        </div>
+        
+    </div>
+</div>
+
+<div class="notification is-danger" style="position:fixed; left:1em;  bottom:1em;" *ngIf="mensajeError.mostrar">
+    <button class="delete" (click)="mensajeError.mostrar = false"></button>        
+    <b>Error:</b> {{ mensajeError.texto }}<br> 
+    <p style="text-align: center;"><small >Este mensaje desaparecerá en {{ mensajeError.cuentaAtras }} segundos.</small></p>       
+</div>
+
+<div class="notification is-success" style="position:fixed; left:1em;  bottom:1em; width: auto" *ngIf="mensajeExito.mostrar">       
+    <button class="delete" (click)="mensajeExito.mostrar = false"></button>
+    <p><span class="icon" style="margin-right: 0.5em;"><i class="fa fa-check-circle"></i></span> <span>{{ mensajeExito.texto }}</span></p>
+    <br>
+    <p style="text-align: center;"><small >Este mensaje desaparecerá en {{ mensajeExito.cuentaAtras }} segundos.</small></p>       
+</div>

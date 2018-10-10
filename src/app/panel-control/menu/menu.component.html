@@ -1,0 +1,55 @@
+<section class="hero is-dark" style="position: fixed; width: 100%;top:0px; z-index:99">
+    <div class="hero-head">
+        <div class="container is-fluid">
+            <nav class="nav is-primary">
+                <div class="nav-left">
+                    <a class="nav-item is-brand" routerLink="/panel-control" routerLinkActive="active">
+                    <!--<img src="http://bulma.io/images/bulma-type.png" alt="Bulma logo">-->
+                     <span class="icon">
+                        <i class="fa fa-cog"></i>
+                    </span> 
+                     <h1 class="title">&nbsp;Panel de control</h1>
+                    </a>
+                </div>
+                <a class="nav-item is-hidden-tablet" (click)="toggleMenuAside()">
+                    <span class="icon">
+                        <i class="fa fa-navicon"></i>
+                    </span>
+                </a>
+                <a class="nav-item"  (click)="hub.toggle()">
+                    <span class="icon">
+                        <i class="fa fa-th"></i>
+                    </span>
+                </a>
+
+                <a class="nav-item is-hidden-mobile" (click)="perfil.toggle()">
+                    
+                    <figure class="image" style="width:26px;"><img src="assets/{{ usuario.avatar || 'avatar-unknow' }}.svg" alt="avatar"></figure>
+                    &nbsp;
+                    <span>{{ usuario.nombre }} {{ usuario.apellidos }}</span>
+                </a>
+                <a class="nav-item is-hidden-tablet" (click)="perfil.toggle()">
+                    
+                    <figure class="image" style="width:26px;"><img src="assets/{{ usuario.avatar || 'avatar-unknow' }}.svg" alt="avatar"></figure>
+                </a>
+               
+                
+            </nav>
+        </div>
+    </div>
+</section>
+
+<app-hub #hub></app-hub>
+<app-perfil #perfil></app-perfil>
+
+<div class="modal" [ngClass]="{'is-active': mostrarMenuAside}">
+  <div class="modal-background" (click)="toggleMenuAside()"></div>
+  <div class="modal-content">
+    <div class="card" style="width: 100%">
+        <div class="card-content">
+            <panel-control-menu-aside></panel-control-menu-aside>
+        </div>
+    </div>
+  </div>
+  <button class="modal-close" (click)="toggleMenuAside()"></button>
+</div>

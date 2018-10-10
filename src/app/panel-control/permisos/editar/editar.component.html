@@ -1,0 +1,87 @@
+<panel-control-menu></panel-control-menu>
+<div style="height:50px;"></div>
+<div class="contenedor columns " style="height:100%; ">
+    <div class="column is-one-quarter is-hidden-mobile">
+        <panel-control-menu-aside></panel-control-menu-aside>
+    </div>
+    <div class="column" >
+        <div style="background: #FFF; border-radius: 1em; overflow: hidden; margin:2em;">
+            <section class="hero is-primary">
+                <div class="hero-body">
+                    <div class="container is-fluid">
+                        <h1 class="title">
+                            <span  *ngIf="!cargando" class="icon is-medium"><i class="fa fa-edit"></i></span>
+                            <span  *ngIf="cargando" class="icon is-medium"><i class="fa fa-refresh fa-spin"></i></span> 
+                            Editar permiso
+                        </h1>
+                        
+                    </div>
+                </div>
+            </section>
+            <section class="section">
+                <h1 class="title">{{id}}</h1>
+                <div class="control is-grouped">
+                    <p class="control is-expanded  has-icon has-icon-right">
+                        <input class="input is-medium" [(ngModel)]="permiso.descripcion"  [ngClass]="{ 'is-danger': errores.descripcion != null}"  type="text" placeholder="Descripción" >
+                        
+                        <span class="icon is-small" *ngIf="errores.descripcion == 'required'">
+                        <i class="fa fa-warning"></i>
+                        </span>
+                        <span class="help is-danger" *ngIf="errores.descripcion == 'required'">Este campo es requerido.</span>
+                    </p>
+                    <p class="control is-expanded  has-icon has-icon-right">
+                        <input class="input is-medium" [(ngModel)]="permiso.grupo"  [ngClass]="{ 'is-danger': errores.grupo != null}"  type="text" placeholder="Grupo" >
+                        
+                        <span class="icon is-small" *ngIf="errores.grupo == 'required'">
+                        <i class="fa fa-warning"></i>
+                        </span>
+                        <span class="help is-danger" *ngIf="errores.grupo == 'required'">Este campo es requerido.</span>
+                    </p>
+                </div>
+                
+                
+                <div class="field">
+                    <div class="control  ">
+                        <label class="checkbox">
+                        <input type="checkbox" [(ngModel)]="permiso.su">
+                        Super usuario
+                        </label>
+                    </div>
+                </div>   
+                <br>
+                    
+                <div class="control is-grouped">
+                    
+                    <p class="control">
+                        <a class="button is-medium is-primary " [ngClass]="{ 'is-loading': enviando}" (click)="guardar()" >
+                        <span class="icon"><i class="fa fa-save"></i></span><span>Guardar</span>
+                        </a>
+                    </p><p class="control">
+                        <a class="button is-medium is-white " [ngClass]="{ 'is-disabled': enviando}" routerLink="/panel-control/permisos">Cancelar</a>
+                    </p>                    
+                </div>
+                           
+              
+              <br>
+              
+
+
+            </section>
+            
+        </div>
+        
+    </div>
+</div>
+
+<div class="notification is-danger" style="position:fixed; left:1em;  bottom:1em;" *ngIf="mensajeError.mostrar">
+    <button class="delete" (click)="mensajeError.mostrar = false"></button>        
+    <b>Error:</b> {{ mensajeError.texto }}<br> 
+    <p style="text-align: center;"><small >Este mensaje desaparecerá en {{ mensajeError.cuentaAtras }} segundos.</small></p>       
+</div>
+
+<div class="notification is-success" style="position:fixed; left:1em;  bottom:1em; width: auto" *ngIf="mensajeExito.mostrar">       
+    <button class="delete" (click)="mensajeExito.mostrar = false"></button>
+    <p><span class="icon" style="margin-right: 0.5em;"><i class="fa fa-check-circle"></i></span> <span>{{ mensajeExito.texto }}</span></p>
+    <br>
+    <p style="text-align: center;"><small >Este mensaje desaparecerá en {{ mensajeExito.cuentaAtras }} segundos.</small></p>       
+</div>

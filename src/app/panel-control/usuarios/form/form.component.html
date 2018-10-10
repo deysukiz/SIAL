@@ -1,0 +1,259 @@
+<form name="form" novalidate [formGroup]="usuario"  (ngSubmit)="enviar()">     
+            
+              <div class="control is-grouped">
+                <p class="control is-expanded  has-icon has-icon-right">
+                  <input class="input" autofocus type="text" [ngClass]="{'is-danger': usuario.get('nombre').hasError('required') && usuario.get('nombre').touched}"  placeholder="Nombre" formControlName="nombre">
+                  <span class="icon is-small" *ngIf="usuario.get('nombre').hasError('required') && usuario.get('nombre').touched">
+                    <i class="fa fa-warning"></i>
+                  </span>
+                  <span class="help is-danger" *ngIf="usuario.get('nombre').hasError('required') && usuario.get('nombre').touched">Este campo es requerido.</span>
+                </p>
+                <p class="control is-expanded has-icon has-icon-right">
+                  <input class="input" type="text" placeholder="Apellidos" [ngClass]="{'is-danger': usuario.get('apellidos').hasError('required') && usuario.get('apellidos').touched}" formControlName="apellidos">
+                  <span class="icon is-small" *ngIf="usuario.get('apellidos').hasError('required') && usuario.get('apellidos').touched">
+                    <i class="fa fa-warning"></i>
+                  </span>
+                  <span class="help is-danger" *ngIf="usuario.get('apellidos').hasError('required') && usuario.get('apellidos').touched">Este campo es requerido.</span>
+                </p>
+              </div>
+             
+              <h2 class="subtitle">Datos de la cuenta</h2>
+              <p class="control has-icon has-icon-right">
+                <input type="text" class="input" placeholder="Usuario" (ngModelChange)="usuarioRepetido = false; usuarioInvalido = false" [ngClass]="{'is-danger': (usuario.get('id').hasError('required') || usuarioRepetido || usuarioInvalido) && usuario.get('id').touched}" formControlName="id">
+                <span class="icon is-small" *ngIf="(usuario.get('id').hasError('required') || usuarioRepetido || usuarioInvalido) && usuario.get('id').touched">
+                    <i class="fa fa-warning"></i>
+                </span>
+                <span class="help is-danger" *ngIf="usuario.get('id').hasError('required') && usuario.get('id').touched">Este campo es requerido.</span>
+                <span class="help is-danger" *ngIf="usuarioRepetido && usuario.get('id').touched">Este usuario ya fue utilizado.</span>
+                <!--span class="help is-danger" *ngIf="usuarioInvalido && usuario.get('id').touched">El usuario debe tener un formato de <b>email</b> válido.</span-->
+              </p>
+              <p class="control" *ngIf="mostrarCambiarPassword">
+                  <label class="checkbox">
+                    <input type="checkbox" formControlName="cambiarPassword" (click)="toggleCambiarPassword()">
+                    Cambiar contraseña
+                  </label>
+                </p>
+              <div class="control is-grouped">
+                
+                <p class="control is-expanded has-icon has-icon-right">
+                  <input class="input" type="password" placeholder="Contraseña" [ngClass]="{'is-danger': (usuario.get('password').hasError('required') || (usuario.get('password').value != usuario.get('confirmarPassword').value && usuario.get('confirmarPassword').touched)) && usuario.get('password').touched}" formControlName="password">
+                  <span class="icon is-small" *ngIf="(usuario.get('password').hasError('required') || (usuario.get('password').value != usuario.get('confirmarPassword').value && usuario.get('confirmarPassword').touched)) && usuario.get('password').touched">
+                    <i class="fa fa-warning"></i>
+                  </span>
+                  <span class="help is-danger" *ngIf="usuario.get('password').hasError('required') && usuario.get('password').touched">Este campo es requerido.</span>
+                  <span class="help is-danger" *ngIf="(usuario.get('password').value != usuario.get('confirmarPassword').value && usuario.get('confirmarPassword').touched) && usuario.get('password').touched">Las contraseñas no coinciden.</span>
+                </p>
+                <p class="control is-expanded has-icon has-icon-right">
+                  <input class="input" type="password" placeholder="Confirmar contraseña" [ngClass]="{'is-danger': usuario.get('confirmarPassword').hasError('required') && usuario.get('confirmarPassword').touched}" formControlName="confirmarPassword">
+                  <span class="icon is-small" *ngIf="usuario.get('confirmarPassword').hasError('required') && usuario.get('confirmarPassword').touched">
+                    <i class="fa fa-warning"></i>
+                  </span>
+                  <span class="help is-danger" *ngIf="usuario.get('confirmarPassword').hasError('required') && usuario.get('confirmarPassword').touched">Este campo es requerido.</span>
+                </p>
+                
+              </div>
+              <h2 class="subtitle">Pregunta secreta para recuperación de contraseña</h2>
+              <p class="control has-icon has-icon-right">
+                  <input type="text" class="input" placeholder="Pregunta secreta" formControlName="pregunta_secreta" >
+              </p>
+              <p class="control has-icon has-icon-right">
+                  <input type="text" class="input" placeholder="Respuesta"   [ngClass]="{'is-danger': respuestaRequerida}" formControlName="respuesta">
+                  <span class="icon is-small" *ngIf="respuestaRequerida ">
+                      <i class="fa fa-warning"></i>
+                  </span>
+                  <span class="help is-danger" *ngIf="respuestaRequerida">Si escribe una pregunta secreta, la respuesta es obligatoria.</span>
+                </p>
+
+              <!--<h2 class="subtitle">Roles</h2>
+              <div class="control" [ngClass]="{'is-loading': cargandoRoles}">
+ 
+                  <select  name="roles" formControlName="roles" multiple class="bulma-select-multiple" [ngClass]="{'is-warning': roles?.length ==0 }">
+                    <option *ngFor="let item of roles" value="{{item.id}}">{{ item.nombre }}</option>
+                  </select>
+                  <span class="help is-danger" *ngIf="usuario.get('roles').hasError('required') && usuario.get('roles').touched">Debe elegir por lo menos un rol.</span>
+                  <span class="help " *ngIf="roles?.length == 0"><b>La lista de roles está vacía.</b> <a (click)="cargarRoles()"><span class="icon is-small"><i class="fa fa-refresh"></i></span> <span>Actualizar</span></a></span>
+              </div>
+-->
+              
+              <h2 class="subtitle">Configuración</h2>
+              <div class="tabs is-centered">
+                <ul>
+                  
+                  <li [ngClass]="{ 'is-active' : tab == 1}"><a (click)="tab=1">Roles</a></li>
+                  <li [ngClass]="{ 'is-active' : tab == 2}"><a (click)="tab=2">Clues / Almacenes</a></li>
+                  <li [ngClass]="{ 'is-active' : tab == 3}"><a (click)="tab=3">Avatar</a></li>
+                  <li [ngClass]="{ 'is-active' : tab == 4}"><a (click)="tab=4">Médico</a></li>
+                  <li [ngClass]="{ 'is-active' : tab == 5}"><a (click)="tab=5" *ngIf="servidor.id == '0001'">Proveedor</a></li>
+                </ul>
+              </div>
+       
+              <div  [ngClass]="{ 'is-hidden': tab != 1}">
+                <div class="control is-grouped">
+                  <p class="control is-expanded">
+                    <label class="tag" [ngClass]="{'is-disabled': cargando, 'is-success': (idRolesSeleccionados[item.id])}" *ngFor="let item of roles" style="margin: 1px; cursor:pointer;">
+                      <input type="checkbox" value="{{item.id}}" style="display:none;" (change)="checkRol(item.id)"> {{item.nombre}}
+                    </label>
+                  </p>
+                </div>
+                <div class="control" [ngClass]="{'is-loading': cargandoRoles}">
+                  <!--select  name="roles" formControlName="roles" multiple class="bulma-select-multiple" [ngClass]="{'is-warning': roles?.length ==0 }">
+                    <option *ngFor="let item of roles" value="{{item.id}}">{{ item.nombre }}</option>
+                  </select-->
+                  <span class="help is-danger" *ngIf="usuario.get('roles').hasError('required') && usuario.get('roles').touched">Debe elegir por lo menos un rol.</span>
+                  <span class="help " *ngIf="roles?.length == 0"><b>La lista de roles está vacía.</b> <a (click)="cargarRoles()"><span class="icon is-small"><i class="fa fa-refresh"></i></span> <span>Actualizar</span></a></span>
+                </div>
+              </div>
+              <div [ngClass]="{ 'is-hidden': tab != 2}">
+                <div class="control is-grouped">
+                  <p class="control is-expanded">
+                    <span class="select is-fullwidth">
+                    <select #clues>
+                      <option *ngFor="let item of unidadesMedicas" value="{{item.clues}}">{{ item.nombre }} - {{item.clues}}</option>
+                    </select>
+                    </span>
+                  </p>
+                  <p class="control">
+                    <a class="button is-primary" (click)="agregarUnidadMedica(clues.value)"><span class="icon"><i class="fa fa-plus"></i></span></a>
+                  </p>                      
+                </div>
+                
+                <div class="columns is-gapless">
+                  <div class="column">
+                    <table class="table">
+                      <thead>
+                        <tr>
+                          <td colspan="2">CLUES</td>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr style="cursor:pointer;" *ngFor="let item of unidadesMedicasAgregadas; let i = index" (click)="unidadMedicaSeleccionada=item" [ngClass]="{'is-selected':unidadMedicaSeleccionada && unidadMedicaSeleccionada.clues==item.clues }">
+                          <td>{{ item.nombre}}</td>
+                          <td style="width:1em;">
+                            <a (click)="eliminarClues($event,item,index)"><span class="icon is-small"><i class="fa fa-trash"></i></span> </a>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <div class="column">
+                    <table class="table">
+                      <thead>
+                        <tr>
+                          <td colspan="2">ALMACENES</td>
+                        </tr>
+                      </thead>
+                      <tbody *ngIf="unidadMedicaSeleccionada">
+                        <tr style="cursor:pointer;"*ngFor="let item of unidadMedicaSeleccionada.almacenes; let i = index" (click)="toggleAlmacen(item)" >
+                          
+                          <td style="width:1em;">
+                            <span class="icon"><i class="fa" [ngClass]="{'fa-circle-thin': !item.seleccionado, 'fa-check-circle': item.seleccionado}" ></i></span>                            
+                          </td>
+                          <td>{{ item.nombre}}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                                
+              </div>
+              <div [ngClass]="{ 'is-hidden': tab != 3}">
+                <p class="control">                
+                  <label class="radio" [ngClass]="{'is-disabled': cargando}">
+                    <input type="radio" name="avatar" formControlName="avatar" value="avatar-circled-user-male" >
+                    <figure class="image is-64x64" >
+                      <img src="assets/avatar-circled-user-male.svg" alt="Avatar hombre">
+                    </figure>
+                  </label>
+                  <label class="radio" [ngClass]="{'is-disabled': cargando}">
+                    <input type="radio" name="avatar" formControlName="avatar" value="avatar-circled-user-female"  >
+                    <figure class="image is-64x64">
+                      <img src="assets/avatar-circled-user-female.svg" alt="Avatar mujer">
+                    </figure>
+                  </label>
+                  <label class="radio" [ngClass]="{'is-disabled': cargando}">
+                    <input type="radio" name="avatar" formControlName="avatar" value="avatar-circled-user-male-skin-type-6" >
+                    <figure class="image is-64x64">
+                      <img src="assets/avatar-circled-user-male-skin-type-6.svg" alt="Avatar hombre piel tipo 6">
+                    </figure>
+                  </label>
+                  <label class="radio" [ngClass]="{'is-disabled': cargando}">
+                    <input type="radio" name="avatar" formControlName="avatar" value="avatar-circled-user-female-skin-type-6" >
+                    <figure class="image is-64x64">
+                      <img src="assets/avatar-circled-user-female-skin-type-6.svg" alt="Avatar mujer piel tipo 6">
+                    </figure>
+                  </label>
+
+                  <label class="radio" [ngClass]="{'is-disabled': cargando}">
+                    <input type="radio" name="avatar" formControlName="avatar" value="avatar-circled-collaborator-male" >
+                    <figure class="image is-64x64" >
+                      <img src="assets/avatar-circled-collaborator-male.svg" alt="Avatar hombre">
+                    </figure>
+                  </label>
+                  
+                  <label class="radio" [ngClass]="{'is-disabled': cargando}">
+                    <input type="radio" name="avatar" formControlName="avatar" value="avatar-nurse" >
+                    <figure class="image is-64x64">
+                      <img src="assets/avatar-nurse.svg" alt="Avatar enfermera">
+                    </figure>
+                  </label>
+                  <label class="radio" [ngClass]="{'is-disabled': cargando}">
+                    <input type="radio" name="avatar" formControlName="avatar" value="avatar-circled-doctor-male" >
+                    <figure class="image is-64x64">
+                      <img src="assets/avatar-circled-doctor-male.svg" alt="Avatar doctor">
+                    </figure>
+                  </label>
+
+                  <label class="radio" [ngClass]="{'is-disabled': cargando}">
+                    <input type="radio" name="avatar" formControlName="avatar" value="avatar-circled-doctor-female" >
+                    <figure class="image is-64x64">
+                      <img src="assets/avatar-circled-doctor-female.svg" alt="Avatar doctora">
+                    </figure>
+                  </label>
+
+                  <label class="radio" [ngClass]="{'is-disabled': cargando}">
+                    <input type="radio" name="avatar" formControlName="avatar" value="avatar-cat" >
+                    <figure class="image is-64x64">
+                      <img src="assets/avatar-cat.svg" alt="Avatar de gato">
+                    </figure>
+                  </label>
+
+                  
+                </p>
+              </div>
+              <div [ngClass]="{ 'is-hidden': tab != 4}">
+              
+                  <p class="control is-expanded">
+                    <label for="medico">Enlazar cuenta con un médico:</label>
+                    <span class="select is-fullwidth">
+                    <select #medico id="medico" formControlName="medico_id">
+                      <option value="-1">Ninguno</option>
+                      <option *ngFor="let item of medicos" [value]="item.id">{{ item.nombre }}</option>
+                    </select>
+                    </span>
+                  </p>   
+              </div>
+              <div [ngClass]="{ 'is-hidden': tab != 5}">
+                <p class="control is-expanded">
+                  <label for="proveedor">Enlazar cuenta con un proveedor:</label>
+                  <span class="select is-fullwidth">
+                  <select #proveedor id="proveedor" formControlName="proveedor_id">
+                    <option value="-1">Ninguno</option>
+                    <option *ngFor="let item of proveedores" [value]="item.id">{{ item.nombre }}</option>
+                  </select>
+                  </span>
+                </p>   
+            </div>
+
+              <br><br>
+              <div class="control is-grouped">
+                <p class="control">
+                  <button class="button is-primary" type="submit" [ngClass]="{'is-loading': cargando}" [disabled]="usuario.invalid" >Guardar</button>
+                </p>
+                <p class="control">
+                  <button class="button is-danger" type="button" [ngClass]="{'is-loading': cargando}" [disabled]="usuario.invalid" >Eliminar usuario</button>
+                </p>
+                <p class="control">
+                  <a class="button is-white" (click)="regresar()" >Regresar</a>
+                </p>
+              </div>
+          </form>

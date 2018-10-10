@@ -1,0 +1,167 @@
+<!-- crud asignar url de la api URL="url de la api" titulo="un titulo para la pestaña de la pagina" [dato]="variable que contiene el formulario]-->
+<listar #ctrl URL="resguardos-articulo" titulo="Resguardos"></listar>
+
+<!-- Menu principal "-->
+<menu-almacen-articulos></menu-almacen-articulos>
+<div style="height:50px;"></div>
+<div class="contenedor columns " style="height:100%; padding-top: 1em;">
+  <!--<div class="column is-one-quarter is-hidden-mobile menu-izquierda">
+
+         Menu izquierda del modulo enviroment"
+        <panel-control-menu-aside></panel-control-menu-aside>
+    </div>-->
+  <div class="column" style="padding: 0em 2em 0em 2em">
+    <div style="background: #FFF; border-radius: 1em;">
+
+        <a id="lista" (click)="ctrl.listar(1)"></a>
+
+      <!-- Opciones y busqueda -->
+      <tabla-opciones #opciones [ctrl]="ctrl" [nombre]="'Resguardos'" [ruta]="'resguardos-articulo'" [ruta_pdf]="'almacen-articulos/resguardos.js'"></tabla-opciones>
+
+      <span style="overflow-y:auto; overflow-x: hidden; display:block" [style.maxHeight.px]="tamano-285">
+        <div class="is-fullwidth has-text-centered" *ngIf="opciones.cargandoPdf">
+          <br>
+          <span class="tag is-primary is-large ">
+            <span class="icon">
+              <i class="fa fa-refresh fa-spin"></i>
+            </span> &nbsp;
+            <span>Generando PDF...</span>
+          </span>
+          <br>
+          <br>
+        </div>
+
+        <!--Tabla -->
+        <table class="table" *ngIf="!ctrl.cargando && !opciones.cargandoPdf">
+          <thead>
+            <tr>
+              <th>
+                <abbr>ID</abbr>
+              </th>
+              <th>Almacen </th>
+              <th>Clues</th>
+              <th>Área</th>
+              <th>Resguardante</th>
+              <th>Status </th>
+              <th>Opciones</th>
+            </tr>
+          </thead>
+
+          <tbody *ngIf="!ctrl.busquedaActivada">
+            <tr *ngFor="let item of ctrl.dato; let i=index">
+              <th style="vertical-align: middle;">
+                <a routerLink="/almacen-articulos/resguardos/editar/{{item.id}}">{{ item.id }}</a>
+              </th>
+              <td style="vertical-align: middle;">
+                <a routerLink="/almacen-articulos/resguardos/editar/{{item.id}}">{{ item.almacen ? item.almacen.nombre : 'NO TIENE' }} </a>
+              </td>
+              <td style="vertical-align: middle;">
+                <a routerLink="/almacen-articulos/resguardos/editar/{{item.id}}">{{ item.clues_destino }} </a>
+              </td>
+              <td style="vertical-align: middle;">
+                <a routerLink="/almacen-articulos/resguardos/editar/{{item.id}}">{{ item.area_resguardante }} </a>
+              </td>
+              <td style="vertical-align: middle;">
+                <a routerLink="/almacen-articulos/resguardos/editar/{{item.id}}">{{ item.nombre_resguardante }} {{ item.aoellidos_resguardante }} </a>
+              </td>
+              <td style="vertical-align: middle;">
+                  <span *ngIf="item.status=='ACTIVO'" class="tag is-success is-medium ">{{ item.status }}</span>
+                  <span *ngIf="item.status!='ACTIVO'" class="tag is-warning is-medium ">{{ item.status }}</span>
+              </td>
+              <td style="vertical-align: middle;" class="has-text-centered">
+                <a *ngIf="item.status=='ACTIVO'" title="Devolver" class="button is-medium is-warning" (click)="confirmar_devolucion(item)">
+                  <span class="icon">
+                    <i class="fa fa-undo"></i>
+                  </span>
+                </a>
+                <!-- <span class="icon " *ngIf="item.cargando">
+                  <i class="fa fa-circle-o-notch fa-spin"></i>
+                </span>
+                <a *ngIf="!item.cargando"  title="Borrar" class="button is-medium is-danger" (click)="ctrl.eliminar(item, i)">
+                  <span class="icon">
+                    <i class="fa fa-trash-o"></i>
+                  </span>
+                </a> -->
+              </td>
+            </tr>
+            <!-- <tr *ngIf="ctrl.dato">
+              <td colspan="8" style="vertical-align: middle; color:#888;">Esta lista está vacía.</td>
+            </tr> -->
+          </tbody>
+          <tbody *ngIf="ctrl.busquedaActivada">
+            <tr *ngFor="let item of ctrl.resultadosBusqueda; let i=index">
+              <th style="vertical-align: middle;">
+                <a routerLink="/almacen-articulos/resguardos/editar/{{item.id}}">{{ item.id }}</a>
+              </th>
+              <td style="vertical-align: middle;">
+                <a routerLink="/almacen-articulos/resguardos/editar/{{item.id}}">{{ item.almacen ? item.almacen.nombre : 'NO TIENE' }} </a>
+              </td>
+              <td style="vertical-align: middle;">
+                <a routerLink="/almacen-articulos/resguardos/editar/{{item.id}}">{{ item.clues_destino }} </a>
+              </td>
+              <td style="vertical-align: middle;">
+                <a routerLink="/almacen-articulos/resguardos/editar/{{item.id}}">{{ item.area_resguardante }} </a>
+              </td>
+              <td style="vertical-align: middle;">
+                <a routerLink="/almacen-articulos/resguardos/editar/{{item.id}}">{{ item.nombre_resguardante }} {{ item.aoellidos_resguardante }} </a>
+              </td>
+              <td style="vertical-align: middle;">
+                  <span *ngIf="item.status=='ACTIVO'" class="tag is-success is-medium ">{{ item.status }}</span>
+                  <span *ngIf="item.status!='ACTIVO'" class="tag is-warning is-medium ">{{ item.status }}</span>
+              </td>
+              <td style="vertical-align: middle;" class="has-text-centered">
+                <a *ngIf="item.status=='ACTIVO'" title="Devolver" class="button is-medium is-warning" (click)="confirmar_devolucion(item)">
+                  <span class="icon">
+                    <i class="fa fa-undo"></i>
+                  </span>
+                </a>
+                <!-- <span class="icon " *ngIf="item.cargando">
+                  <i class="fa fa-circle-o-notch fa-spin"></i>
+                </span>
+                <a *ngIf="!item.cargando" class="is-danger" (click)="ctrl.eliminar(item, i)">
+                  <span class="icon">
+                    <i class="fa fa-trash-o"></i>
+                  </span>
+                </a> -->
+              </td>
+
+            </tr>
+
+            <tr *ngIf="ctrl.resultadosBusqueda.length == 0 && ctrl.busquedaActivada">
+              <td colspan="8" style="vertical-align: middle; color:#888;">No se encontraron resultados.</td>
+            </tr>
+          </tbody>
+
+        </table>
+      </span>
+      <!-- Paginación para la lista  -->
+      <paginacion [ctrl]="ctrl"></paginacion>
+    </div>
+
+  </div>
+</div>
+
+<div class="modal" id="borrar">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+        <header class="modal-card-head">
+            <p class="modal-card-title"><i class="fa fa-question-circle"></i> Confirmación</p>
+            <button class="delete" (click)="cancelarModal('borrar')"></button>
+        </header>
+        <section class="modal-card-body">
+            <div class="content">
+                <h1>¿Está seguro que desea realizar la devolución?</h1>
+                <p>Se realizará la devolución de todos los articulos del resguardo.</p>
+            </div>
+
+            <div class="content">
+              <label for="persona_recibe" class="label">Persona que recibe</label>
+                <input id="persona_recibe" class="input is-medium" type="text" placeholder="Persona que recibe" [(ngModel)]="persona_recibe">
+            </div>
+        </section>
+        <footer class="modal-card-foot">
+            <a class="button is-success" (click)="devolver(); cancelarModal('borrar');">Devolver</a>
+            <a class="button" (click)="cancelarModal('borrar')">Cancelar</a>
+        </footer>
+    </div>
+</div>

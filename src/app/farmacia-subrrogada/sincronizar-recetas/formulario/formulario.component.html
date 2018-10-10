@@ -1,0 +1,456 @@
+<formulario #ctrl URL="sincronizar-recetas" titulo="Sincronizar receta" [dato]="dato"></formulario>
+<menu-farmacia [modulo]="'Sincronizar recetas'" [icono]="'assets/hub-farmacia-sub.svg'" [url]="'/farmacia-subrrogada/sincronizar-recetas'"></menu-farmacia>
+<div style="height:50px;"></div>
+<form name="form" novalidate [formGroup]="dato" (ngSubmit)="ctrl.enviar()">
+    <div class="contenedor columns " style="height:100%">
+        <div class="column is-one-third" style="padding:1em;">
+            <div style="background: #FFF; border-radius: 1em; ">
+                <section class="hero is-primary">
+                    <h1 class="title" style="margin:0.5em; ">
+                        <span class="icon is-medium">
+                            <i class="fa fa-file-text"></i>
+                        </span> {{ctrl.moduloTitulo}}
+                    </h1>
+
+
+                </section>
+                <div style="padding: 1em;">
+                    <nav class="nav">
+                        <div class="nav-right nav-menu">
+                            <div class="nav-item">
+                                <div class="field is-grouped">
+                                    <p class="control" *ngIf="!tieneid" style="float:left">
+                                        <button class="button is-primary" type="submit" [ngClass]="{'is-loading': ctrl.cargando}" [disabled]="ctrl.dato.invalid">Guardar</button>
+                                    </p>
+                                    <p class="control" style="float:left">
+                                        <a class="button" (click)="ctrl.regresar()">
+                                            Regresar
+                                        </a>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </nav>
+
+                    <h3 class="title">
+                        <i class="fa fa-file"></i>
+                         Datos del movimiento
+                    </h3>
+                    <div >
+                        <div class="field">
+                            <label class="label">Fecha del movimiento:</label>
+                            <p class="control is-expanded  has-icon has-icon-right">
+
+
+                                <input class="input" [value]="fecha_actual" [(ngModel)]='fecha_movimiento' formControlName="fecha_movimiento" ngui-datetime-picker
+                                    [min-date]="MinDate" [max-date]="MaxDate" date-only="true" [ngClass]="{'is-danger': ctrl.dato.get('fecha_movimiento').hasError('required') && ctrl.dato.get('fecha_movimiento').touched}"
+                                    placeholder="YYYY-MM-DD" />
+
+                                <span class="icon is-small" *ngIf="ctrl.dato.get('fecha_movimiento').hasError('required') && ctrl.dato.get('fecha_movimiento').touched">
+                                    <i class="fa fa-warning"></i>
+                                </span>
+                                <span class="help is-danger" *ngIf="ctrl.dato.get('fecha_movimiento').hasError('required') && ctrl.dato.get('fecha_movimiento').touched">Este campo es requerido.</span>
+                            </p>
+                        </div>
+
+                        <div class="field">
+                            <label class="label">Observaciones:</label>
+                            <p class="control is-expanded  has-icon has-icon-right">
+                                <textarea class="textarea" autofocus type="text" [ngClass]="{'is-danger': ctrl.dato.get('observaciones').hasError('required') && ctrl.dato.get('observaciones').touched}"
+                                    placeholder="Observaciones" formControlName="observaciones"></textarea>
+                                <span class="icon is-small" *ngIf="ctrl.dato.get('observaciones').hasError('required') && ctrl.dato.get('observaciones').touched">
+                                    <i class="fa fa-warning"></i>
+                                </span>
+                                <span class="help is-danger" *ngIf="ctrl.dato.get('observaciones').hasError('required') && ctrl.dato.get('observaciones').touched">Este campo es requerido.</span>
+                            </p>
+                        </div>
+
+                        <div class="control" *ngIf="mostrarCancelado"> 
+                            <!-- *ngIf -->
+                            <div class="field">
+                                <div class="b-checkbox control is-expanded  has-icon has-icon-right">
+
+                                    <input type="checkbox" id="cancelado" class="styled" [checked]="ctrl.dato.get('cancelado').value == '1' ? true : false" (change)="ctrl.dato.get('cancelado').patchValue(ctrl.dato.get('cancelado').value == '1' ? '0' : '1')">
+                                    <label for="cancelado">  Cancelado
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="field">
+                                <label class="label">Observaciones de cancelación:</label>
+                                <p class="control is-expanded  has-icon has-icon-right">
+                                    <textarea class="textarea" autofocus type="text" [ngClass]="{'is-danger': ctrl.dato.get('observaciones_cancelacion').hasError('required') && ctrl.dato.get('observaciones_cancelacion').touched}"
+                                        placeholder="Observaciones de cancelacion" formControlName="observaciones_cancelacion"></textarea>
+                                    <span class="icon is-small" *ngIf="ctrl.dato.get('observaciones_cancelacion').hasError('required') && ctrl.dato.get('observaciones_cancelacion').touched">
+                                        <i class="fa fa-warning"></i>
+                                    </span>
+                                    <span class="help is-danger" *ngIf="ctrl.dato.get('observaciones_cancelacion').hasError('required') && ctrl.dato.get('observaciones_cancelacion').touched">Este campo es requerido.</span>
+                                </p>
+                            </div>
+
+                        </div>
+                        <div formGroupName="movimiento_metadato">
+                            <div class="field"  >
+                                <label class="label">Turno:</label>
+                                <p class="control is-expanded  has-icon has-icon-right">
+                                    <select class="select" name="turno" formControlName="turno_id" [ngClass]="{'is-danger': ctrl.dato.get('movimiento_metadato').get('turno_id').hasError('required') && ctrl.dato.get('movimiento_metadato').get('turno_id').touched}">
+                                        <option *ngFor="let item of ctrl.turnos" value="{{item.id}}" [attr.selected]="ctrl.dato.get('movimiento_metadato').get('turno_id').value == item.id ">{{ item.nombre }}</option>
+                                    </select>
+                                    <span class="icon is-small" *ngIf="ctrl.dato.get('movimiento_metadato').get('turno_id').hasError('required') && ctrl.dato.get('movimiento_metadato').get('turno_id').touched">
+                                        <i class="fa fa-warning"></i>
+                                    </span>
+                                    <span class="help is-danger" *ngIf="ctrl.dato.get('movimiento_metadato').get('turno_id').hasError('required') && ctrl.dato.get('movimiento_metadato').get('turno_id').touched">Este campo es requerido.</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr id="catalogos" (click)="ctrl.cargarCatalogo('turnos', 'turnos'); ">
+                    <h3 class="title">
+                        <i class="fa fa-user-md"></i>
+                        Datos de la receta
+                    </h3>
+
+                    <div >
+                        <nav class="panel" formGroupName="receta">
+
+                            <div class="columns" style="width:100%">
+                                <div class="column is-half">
+                                    <div class="field">
+                                        <label class="label">Folio:</label>
+                                        <p class="control is-expanded  has-icon has-icon-right">
+                                            <input class="input" type="text" [ngClass]="{'is-danger': ctrl.dato.get('receta').get('folio').hasError('required') && ctrl.dato.get('receta').get('folio').touched}"
+                                                placeholder="folio" formControlName="folio">
+                                            <span class="icon is-small" *ngIf="ctrl.dato.get('receta').get('folio').hasError('required') && ctrl.dato.get('receta').get('folio').touched">
+                                                <i class="fa fa-warning"></i>
+                                            </span>
+                                            <span class="help is-danger" *ngIf="ctrl.dato.get('receta').get('folio').hasError('required') && ctrl.dato.get('receta').get('folio').touched">Este campo es requerido.</span>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="column is-half">
+                                    <div class="field">
+                                        <label class="label">Tipo de receta:</label>
+                                        <p class="control is-expanded  has-icon has-icon-right">
+
+                                                <select class="select" name="tipo_receta" formControlName="tipo_receta" [ngClass]="{'is-danger': ctrl.dato.get('receta').get('tipo_receta').hasError('required') && ctrl.dato.get('receta').get('tipo_receta').touched}">
+                                                    <option *ngFor="let item of tipos_recetas" value="{{item.id}}" >{{ item.nombre }}</option>
+                                                </select>
+
+                                            <span class="icon is-small" *ngIf="ctrl.dato.get('receta').get('tipo_receta').hasError('required') && ctrl.dato.get('receta').get('tipo_receta').touched">
+                                                <i class="fa fa-warning"></i>
+                                            </span>
+                                            <span class="help is-danger" *ngIf="ctrl.dato.get('receta').get('tipo_receta').hasError('required') && ctrl.dato.get('receta').get('tipo_receta').touched">Este campo es requerido.</span>
+                                        </p>
+                                    </div>
+
+                                    
+                                </div>
+                            </div>
+
+                            <div class="columns" style="width:100%">
+                                <div class="column is-half">
+                                    <div class="field">
+                                        <label class="label">Fecha de receta:</label>
+                                        <p class="control is-expanded  has-icon has-icon-right">
+                                            <input class="input" [value]="fecha_actual" [(ngModel)]='fecha_receta' formControlName="fecha_receta" ngui-datetime-picker
+                                                [min-date]="MinDate" [max-date]="MaxDate" date-only="true" [ngClass]="{'is-danger': ctrl.dato.get('receta').get('fecha_receta').hasError('required') && ctrl.dato.get('receta').get('fecha_receta').touched}"
+                                                placeholder="YYYY-MM-DD" />
+
+                                            <span class="icon is-small" *ngIf="ctrl.dato.get('receta').get('fecha_receta').hasError('required') && ctrl.dato.get('receta').get('fecha_receta').touched">
+                                                <i class="fa fa-warning"></i>
+                                            </span>
+                                            <span class="help is-danger" *ngIf="ctrl.dato.get('receta').get('fecha_receta').hasError('required') && ctrl.dato.get('receta').get('fecha_receta').touched">Este campo es requerido.</span>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="column is-half">
+                                    <div class="field">
+                                        <label class="label">Imagen:</label>
+                                        <p class="control is-expanded  has-icon has-icon-right">
+                                            <input type="file" (change)="ctrl.seleccionarImagenBase64($event, ctrl.dato.controls.receta.controls.imagen_receta)">
+                                            <input type="hidden" placeholder="Imagen de la receta" formControlName="imagen_receta">
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="columns" style="width:100%">
+                                <div class="column ">
+                                    <div class="field">
+                                        <label class="label">Doctor:</label>
+                                        <p class="control is-expanded  has-icon has-icon-right">
+                                            <input class="input" type="text" [ngClass]="{'is-danger': ctrl.dato.get('receta').get('doctor').hasError('required') && ctrl.dato.get('receta').get('doctor').touched}"
+                                                placeholder="Doctor" formControlName="doctor">
+                                            <span class="icon is-small" *ngIf="ctrl.dato.get('receta').get('doctor').hasError('required') && ctrl.dato.get('receta').get('doctor').touched">
+                                                <i class="fa fa-warning"></i>
+                                            </span>
+                                            <span class="help is-danger" *ngIf="ctrl.dato.get('receta').get('doctor').hasError('required') && ctrl.dato.get('receta').get('doctor').touched">Este campo es requerido.</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="columns" style="width:100%">
+                                <div class="column ">
+                                    <div class="field">
+                                        <label class="label">Paciente:</label>
+                                        <p class="control is-expanded  has-icon has-icon-right">
+                                            <input class="input" type="text" [ngClass]="{'is-danger': ctrl.dato.get('receta').get('paciente').hasError('required') && ctrl.dato.get('receta').get('paciente').touched}"
+                                                placeholder="Paciente" formControlName="paciente">
+                                            <span class="icon is-small" *ngIf="ctrl.dato.get('receta').get('paciente').hasError('required') && ctrl.dato.get('receta').get('paciente').touched">
+                                                <i class="fa fa-warning"></i>
+                                            </span>
+                                            <span class="help is-danger" *ngIf="ctrl.dato.get('receta').get('paciente').hasError('required') && ctrl.dato.get('receta').get('paciente').touched">Este campo es requerido.</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="columns" style="width:100%">
+                                <div class="column ">
+                                    <div class="field">
+                                        <label class="label">Diagnostico:</label>
+                                        <p class="control is-expanded  has-icon has-icon-right">
+                                            <textarea class="textarea" autofocus type="text" [ngClass]="{'is-danger': ctrl.dato.get('receta').get('diagnostico').hasError('required') && ctrl.dato.get('receta').get('diagnostico').touched}"
+                                                placeholder="Diagnostico" formControlName="diagnostico"></textarea>
+                                            <span class="icon is-small" *ngIf="ctrl.dato.get('receta').get('diagnostico').hasError('required') && ctrl.dato.get('receta').get('diagnostico').touched">
+                                                <i class="fa fa-warning"></i>
+                                            </span>
+                                            <span class="help is-danger" *ngIf="ctrl.dato.get('receta').get('diagnostico').hasError('required') && ctrl.dato.get('receta').get('diagnostico').touched">Este campo es requerido.</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="block" *ngIf="ctrl.dato.controls.receta.controls.imagen_receta.value != ''">
+                                <a class="button is-primary is-outlined is-fullwidth" (click)="abrirModal('verFoto')">
+                                    <span class="icon">
+                                        <i class="fa fa-eye"> </i> 
+                                    </span> 
+                                    &nbsp; Ver receta
+                                </a>
+                            </div>
+
+                            <div class="modal" id="verFoto">
+                                <div class="modal-background"></div>
+                                <div class="modal-content">
+                                    <p class="image is-4by3">
+                                        <img [src]="'data:image/jpg;base64,'+ctrl.dato.controls.receta.controls.imagen_receta.value" alt="Receta" />
+                                    </p>
+                                </div>
+                                <button type="button" class="modal-close" (click)="cancelarModal('verFoto')"></button>
+                            </div>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- apartado de insumos -->
+        <div class="column" style="padding:1em;">
+            <div style="background: #FFF; border-radius: 1em; ">
+                <section class="hero is-primary">
+                    <div class="hero-body">
+                        <a class="button  is-primary" style="position:absolute; top:5em; right:3em;" (click)="ctrl.cargarDatos(dato);  "><span class="icon "><i class="fa fa-refresh"></i></span></a>
+                        <div class="container is-fluid">
+                            <h1 class="title">
+                                <span *ngIf="!ctrl.cargando || !cargando" class="icon is-medium"><i class="fa fa-edit"></i></span>
+                                <span *ngIf="ctrl.cargando || cargando" class="icon is-medium"><i class="fa fa-refresh fa-spin"></i></span>                                Insumos
+                            </h1>
+
+                        </div>
+                    </div>
+                </section>
+                <div class="is-fullwidth has-text-centered" *ngIf="!ctrl.datosCargados">
+                    <br>
+                    <span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span>                    &nbsp;<span>Cargando...</span></span>
+                </div>
+                <section class="section">
+
+                    <div class="field has-addons has-addons-centered" *ngIf="!tieneid">
+
+                        <p class="control">
+                            <input ngui-auto-complete [source]="insumos_term" [list-formatter]="autocompleListFormatter" id="buscarInsumo" value-property-name="clave"
+                                display-property-name="nombre" path-to-data="" loading-text="Cargando..." no-match-found-text="No hay resultados."
+                                (valueChanged)="select_insumo_autocomplete($event)" min-chars="1" class="input is-success is-medium"
+                                type="text" placeholder="Escanea el codigo de barra, o empieza escribir el nombre del producto" >
+
+                        </p>
+
+                        <hr>
+                    </div>
+
+                    <div formArrayName="insumos">
+                        <div class="box" *ngFor="let item of ctrl.dato.controls.insumos.controls; let i=index"  [ngStyle]="{'background': i%2 == 0 ? 'rgba(230, 230, 232, 0.44)' : ''}">
+                            <article class="media" [formGroupName]="i">
+                                <div class="media-content">
+                                    <div class="content">
+                                        <a *ngIf="!tieneid" class="is-danger" title="Quitar este elemento de la lista" style="float:right" (click)="ctrl.quitar_form_array('insumos', i)"><span class="icon"><i class="fa fa-trash-o"></i></span></a>
+                                        <p>
+                                            <strong>
+                                                <span style="color:cornflowerblue">
+                                                    Clave: {{ ctrl.dato.controls.insumos.controls[i].controls.clave.value }} 
+                                                </span>
+                                                Nombre: {{ctrl.dato.controls.insumos.controls[i].controls.nombre.value}}
+                                            
+                                                <label class="tag is-success" *ngIf="ctrl.dato.controls.insumos.controls[i].controls.es_causes.value"><strong>Cause </strong></label>
+                                                <label class="tag is-success" *ngIf="!ctrl.dato.controls.insumos.controls[i].controls.es_causes.value"><strong>No Cause </strong> </label>                                           
+                                                                                            
+                                                <label class="tag is-warning" *ngIf="ctrl.dato.controls.insumos.controls[i].controls.es_unidosis.value"><strong>Unidosis</strong> </label>
+                                            </strong>
+                                            <br> {{ctrl.dato.controls.insumos.controls[i].controls.descripcion.value}}
+                                        </p>
+                                        <a class="is-danger" title="Ver la lista de lotes de este articulo" style="float:right" (click)="ver_lotes_asignados(i)">
+                                            <span class="icon">
+                                                <i *ngIf="!mostrar_lote[i]" class="fa fa-plus"></i>
+                                                <i *ngIf="mostrar_lote[i]" class="fa fa-minus"></i>
+                                            </span>
+                                        </a>
+                                    </div>
+                                    <section *ngIf="mostrar_lote[i]">
+                                        <table class="table is-narrow is-bordered is-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Lote</th>
+                                                    <th>Caducidad</th>
+                                                    <th>Codigo de barras</th>
+                                                    <th *ngIf="!tieneid">Existencia</th>
+                                                    <th>Cantidad</th>
+                                                    <th *ngIf="!tieneid"></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody formArrayName="lotes">
+                                                <tr *ngFor="let val of ctrl.dato.controls.insumos.controls[i].controls.lotes.controls;  let i2 = index;">
+                                                    <td>{{val.value.lote}} </td>
+                                                    <td>{{val.value.fecha_caducidad}}</td>
+                                                    <td>{{val.value.codigo_barras}}</td>
+                                                    <td *ngIf="!tieneid">{{val.value.existencia}}</td>
+                                                    <td [formGroupName]="i2">
+                                                        <input *ngIf="!val.nuevo" class="input has-text-centered" (blur)="validar_cantidad_lote(i, val, i2)" type="number" step="1" min="0" max="{{val.value.existencia}}"
+                                                            placeholder="Cantidad" formControlName="cantidad">
+                                                        <input *ngIf="val.nuevo" class="input has-text-centered" (blur)="validar_cantidad_lote(i, val, i2)" type="number" step="1" min="0" 
+                                                            placeholder="Cantidad" formControlName="cantidad"></td>
+                                                    <td *ngIf="!tieneid">
+                                                        <a class="is-danger" title="Quitar este lote" (click)="quitar_lote_insumo(i, val.value, i2)">
+                                                            <span class="icon">
+                                                                <i class="fa fa-trash-o"></i>
+                                                            </span>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </section>
+                                    <nav class="level is-mobile">
+                                        <div class="level-left">
+                                            <a class="level-item">
+                                                <div class="field">
+                                                    <label class="label">Dosis:</label>
+                                                    <p class="control is-expanded  has-icon has-icon-right">
+                                                        <input type="text" class="input" formControlName="dosis" [ngClass]="{'is-danger': ctrl.dato.controls.insumos.controls[i].controls.dosis.hasError('required') && ctrl.dato.controls.insumos.controls[i].controls.dosis.touched}">
+                                                    </p>
+                                                </div>
+                                            </a>
+                                            <a class="level-item">
+                                                <div class="field">
+                                                    <label class="label">Frecuencia (Horas):</label>
+                                                    <p class="control is-expanded  has-icon has-icon-right">
+                                                        <input type="text" class="input" formControlName="frecuencia" [ngClass]="{'is-danger': ctrl.dato.controls.insumos.controls[i].controls.frecuencia.hasError('required') && ctrl.dato.controls.insumos.controls[i].controls.frecuencia.touched}">
+                                                    </p>
+                                                </div>
+                                            </a>
+                                            <a class="level-item">
+                                                <div class="field">
+                                                    <label class="label">Duración:</label>
+                                                    <p class="control is-expanded  has-icon has-icon-right">
+                                                        <input type="text" class="input" formControlName="duracion" [ngClass]="{'is-danger': ctrl.dato.controls.insumos.controls[i].controls.duracion.hasError('required') && ctrl.dato.controls.insumos.controls[i].controls.duracion.touched}">
+                                                    </p>
+                                                </div>
+                                            </a>
+                                            <a class="level-item">
+                                                <div class="field">
+                                                    <label class="label">Cant. recetada:</label>
+                                                    <p class="control is-expanded  has-icon has-icon-right">
+                                                        <input type="text" class="input" formControlName="cantidad_recetada" [ngClass]="{'is-danger': ctrl.dato.controls.insumos.controls[i].controls.cantidad_recetada.hasError('required') && ctrl.dato.controls.insumos.controls[i].controls.cantidad_recetada.touched}">
+                                                    </p>
+                                                </div>
+                                            </a>
+                                            <a class="level-item">
+                                                <div class="field">
+                                                    <label class="label">Cant. surtida:</label>
+                                                    <p class="control is-expanded  has-icon has-icon-right">
+                                                        <input *ngIf="!tieneid" style="background:aliceblue" type="text" readonly class="input" formControlName="cantidad_surtida" [ngClass]="{'is-danger': ctrl.dato.controls.insumos.controls[i].controls.cantidad_surtida.hasError('required') && ctrl.dato.controls.insumos.controls[i].controls.cantidad_surtida.touched}">
+                                                        <input *ngIf="tieneid" style="background:aliceblue" type="text" readonly class="input" formControlName="cantidad" >
+                                                    </p>
+                                                </div>
+                                            </a>
+                                        </div>
+                                    </nav>
+                                </div>
+                            </article>
+                        </div>
+                    </div>
+
+                </section>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+<div class="modal" id="verLotes">
+    <div class="modal-background"></div>
+    <div class="modal-card" style="width: 60%;">
+        <header class="modal-card-head">
+            <p class="modal-card-title" id="tituloModal"> </p>
+            <button type="button" class="delete" (click)="cancelarModal('verLotes')"></button>
+        </header>
+        <section class="modal-card-body">
+            <table class="table is-narrow is-bordered is-striped">
+                <thead>
+                    <tr>
+                        <th>Lote</th>
+                        <th>Caducidad</th>
+                        <th>Codigo de barras</th>
+                        <th>Existencia</th>
+                        <th>Cantidad</th>
+                        <th *ngIf="es_unidosis">Existencia Unidosis</th>
+                        <th *ngIf="es_unidosis">Cantidad Unidosis</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let item of lotes_insumo;  let i = index;">
+                        <td *ngIf="!item.nuevo">{{item.lote}}</td>
+                        <td *ngIf="item.nuevo"><input class="input has-text-centered " type="text" placeholder="Lote" [(ngModel)]="item.lote"></td>
+                        <td *ngIf="!item.nuevo">{{item.fecha_caducidad}}</td>
+                        <td *ngIf="item.nuevo"><input class="input has-text-centered " type="date" placeholder="Fecha de caducidad" [(ngModel)]="item.fecha_caducidad"></td>
+                        <td *ngIf="!item.nuevo">{{item.codigo_barras}}</td>
+                        <td *ngIf="item.nuevo"><input class="input has-text-centered " type="text" placeholder="Codigo de barras" [(ngModel)]="item.codigo_barras"></td>
+                        <td *ngIf="!item.nuevo">{{item.existencia}}</td>
+                        <td *ngIf="item.nuevo"></td>
+                        <td>
+                            <input class="input has-text-centered " type="number" step="1" min="0" max="{{item.existencia}}" placeholder="Cantidad" [(ngModel)]="item.cantidad">
+                        </td>
+
+                        <td *ngIf="!item.nuevo && es_unidosis">{{item.existencia_unidosis}}</td>
+                        <td *ngIf="item.nuevo && es_unidosis"></td>
+
+                        <td *ngIf="es_unidosis">
+                            <input class="input has-text-centered " type="number" step="1" min="0" max="{{item.cantidad_unidosis}}" placeholder="Cantidad Unidosis" [(ngModel)]="item.cantidad_unidosis">
+                        </td>
+
+                        <td *ngIf="item.nuevo">
+                            <a class="delete" (click)=eliminarLote(i)></a>
+                        </td>
+                    </tr>
+                </tbody>
+                
+            </table>
+        </section>
+        <footer class="modal-card-foot">
+            <a class="button is-dark" (click)="agregarNuevoLote()">Agregar nuevo lote</a>                            
+            <a class="button is-success" (click)="agregarLoteIsumo()">Aceptar</a>
+            <a class="button" (click)="cancelarModal('verLotes')">Cancelar</a>
+        </footer>
+    </div>
+</div>

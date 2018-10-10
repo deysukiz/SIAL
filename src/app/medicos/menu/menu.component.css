@@ -1,0 +1,23 @@
+.top-nav { position: fixed; width: 100%;top:0px; z-index:99; background: #00d1b2; }
+
+
+nav {
+    background-color:#00d1b2;
+    color: #FFF !important;
+}
+a.nav-hub-active { background:rgba(0,0,0,0.05); width:4em !important;}
+a.nav-hub-active:hover { background:rgba(0,0,0,0.1);}
+nav a { color: #FFF ; color: rgba(255,255,255,0.9)  !important;}
+nav a:hover { color: #FFF !important;}
+nav .title  { color:#FFF;}
+nav a .title { color:#FFF; color: rgba(255,255,255,0.9)  !important;}
+
+nav a:hover .title { color:#FFF !important; }
+
+.unidad-trabajo {
+	font-size: 0.7em;
+	text-align: right !important;
+	padding: 1em;
+    vertical-align: middle;
+    text-shadow: 2px 2px slategray;
+}

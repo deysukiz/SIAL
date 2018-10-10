@@ -1,0 +1,26 @@
+.top-bar {
+	padding: 1em ; 
+	font-size: 1.2em; 
+	background: #FFF;    
+	color: #333;
+ }
+ .contenedor-pedido.con-tabs .top-bar {
+	padding: 0.5em ; 
+ }
+ .top-bar.is-primary {
+	background: #00d1b2;
+	color:#FFF
+ }
+ .top-bar.is-dark {
+	background: #333;
+	color:#FFF
+ }
+ .contenedor-pedido {
+	background: #FFF; border-radius: 1em; overflow: hidden;
+ }
+ .contenedor-pedido.con-tabs {
+	border-top-left-radius: 0px !important;
+	border-top-right-radius: 0px !important;
+ }
+ 
+ 

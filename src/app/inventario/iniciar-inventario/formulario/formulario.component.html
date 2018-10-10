@@ -1,0 +1,522 @@
+<!-- crud asignar url de la api URL="url de la api" titulo="un titulo para la pestaña de la pagina" [dato]="variable que contiene el formulario]-->
+<!-- <formulario #ctrl URL="inicializar-inventario-me" titulo="Inicializar / Inventario" [dato]="dato"></formulario> -->
+
+<!-- Menu principal  menutitulo="titulo del modulo en el que estamos con el nombre como se encuentra en enviroment" menuactual="nombre del hub donde estamos como se especifico en el routing"-->
+<div style="height: 50px">
+    <app-menu-inventario [modulo]="'Inicialización de inventario de insumos médicos'" [icono]="'assets/icono-salidas.svg'" [url]="'/inventario/iniciar-inventario'"></app-menu-inventario>
+</div>
+
+<div class="contenedor columns " style="height:90%; padding: 1em;">
+    <div class="column is-one-quarter">
+        <section class="hero is-primary" style="border-top-left-radius: 1em; border-top-right-radius: 1em;">
+            <h1 class="title" style="margin:0.5em; ">
+                <span class="icon is-medium">
+                    <i class="fa fa-file-text"></i>
+                </span> Datos generales
+            </h1>
+        </section>
+        <div style="background: #FFF; border-radius: 1em; overflow:auto; display:block" [style.maxHeight.px]="tamano-250">
+            
+            <div style="padding: 1em; overflow-x: hidden;">              
+                <h3 class="title">
+                    <!-- <i class="fa fa-file"></i>
+                        Datos del movimiento -->
+                        <div class="columns" style="font-size: 18px; text-align: right">
+                        <strong class="column is-one-third">Subtotal: </strong><strong class="column">{{   ( subtotal_precios | currency:'' ) }}  &nbsp;  &nbsp;  </strong>
+                        </div>
+                        <div class="columns" style="font-size: 18px; text-align: right">
+                        <strong class="column is-one-third">IVA: </strong><strong class="column">{{   ( total_iva | currency:'' ) }}  &nbsp;  &nbsp;  </strong>
+                        </div>
+                        <div class="columns" style="font-size: 24px; text-align: right">
+                        <strong class="column is-one-third">TOTAL: </strong><strong class="column">{{   ( total_precio | currency:'' ) }}  &nbsp;  &nbsp;  </strong>
+                        </div>
+                </h3>
+            </div>
+        </div>
+        <div style="background: #FFF; border-radius: 1em; padding: 1em; overflow: scroll; overflow-x: hidden; margin-top: 1em" [style.height.px]="tamano-350"> 
+            <div style="padding-bottom: 1em">
+                <div class="field">
+                    <label class="label">Fecha de inicio:</label>
+                    <p class="control is-expanded  has-icon has-icon-right">
+                        <input class="input"  [(ngModel)]='form_dato.fecha_inicio' ngui-datetime-picker 
+                            [max-date]="MaxDate" date-only="true" [ngClass]="{'is-disabled': form_dato.estatus === 'INICIALIZADO' || form_dato.estatus === 'NOINICIALIZADO', 'is-danger': form_dato.fecha_inicio == ''}" name="fecha_inicio"
+                            placeholder="YYYY-MM-DD" readonly/>
+
+                        <span class="icon is-small">
+                            <i class="fa fa-warning" *ngIf="form_dato.fecha_inicio == ''"></i>
+                        </span>
+                        <span class="help is-danger" *ngIf="form_dato.fecha_inicio == ''">Este campo es requerido.</span>
+                    </p>
+                </div>
+                <div class="field">
+                        <label class="label">Fecha de fin:</label>
+                        <p class="control is-expanded  has-icon has-icon-right">
+                            <input class="input" [(ngModel)]='form_dato.fecha_fin' ngui-datetime-picker
+                                [max-date]="MaxDate" date-only="true" [ngClass]="{'is-disabled': form_dato.estatus === 'INICIALIZADO' || form_dato.estatus === 'NOINICIALIZADO', 'is-danger': form_dato.fecha_fin == ''}"
+                                placeholder="YYYY-MM-DD" readonly/>
+    
+                            <span class="icon is-small">
+                                <i class="fa fa-warning" *ngIf="form_dato.fecha_fin == ''"></i>
+                            </span>
+                            <span class="help is-danger" *ngIf="form_dato.fecha_fin == ''">Este campo es requerido.</span>
+                        </p>
+                    </div>
+                <br>
+                <div class="control" [ngClass]="{'is-hidden': form_dato.estatus == 'INICIALIZADO'}">
+                    <div class="field">
+                        <label class="label">Programa:</label>
+                    </div><!-- SI carga los programas -->
+                    <div class="control is-grouped">
+                        <span *ngIf="cargando || cargandoCatalogo" class="tag is-primary is-medium">Cargando programas. 
+                            <i class="fa fa-refresh fa-spin" aria-hidden="true"></i>
+                        </span>
+                        <div  *ngIf="!cargando && !cargandoCatalogo" class="select control is-expanded  has-icon has-icon-right">
+                            <select class="select is-medium" name="seleccionar_programa" id="seleccionar_programa" required
+                                [ngClass]="{'is-disabled': tieneid && form_dato.estatus == 'FI', 'is-hidden': form_dato.estatus === 'INICIALIZADO'}">
+                                <option value="">Seleccione un programa</option>
+                                <option *ngFor="let item of lista_programas" value="{{item.id}}">{{ item.nombre }}</option>
+                            </select>
+                            <span class="icon is-small" *ngIf="">
+                                <i class="fa fa-warning"></i>
+                            </span>
+                            <span class="help is-danger" *ngIf="">Este campo es requerido.</span>
+                            <span class="help is-danger" *ngIf="lista_programas.length == 0"> No se cargaron programas, contacte al administrador.</span>
+                        </div>
+                        <!-- Botón para agregar programas  -->
+                        <div class="control" [ngClass]="{'is-hidden': form_dato.estatus == 'INICIALIZADO'}" >
+                            <a class="button" 
+                                (click)="addPrograma()" title="Agregar programa">
+                                <i class="fa fa-plus fa-fw" aria-hidden="true"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <!-- <div class="control">
+                    <div class="field">
+                        <label class="label">Programas agregados:</label>
+                    </div>
+                    <div class="control is-grouped">
+                        <div class="select is-multiple control is-expanded  has-icon has-icon-right">
+                            <select class="select is-medium" multiple (click)="seleccionarPrograma()" id="programa_agregado" style="height: 150px">
+                                <option *ngFor="let item_programa of form_dato.programas; let idx = index" value="{{item_programa.id}}">{{ item_programa.nombre }}</option>
+                            </select>
+                        </div>
+                    </div>
+                </div> -->
+                <br>
+                <div class="control">
+                    <nav class="panel">
+                        <p class="panel-heading">
+                          Programas agregados:
+                        </p>
+                        <!-- Para buscar dentro de la lista (falta agregar funcionalidad)
+                        <div class="panel-block">
+                          <p class="control has-icons-left">
+                            <input class="input is-small" type="text" placeholder="Buscar programa">
+                          </p>
+                        </div> -->
+                        <div style="height: 200px; overflow:auto;">
+                            <a class="panel-block is-active" *ngFor="let item_programa of form_dato.programas; let idx = index" 
+                                (click)="seleccionarPrograma(item_programa.id)" [ngClass]="{'is-active': i_programa == idx}" >
+                                <span class="panel-icon">
+                                    <i class="fa fa-book"></i>
+                                </span>
+                                {{ item_programa.nombre }}
+                            </a>
+                        </div>
+                      </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="column" style="padding:1em;">
+        <!-- <form #f="ngForm"> -->
+            <!-- inicio formulario -->
+            <div style="background: #FFF; border-radius: 1em; ">
+                    <section class="hero is-primary"  style="border-top-left-radius: 1em; border-top-right-radius: 1em;">
+                        <div class="title" style="margin:0.5em;">
+                            <!-- Opciones  -->
+                            <nav class="level" style="padding-left: 1em;">
+                                <!-- Left side -->
+                                <div class="level-left ">
+                                    <div class="level-item">
+                                        <p class="title">
+                                            <span *ngIf="!cargando || !cargando" class="icon is-medium">
+                                                <i class="fa fa-list-alt"></i>
+                                            </span>
+                                            <span *ngIf="cargando || cargando" class="icon is-medium">
+                                                <i class="fa fa-refresh fa-spin"></i>
+                                            </span>
+                                            Inicializar inventarios
+                                        </p>
+                                    </div>
+                                </div>
+                            
+                                <div class="level-right">
+                                    <button class="button is-primary tooltip" routerLink="/inventario/iniciar-inventario">
+                                        <span class="icon fa-2x">
+                                            <i class="fa fa-arrow-left"> </i>
+                                        </span>
+                                        <span class="tooltiptext">Regresar</span>
+                                    </button>
+
+                                    <button class="button is-primary tooltip" (click)=" cargarCatalogo('programa', 'lista_programas', 'estatus'); actualizar()" id='cargar_datos_actualizar'>
+                                        <span class="icon ">
+                                            <i class="fa fa-refresh fa-2x"></i>
+                                        </span>
+                                        <span class="tooltiptext">Actualizar</span>
+                                    </button>
+    
+                                    <button class="button is-primary tooltip" (click)="enviar()" type="submit" [ngClass]="{'is-loading': cargando, 'is-hidden': form_dato.estatus === 'INICIALIZADO'}" [disabled]="form_dato.invalid">
+                                        <span class="icon ">
+                                            <i class="fa fa-save fa-2x"> </i>
+                                        </span>
+                                        <span class="tooltiptext">Guardar avance</span>
+                                    </button>
+                                    
+                                    <button class="button is-primary tooltip" (click)="inicializar();" type="submit" [ngClass]="{'is-loading': cargando, 'is-hidden': form_dato.estatus === 'INICIALIZADO'}" [disabled]="form_dato.invalid">
+                                        <span class="icon" style="color: gold">
+                                            <i class="fa fa-play-circle fa-2x"></i>
+                                        </span>
+                                        <span class="tooltiptext">Inicializar inventario</span>
+                                    </button>
+                                    <button class="button is-primary tooltip"  (click)="imprimir()" title="PDF" type="submit" [ngClass]="{'is-loading': cargando, 'is-hidden': form_dato.estatus === 'NOINICIALIZADO'}" [disabled]="form_dato.invalid">
+                                        <span class="icon">
+                                            <i class="fa fa-file-pdf-o fa-2x"></i>
+                                        </span>
+                                        <span class="tooltiptext">Imprimir</span>
+                                    </button>
+                                </div>
+                            </nav>
+                        </div>
+                    </section>
+                <div style="background: #FFF;" [style.height.px]="tamano-180">
+                        
+                    <div  *ngFor="let programa of form_dato.programas; let idx = index">
+                    <!-- <div [ngClass]="{'is-hidden': i_programa != idx}" > -->
+                    <div *ngIf="i_programa == idx" >
+                        <div class="columns" style="padding: 1em;">
+                            <div class="column is-one-quarter">
+                                <div class="control" >
+                                    <div class="field">
+                                        <label class="label">Programa:</label>
+                                    </div>
+                                    <div>
+                                        <span class="tag" style="color:darkblue; font-size: 18px">
+                                            {{ form_dato.programas[i_programa].nombre }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="column">
+                                <div class="field has-addons has-addons-centered" style="padding-top: 1.5em">
+                                    <!-- *****************     INPUT DE BUSQUEDA DE INSUMO     ****************** -->    
+                                    <div class="control is-grouped">
+                                        <div class="control is-expanded">
+                                            <input 
+                                                (keyup.enter)="buscarInsumo.value != '' ?  enviarAutocomplete(buscarInsumo.value) : buscarInsumo.value = ''" 
+                                                id="buscarInsumo"
+                                                name="buscarInsumo"
+                                                #buscarInsumo
+                                                class="input is-success is-medium"
+                                                type="text"
+                                                placeholder="Escriba la clave o el nombre del insumo y presione la tecla ENTER"
+                                                [ngClass]="{'is-disabled': form_dato.programas[i_programa].id == '', 'is-hidden': form_dato.estatus === 'INICIALIZADO' }"/>
+                                        </div>
+                                        <div class="control">
+                                            <a class="button is-success is-medium" title="Buscar insumo" [ngClass]="{'is-hidden': form_dato.estatus === 'INICIALIZADO' }"
+                                            (click)="buscarInsumo.value != '' ?  enviarAutocomplete(buscarInsumo.value) : buscarInsumo.value = ''">
+                                                <i class="fa fa-search" aria-hidden="true"></i> &nbsp; Buscar
+                                            </a>
+                                        </div>
+                                        <div class="control" *ngIf="buscarInsumo.value != ''">
+                                            <a class="button is-info is-medium" title="Borrar texto" (click)="res_busq_insumos=[]; buscarInsumo.value='';">
+                                                <i class="fa fa-times" aria-hidden="true"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div class="is-fullwidth has-text-centered" *ngIf="cargando" style="height:100px;">
+                                        <br>
+                                        <span class="tag is-primary is-large">
+                                            <span class="icon"><i class="fa fa-refresh fa-spin"></i></span> &nbsp;<span>Cargando...</span>
+                                        </span>
+                                    </div>
+                                    <!-- *****************     RESULTADOS DE BUSQUEDA DE INSUMO     ****************** -->
+                                    <div *ngIf="res_busq_insumos.length > 0 && !cargando" style="height: 200px;">
+                                        <div *ngIf="res_busq_insumos.length > 0 && !cargando" style="overflow: scroll; overflow-x: hidden; height: 90%;">
+                                            <div class="content" style="z-index: 1;" *ngFor="let item_insumo of res_busq_insumos; let c = index">
+                                                <div class="card" (click)="select_insumo_autocomplete(item_insumo, i_programa)" style="background: rgba(242,248,253, 0.8)">
+                                                    <div class="card-content">
+                                                        <div class="media">          
+                                                            <div class="media-content">
+                                                                <p class="title is-4">{{item_insumo.descripcion}}</p>
+                                                                <p class="subtitle is-6">
+                                                                    <strong>Clave: </strong> {{item_insumo.clave}}
+                                                                    <label class="tag is-success" *ngIf="item_insumo.es_causes == 1"><strong>Cause </strong></label>
+                                                                    <label class="tag" *ngIf="item_insumo.es_causes == 0" style="background: #B8FB7E; border-color: #B8FB7E; color: rgba(0,0,0,0.7);" ><strong>No Cause </strong> </label>
+                                                                    <label class="tag is-warning" *ngIf="item_insumo.es_unidosis == 1"><strong>Unidosis</strong> </label>
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr>
+                        </div>
+                        <!-- FORMULARIO DE INSUMOS -->
+                        <div style="overflow:auto; display:block" [style.maxHeight.px]="tamano-300"> <!-- DATOS DEL INSUMO -->
+                            <div *ngFor="let insumo of form_dato.programas[i_programa].insumos; let i = index" style="padding: 1em;">
+                                <div class="box" style="padding: 1em">                                
+                                        <div class="content">
+                                            <span style="float:right; padding-left: 15px;" [ngClass]="{'is-hidden': form_dato.estatus === 'INICIALIZADO' }">
+                                                <a  class="button is-danger" title="Quitar este elemento de la lista" (click)="abrirModal('borrarInsumo', i_programa, i)">
+                                                    <span class="icon"><i class="fa fa-trash-o"></i></span>
+                                                </a>
+                                            </span>
+                                            <a  class="button is-success" 
+                                                [ngClass]="{'is-hidden': form_dato.estatus === 'INICIALIZADO' }"
+                                                title="Agregar más insumos de esta clave" style="float:right" (click)="agregarLote(i_programa, i)" > 
+                                                <!-- (click)="select_insumo_autocomplete(item.value);" -->
+                                                <span class="icon"><i class="fa fa-plus-circle" aria-hidden="true"></i></span>
+                                            </a>
+                                            <span style="float:right; padding-left: 15px; font-size: 20px; color: navy" >
+                                                &nbsp; <strong>Subtotal: {{ form_dato.programas[i_programa].insumos[i].subtotal ? ( form_dato.programas[i_programa].insumos[i].subtotal | currency:'') : ( 0 | currency:'' ) }}  &nbsp;  &nbsp; </strong> 
+                                            </span>
+                                            <p>
+                                                <strong>
+                                                    Clave: 
+                                                    <span style="color:cornflowerblue; font-size: 18px">
+                                                        {{ form_dato.programas[i_programa].insumos[i].clave_insumo_medico }} 
+                                                    </span>
+                                                    Nombre: {{ form_dato.programas[i_programa].insumos[i].descripcion }}
+                                                
+                                                    <label class="tag is-success" *ngIf="form_dato.programas[i_programa].insumos[i].es_causes == 1"><strong>Cause </strong></label>
+                                                    <label class="tag" style="background: #B8FB7E; border-color: #B8FB7E; color: rgba(0,0,0,0.7);" *ngIf="form_dato.programas[i_programa].insumos[i].es_causes== 0"><strong>No Cause </strong> </label>                                           
+                                                                                                
+                                                    <label class="tag is-warning" *ngIf="form_dato.programas[i_programa].insumos[i].es_unidosis == 1"><strong>Unidosis</strong> </label>
+                                                </strong>
+                                                <!-- <br> {{dato.controls.insumos.controls[i].controls.descripcion.value}}  -->
+                                            </p>
+                                        </div>
+
+                                        <!-- <pre style="height: 50px">{{form_dato.programas[i_programa].insumos[i].lotes | json}}</pre> -->
+                                    <div *ngFor="let lote of form_dato.programas[i_programa].insumos[i].lotes; let i_lote = index">
+                                        <!-- inputs DE LOTES-->
+                                        <div class="level-left" [ngStyle]="{'background': form_dato.estatus === 'INICIALIZADO' ? '' : i_lote%2 == 0 ? 'rgba(236, 238, 241, 256)' :  ''}" style="border-bottom:1px solid rgba(236, 238, 241, 256)">
+                                            <div class="columns is-flex-desktop" style="width: 100%; padding: 1px">
+                                                <div class="column is-1">
+                                                    <p class="b-checkbox control is-expanded  has-icon has-icon-right" style="margin-left: 2em;">
+                                                        <input class="styled" type="checkbox"
+                                                            id="exclusivo{{i_programa}}{{i}}{{i_lote}}"
+                                                            class="input is-small" [(ngModel)]="lote.exclusivo" [ngModelOptions]="{standalone: true}"
+                                                            [checked]="form_dato.programas[i_programa].insumos[i].lotes[i_lote].exclusivo == 1 ? true : false"
+                                                            (click)="form_dato.programas[i_programa].insumos[i].lotes[i_lote].exclusivo == 1 ? form_dato.programas[i_programa].insumos[i].lotes[i_lote].exclusivo = 0 : form_dato.programas[i_programa].insumos[i].lotes[i_lote].exclusivo = 1;"
+                                                            [ngClass]="{'is-disabled': form_dato.estatus === 'INICIALIZADO'}">
+                                                        <label for="exclusivo{{i_programa}}{{i}}{{i_lote}}" title="Para distribución exclusiva del programa" [ngClass]="{'is-disabled': form_dato.estatus === 'INICIALIZADO'}">Exclusivo </label>
+                                                    </p>
+                                                </div>
+                                                <div class="column is-2">
+                                                    <p class="control is-expanded">
+                                                        <label>Lote:</label>
+                                                        <input type="text" class="input is-small" [(ngModel)]="lote.lote" [ngModelOptions]="{standalone: true}"
+                                                            [ngClass]="{'is-danger': form_dato.programas[i_programa].insumos[i].lotes[i_lote].lote == '',
+                                                                        'is-disabled': form_dato.estatus === 'INICIALIZADO'}">
+                                                    </p>
+                                                </div>                      
+                                                <div class="column is-1">
+                                                    <p class="control is-expanded">
+                                                        <label>Caducidad:</label>
+                                                        <input class="input is-small" [(ngModel)]="lote.fecha_caducidad" [ngModelOptions]="{standalone: true}"
+                                                            min="MinDateCaducidad" date-only="true" (blur)="validar_fecha(form_dato.programas[i_programa].insumos[i].lotes[i_lote].fecha_caducidad, i_programa, i, i_lote)"
+                                                            placeholder="YYYY-MM-DD" [textMask]="{mask:mask, keepCharPositions: true, pipe: autoCorrectedDatePipe}"
+                                                            [ngClass]="{'is-danger': form_dato.programas[i_programa].insumos[i].lotes[i_lote].fecha_caducidad == '',
+                                                                        'is-disabled': form_dato.estatus === 'INICIALIZADO'}">
+                                                    </p>
+                                                </div>                          
+                                                <div class="column is-2">
+                                                    <p class="control is-expanded">
+                                                        <label>Codigo de barras:</label>
+                                                        <input type="text" class="input is-small" [(ngModel)]="lote.codigo_barras" [ngModelOptions]="{standalone: true}"
+                                                            [ngClass]="{'is-disabled': form_dato.estatus === 'INICIALIZADO'}" >
+                                                    </p>
+                                                </div>    
+                                                <div class="column is-1">                                                
+                                                    <p class="control is-expanded">
+                                                        <label>Existencia:</label>
+                                                        <input class="input is-small" [(ngModel)]="lote.existencia" [ngModelOptions]="{standalone: true}"
+                                                            [textMask]="{mask:numberMask}"
+                                                            (keyup)="cambio_cantidad_stock_key($event, form_dato.programas[i_programa].insumos[i].lotes[i_lote], i_programa, i, i_lote)"
+                                                            
+                                                            [ngClass]="{'is-danger': form_dato.programas[i_programa].insumos[i].lotes[i_lote].existencia == '' || form_dato.programas[i_programa].insumos[i].lotes[i_lote].existencia == null || form_dato.programas[i_programa].insumos[i].lotes[i_lote].existencia < 1, 'is-disabled': form_dato.estatus === 'INICIALIZADO'}">
+                                                            <!-- 
+                                                                (change)="cambio_cantidad_stock_key($event, form_dato.programas[i_programa].insumos[i].lotes[i_lote], i_programa, i, i_lote)"
+                                                                (keyup)="cambio_cantidad_stock_key($event, form_dato.programas[i_programa].insumos[i].lotes[i_lote], i_programa, i, i_lote)"
+                                                                (blur)="cambio_cantidad_stock_key($event, form_dato.programas[i_programa].insumos[i].lotes[i_lote], i_programa, i, i_lote)" -->
+                                                    </p>
+                                                </div> 
+                                                <div class="column is-2">                                                
+                                                    <p class="control is-expanded">
+                                                        <label style="float:right;text-align: right !important; width: 100%">Precio unitario:</label>
+                                                        <input class="input is-small"  currencyMask [(ngModel)]='lote.precio_unitario' [ngModelOptions]="{standalone: true}"
+                                                            [options]="{ prefix: '$ ', thousands: ',', decimal: '.', allowZero: true }"
+                                                            (keyup)="cambio_cantidad_stock_key($event, form_dato.programas[i_programa].insumos[i].lotes[i_lote], i_programa, i, i_lote); validar_precio_unitario(i_programa, i, i_lote)"
+                                                            (blur)="cambio_cantidad_stock_key($event, form_dato.programas[i_programa].insumos[i].lotes[i_lote], i_programa, i, i_lote)"
+                                                            (change)="cambio_cantidad_stock_key($event, form_dato.programas[i_programa].insumos[i].lotes[i_lote], i_programa, i, i_lote)"
+                                                            [ngClass]="{'is-danger': form_dato.programas[i_programa].insumos[i].lotes[i_lote].requerir_pu == true,
+                                                                        'is-disabled': form_dato.estatus === 'INICIALIZADO' || form_dato.programas[i_programa].insumos[i].precio_unitario,
+                                                                        'is-hidden': form_dato.programas[i_programa].insumos[i].precio_unitario}"
+                                                            />
+                                                            <span class="control is-expanded"  style="float:right;" *ngIf="form_dato.programas[i_programa].insumos[i].precio_unitario">
+                                                                {{form_dato.programas[i_programa].insumos[i].precio_unitario | currency:'' }}
+                                                            </span>
+                                                    </p>
+                                                </div>
+                                                <div class="column is-1" style="padding-right: 0em">
+                                                    <span class="control is-expanded">        
+                                                        <label style="float:right;text-align: right !important; width: 100%">Importe:</label>    
+                                                    </span>
+                                                    <span class="control is-expanded"  style="float:right;">
+                                                            {{ form_dato.programas[i_programa].insumos[i].lotes[i_lote].importe ? ( form_dato.programas[i_programa].insumos[i].lotes[i_lote].importe | currency:'') : ( 0 | currency:'' ) }}
+                                                    </span>
+                                                </div>
+                                                <div class="column is-1" style="padding-right: 0em">
+                                                    <span class="control is-expanded">        
+                                                        <label style="float:right; text-align: right !important; width: 100%;">I.V.A.:</label>    
+                                                    </span><br>
+                                                    <span class="control is-expanded" style="float:right; text-align: right !important;">
+                                                            {{ form_dato.programas[i_programa].insumos[i].lotes[i_lote].iva_importe ? ( form_dato.programas[i_programa].insumos[i].lotes[i_lote].iva_importe | currency:'') : ( 0 | currency:'' ) }}
+                                                    </span>
+                                                </div>
+                                                <!-- <div class="column is-1">
+                                                    <p class="control is-expanded" >        
+                                                        <label style="float:right;"> IVA:</label>
+                                                    </p>
+                                                    <p>
+                                                        <span>
+                                                            {{ form_dato.programas[i_programa].insumos[i].lotes[i_lote].iva_importe ? ( form_dato.programas[i_programa].insumos[i].lotes[i_lote].iva_importe | currency:'') : ( 0 | currency:'' ) }}                                 
+                                                        </span>
+                                                    </p>
+                                                </div> -->
+                                                <div class="column is-1">
+                                                    <p class="control is-expanded" [ngClass]="{'is-hidden': form_dato.estatus === 'INICIALIZADO' }" style="margin: 0.5em">    
+                                                        <span style="float:right;" >
+                                                            <a  class="button is-small" style="color: red; padding-left: 12px;" title="Quitar este elemento de la lista" (click)="abrirModal('borrarLote', i_programa, i, i_lote)">
+                                                                <span class="icon is-small"><i class="fa fa-trash-o"></i></span>
+                                                            </a>
+                                                        </span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+            </div>
+            <simple-notifications [options]="options"></simple-notifications>
+        <!-- </form> FIN DE FORMULARIO -->
+    </div>
+</div>
+
+<!-- ***************************************** INICIO - MODALES ***************************************** -->
+
+
+<div [ngClass]="{'is-active': cargarInventario}" class="modal" id="cargandoInventario" >
+    <div class="modal-background"></div>
+    <div class="modal-content">
+        <p style="color: rgb(255, 255, 255); text-align: center;">
+            <span><i class="fa fa-spinner fa-pulse fa-10x"></i></span>
+            <br>
+            <span><h1>Cargando inventario. <strong style="color: #FFF">Espere un momento.</strong> </h1></span>
+        </p>
+    </div>
+  </div>
+
+<div class="modal" id="confirmarReestablecer">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+        <header class="modal-card-head">
+        <p class="modal-card-title"><i class="fa fa-warning"></i> Alerta</p>
+        <button class="delete" (click)="cancelarModal('confirmarReestablecer')"></button>
+        </header>
+        <section class="modal-card-body">
+            <div class="content">
+                <h1>¿Esta seguro de resetear el inventario?</h1>
+                <p>esta acción cargaratodos los productos que tienen inventario para susutituirlo, es necesario llenar y guardar la inicialización de inventario para que se refleje en el stock</p>
+            </div>
+        </section>
+        <footer class="modal-card-foot">
+        <a class="button is-success" (click)="cargarArticulos('iniciar')" >Continuar</a>
+        <a class="button" (click)="cancelarModal('confirmarReestablecer')" id="cerra_restablecer">Cancelar</a>
+        </footer>
+    </div>
+</div>
+<div class="modal" id="cambiarPrograma">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+        <header class="modal-card-head">
+            <p class="modal-card-title"><i class="fa fa-warning"></i> Alerta</p>
+            <button class="delete" (click)="cancelarModal('cambiarPrograma')"></button>
+        </header>
+        <section class="modal-card-body">
+            <div class="content">
+                <h1>¿Esta seguro de cambiar el programa?</h1>
+                <p style="color:red;">Se eliminarán los insumos capturados.</p>
+                <p class="modal-card-title" id="tituloGuardar"> </p>
+            </div>
+        </section>
+        <footer class="modal-card-foot">
+            <a class="button is-success" (click)="mantenerPrograma(false); cancelarModal('cambiarPrograma')">Continuar</a>
+            <a class="button" (click)="mantenerPrograma(true); cancelarModal('cambiarPrograma')">Cancelar</a>
+        </footer>
+    </div>
+</div>
+
+<div class="modal" id="borrarInsumo">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+        <header class="modal-card-head">
+            <p class="modal-card-title"><i class="fa fa-warning"></i> Alerta</p>
+            <button class="delete" (click)="cancelarModal('borrarInsumo')"></button>
+        </header>
+        <section class="modal-card-body">
+            <div class="content">
+                <h1>¿Esta seguro de eliminar el insumo?</h1>
+                <p>Se borrarán todos los lotes del insumo que se hayan agregado.</p>
+            </div>
+        </section>
+        <footer class="modal-card-foot">
+            <a class="button is-success" (click)="quitar_form_array(form_dato.programas[i_programa].insumos, index_insumo); cancelarModal('borrarInsumo');">Continuar</a>
+            <a class="button" (click)="cancelarModal('borrarInsumo')">Cancelar</a>
+        </footer>
+    </div>
+</div>
+
+<div class="modal" id="borrarLote">
+        <div class="modal-background"></div>
+        <div class="modal-card">
+            <header class="modal-card-head">
+                <p class="modal-card-title"><i class="fa fa-warning"></i> Alerta</p>
+                <button class="delete" (click)="cancelarModal('borrarLote')"></button>
+            </header>
+            <section class="modal-card-body">
+                <div class="content">
+                    <h1>¿Esta seguro de eliminar el lote?</h1>
+                    <p>Se borrarán todos el lote seleccionado.</p>
+                </div>
+            </section>
+            <footer class="modal-card-foot">
+                <a class="button is-success" (click)="quitar_form_array(form_dato.programas[i_programa].insumos[index_insumo].lotes, index_borrar, index_insumo); cancelarModal('borrarLote');">Continuar</a>
+                <a class="button" (click)="cancelarModal('borrarLote')">Cancelar</a>
+            </footer>
+        </div>
+    </div>
+
+<!-- ***************************************** FIN - MODALES ***************************************** -->

@@ -1,0 +1,228 @@
+import { Component, OnInit, NgZone } from '@angular/core';
+import { CrudService } from '../../../crud/crud.service';
+import { NotificationsService } from 'angular2-notifications';
+import { Mensaje } from '../../../mensaje';
+
+import  * as FileSaver    from 'file-saver';
+/**
+ * Componente que muestra la lista de entradas del almacén de artículos.
+ */
+@Component({
+  selector: 'entrada-lista',
+  templateUrl: './lista.component.html'
+})
+
+export class ListaComponent{
+  /**
+   * Variable que contiene la altura de la pantalla.
+   */
+  tamano;
+  /**
+   * Fecha inicial de periodo de tiempo para filtro.
+   * @type {string} */
+  fecha_desde: String = '';
+  /**
+   * Fecha final de periodo de tiempo de filtro.
+   * @type {string} */
+  fecha_hasta: String = '';
+  /**
+   * Nombre de quien recibe para aplicarlo al filtro.
+   * @type {string} */
+  programa_id: String = '';
+  /**
+   * Nombre de quien recibe para aplicarlo al filtro.
+   * @type {string} */
+  proveedor_id: String = '';
+  /**
+   * Nombre de quien recibe para aplicarlo al filtro.
+   * @type {string} */
+  donacion: String = '';
+  /**
+   * Nombre de quien recibe para aplicarlo al filtro.
+   * @type {string} */
+  donante: String = '';
+
+  
+  /**
+   * Contiene el resultado de la consulta de la lista general de programas.
+   * @type {any} */
+  lista_impresion;
+
+  // # SECCION: Reportes
+    /**
+     * Variable para la seccion de reportes.
+     * @type {Worker} */
+      pdfworker: Worker;
+    /**
+     * Identifica su el archivo se está cargando.
+     * @type {boolean} */
+    cargandoPdf = false;
+  // # FIN SECCION
+
+  
+  /**
+   * Contiene los datos de inicio de sesión del usuario.
+   * @type {any} */
+  usuario;
+
+  /**
+   * Variable que muestra las notificaciones.
+   * @type {Mensaje}
+   */
+  mensajeResponse: Mensaje = new Mensaje();
+
+  /**
+   * Variable que contiene la configuracion default para mostrar las notificaciones.
+   * Posición abajo izquierda, tiempo 2 segundos
+   */
+  public options = {
+    position: ['bottom', 'right'],
+    timeOut: 2000,
+    lastOnBottom: true
+  };
+
+  /**
+   * Este método inicializa la carga de las dependencias
+   * que se necesitan para el funcionamiento del modulo
+   */
+  constructor(
+    private _ngZone: NgZone,
+    private crudService: CrudService,
+    private notificacion: NotificationsService){}
+
+  /**
+   * Método que inicializa y obtiene valores para el funcionamiento del componente.
+   */
+  ngOnInit() {
+    this.usuario = JSON.parse(localStorage.getItem('usuario'));
+    this.tamano = document.body.clientHeight;
+
+    document.getElementById('catalogos').click();
+
+    
+    // Inicializamos el objeto para los reportes con web Webworkers
+    this.pdfworker = new Worker('web-workers/almacen-articulos/entradas-activo-fijo/lista-entrada-articulos.js');
+
+    // Este es un hack para poder usar variables del componente dentro de una funcion del worker
+    let self = this;
+    let $ngZone = this._ngZone;
+
+    this.pdfworker.onmessage = function( evt ) {
+      // Esto es un hack porque estamos fuera de contexto dentro del worker
+      // Y se usa esto para actualizar alginas variables
+      $ngZone.run(() => {
+         self.cargandoPdf = false;
+      });
+
+      FileSaver.saveAs( self.base64ToBlob( evt.data.base64, 'application/pdf' ), evt.data.fileName );
+      // open( 'data:application/pdf;base64,' + evt.data.base64 ); // Popup PDF
+    };
+  }
+  
+  /**
+   * Método que genera una lista general de los registros en formato PDF, con los filtros correspondientes
+   * @returns archivo en formato PDF
+   */
+  imprimir() {
+    this.cargandoPdf = true;
+    this.crudService.lista_general(
+      'entrada-articulo?tipo_movimiento_id=11&fecha_desde=' + this.fecha_desde
+      + '&fecha_hasta=' + this.fecha_hasta + '&programa_id=' + this.programa_id 
+      +'&proveedor_id='+this.proveedor_id + '&donacion=' + this.donacion 
+      +'&donante=' + this.donante
+    ).subscribe(
+      resultado => {
+              // this.cargando = false;
+              this.lista_impresion = resultado;
+              try {
+                let entrada_imprimir = {
+                  lista: this.lista_impresion,
+                  usuario: this.usuario,
+                  fecha_desde: this.fecha_desde,
+                  fecha_hasta: this.fecha_hasta,
+                  programa: this.programa_id,
+                  proveedor_id: this.proveedor_id,
+                  donacion: this.donacion,
+                  donante: this.donante
+                };
+                this.pdfworker.postMessage(JSON.stringify(entrada_imprimir));
+              } catch (e) {
+                this.cargandoPdf = false;
+              }
+            },
+            error => {
+              this.cargandoPdf = false;
+              this.mensajeResponse.mostrar = true;
+              try {
+                  let e = error.json();
+                  if (error.estatus === 401) {
+                      this.mensajeResponse.texto = 'No tiene permiso para hacer esta operación.';
+                      this.mensajeResponse.clase = 'danger';
+                      this.mensaje(2);
+                  }
+              } catch (e) {
+                  if (error.estatus === 500) {
+                      this.mensajeResponse.texto = '500 (Error interno del servidor)';
+                  } else {
+                      this.mensajeResponse.texto =
+                        'No se puede interpretar el error. Por favor contacte con soporte técnico si esto vuelve a ocurrir.';
+                  }
+                  this.mensajeResponse.clase = 'danger';
+                  this.mensaje(2);
+              }
+            }
+    );
+  }
+/**
+ * Método que nos ayuda a convertir un archivo para poder guardarlo
+ * @param base64 pendiente
+ * @param type pendiente
+ */
+  base64ToBlob( base64, type ) {
+      let bytes = atob( base64 ), len = bytes.length;
+      let buffer = new ArrayBuffer( len ), view = new Uint8Array( buffer );
+      for ( let i = 0 ; i < len ; i++ ) {
+        view[i] = bytes.charCodeAt(i) & 0xff;
+      }
+      return new Blob( [ buffer ], { type: type } );
+  }
+
+   /**
+     * Este método muestra los mensajes resultantes de los llamados de la api
+     * @param cuentaAtras numero de segundo a esperar para que el mensaje desaparezca solo
+     * @param posicion  array de posicion [vertical, horizontal]
+     * @return void
+     */
+    mensaje(cuentaAtras: number = 6, posicion: any[] = ['bottom', 'left']): void {
+      var objeto = {
+          showProgressBar: true,
+          pauseOnHover: false,
+          clickToClose: true,
+          maxLength: this.mensajeResponse.texto.length
+      };
+
+      this.options = {
+          position: posicion,
+          timeOut: cuentaAtras * 1000,
+          lastOnBottom: true
+      };
+      if (this.mensajeResponse.titulo === '') {
+          this.mensajeResponse.titulo = 'Entradas de medicamentos';
+        }
+      if (this.mensajeResponse.clase === 'alert') {
+          this.notificacion.alert(this.mensajeResponse.titulo, this.mensajeResponse.texto, objeto);
+        }
+      if (this.mensajeResponse.clase === 'success') {
+          this.notificacion.success(this.mensajeResponse.titulo, this.mensajeResponse.texto, objeto);
+        }
+      if (this.mensajeResponse.clase === 'info') {
+          this.notificacion.info(this.mensajeResponse.titulo, this.mensajeResponse.texto, objeto);
+        }
+      if (this.mensajeResponse.clase === 'warning' || this.mensajeResponse.clase === 'warn') {
+          this.notificacion.warn(this.mensajeResponse.titulo, this.mensajeResponse.texto, objeto);
+        }
+      if (this.mensajeResponse.clase === 'error' || this.mensajeResponse.clase === 'danger') {
+          this.notificacion.error(this.mensajeResponse.titulo, this.mensajeResponse.texto, objeto);
+        }
+  }
+}

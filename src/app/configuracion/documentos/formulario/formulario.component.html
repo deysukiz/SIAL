@@ -1,0 +1,95 @@
+<!-- <formulario #ctrl URL="documentos-firmantes" titulo="Documentos / Configuración" [dato]="dato"></formulario> -->
+<panel-control-menu></panel-control-menu>
+<div style="height:50px;"></div>
+
+
+<div class="contenedor columns " style="height:85%">
+    <div class="column is-one-quarter is-hidden-mobile">
+        <panel-control-menu-aside></panel-control-menu-aside>
+    </div>
+    <div class="column" style="padding:2em;">
+        <div style="background: #FFF; border-radius: 1em; overflow: hidden;">
+            <section class="hero is-primary">
+                <div class="hero-body">
+                    <nav class="level">
+                        <div class="level-left">
+                            <div class="container is-fluid">
+                                <h1 class="title">
+                                    <span *ngIf="llenando_formulario" class="icon is-medium"><i class="fa fa-refresh fa-spin"></i></span>  
+                                    <span *ngIf="!llenando_formulario" class="icon is-medium"><i class="fa fa-edit"></i></span>                          
+                                    <!-- --> Firmas de documentos
+                                </h1>
+                            </div>
+                        </div>
+                        <!-- Right side -->
+                        <div class="level-right">
+                            <!-- <p class="level-item"><a class="button is-primary" (click)="ctrl.regresar()">Regresar</a></p> -->
+                            <p class="level-item">
+                                <button class="button is-primary" (click)="actualizarDatos()" [ngClass]="{'is-loading': llenando_formulario}">Guardar</button>
+                            </p>
+                            <p class="level-item">
+                                <a class="button  is-primary"(click)="cargarDatos();" id="actualizar"><span class="icon "><i class="fa fa-refresh"></i></span></a>
+                            </p>
+                            <p class="level-item">&nbsp;</p>
+                        </div>
+                    </nav>
+                    
+                </div>
+            </section>
+            <div class="is-fullwidth has-text-centered" *ngIf="llenando_formulario">
+                <br>
+                <span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span> &nbsp;<span>Cargando...</span></span>
+            </div>
+            <div *ngIf="!llenando_formulario">
+                <div class="box" *ngFor="let documento of modelo.documentos; let i_documento=index"
+                    style="overflow:auto; display:block" [style.maxHeight.px]="tamano-300">
+                    <article class="tile is-white notification" style="border-bottom: solid 1px #00d9b1">
+                            <h2 class="subtitle">Documento de <strong>{{modelo.documentos[i_documento].nombre}}</strong> </h2>
+                    </article>
+                    <div *ngIf="modelo.documentos[i_documento].documento_cargos != [] &&
+                                modelo.documentos[i_documento].documento_cargos != null">
+                        <div class="columns" *ngIf="modelo.documentos[i_documento].documento_cargos != [] &&
+                        modelo.documentos[i_documento].documento_cargos != null">
+                            <div class="column is-1 " style="background-color:  rgb(206, 216, 215); margin-left: 4px;">
+                                <label class="label" style="text-align:  center;">
+                                    Leyenda
+                                </label>
+                            </div>
+                            <div class="column is-3" style="background-color:  rgb(206, 216, 215); margin-left: 4px;">
+                                <label class="label" style="text-align:  center;">
+                                    Cargo
+                                </label>
+                            </div>
+                            <div class="column" style="background-color:  rgb(206, 216, 215); margin-left: 4px;">
+                                <label class="label" style="text-align:  center;">
+                                    Responsable
+                                </label>
+                            </div>
+                        </div>
+                        <div class="columns" *ngFor="let item of modelo.documentos[i_documento].documento_cargos; let i_item=index">
+                            <div class="column is-1" style="margin-left: 4px">
+                                <label class="label" style="text-align:  right;">
+                                    {{modelo.documentos[i_documento].documento_cargos[i_item].leyenda}}
+                                </label>
+                            </div>
+                            <div class="column is-3" style="margin-left: 4px">
+                                <label class="label" style="text-align:  right;">
+                                    {{modelo.documentos[i_documento].documento_cargos[i_item].cargo.nombre}}:
+                                </label>
+                            </div>
+                            <div class="column" style="margin-left: 4px">
+                                <div class="field">
+                                    <p class="control is-expanded  has-icon has-icon-right">
+                                        <input class="input" type="text"
+                                            placeholder="Nombre" [(ngModel)]="modelo.documentos[i_documento].documento_cargos[i_item].firmante.nombre">
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<simple-notifications [options]="options"></simple-notifications>

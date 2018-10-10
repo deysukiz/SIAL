@@ -1,0 +1,157 @@
+<formulario #ctrl URL="unidad-medica" titulo="UM / Catalogo" [dato]="dato"></formulario>
+<articulos-catalogo-menu></articulos-catalogo-menu>
+<div style="height:50px;"></div>
+<div class="contenedor columns " style="height:100%">
+    <div class="column is-one-quarter is-hidden-mobile">
+        <panel-control-menu-aside></panel-control-menu-aside>
+    </div>
+    <div class="column" style="padding: 0em 2em 0em 0em;">
+        <!-- formulario -->
+        <form name="dato" novalidate [formGroup]="dato" (ngSubmit)="ctrl.enviar()">
+            <div style="background: #FFF; overflow: hidden;">
+                <section class="hero is-primary">
+                    <div class="hero-body">
+                        <a class="button  is-primary" style="position:absolute; top:8em; right:3em;" (click)="ctrl.cargarDatos(); "><span class="icon "><i class="fa fa-refresh"></i></span></a>
+                        <div class="container is-fluid">
+                            <h1 class="title">
+                                <span *ngIf="!ctrl.cargando" class="icon is-medium"><i class="fa fa-edit"></i></span>
+                                <span *ngIf="ctrl.cargando" class="icon is-medium"><i class="fa fa-refresh fa-spin"></i></span>                                {{ctrl.moduloTitulo}} unidad médica
+                            </h1>
+
+                        </div>
+                    </div>
+                </section>
+                <div class="is-fullwidth has-text-centered" *ngIf="!ctrl.datosCargados">
+                    <br>
+                    <span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span>                    &nbsp;<span>Cargando...</span></span>
+                </div>
+                <section class="section">
+                    <div class="tabs is-boxed">
+                        <ul>
+                            <li [ngClass]="{ 'is-active' : tab == 1}">
+                                <a (click)="tab=1">
+                                    <span class="icon is-small"><i class="fa fa-file"></i></span>
+                                    <span>Datos de la unidad</span>
+                                </a>
+                            </li>
+                            <li [ngClass]="{ 'is-active' : tab == 2}">
+                                <a (click)="tab=2">
+                                    <span class="icon is-small"><i class="fa fa-home"></i></span>
+                                    <span>Servicios</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div [ngClass]="{ 'is-hidden': tab != 1}">
+
+                        <div class="field" id="catalogos" (click)="ctrl.cargarCatalogo('tipos_servicios', 'servicios'); ">
+                            <label class="label">Clues:</label>
+                            <p class="control is-expanded  has-icon has-icon-right">
+                                <input class="input" type="text" [ngClass]="{'is-danger': ctrl.dato.get('clues').hasError('required') && ctrl.dato.get('clues').touched}"
+                                    placeholder="clues" formControlName="clues">
+                                <span class="icon is-small" *ngIf="ctrl.dato.get('clues').hasError('required') && ctrl.dato.get('clues').touched">
+                                    <i class="fa fa-warning"></i>
+                                </span>
+                                <span class="help is-danger" *ngIf="ctrl.dato.get('clues').hasError('required') && ctrl.dato.get('clues').touched">Este campo es requerido.</span>
+                            </p>
+                        </div>
+
+                        <div class="field">
+                            <label class="label">Nombre:</label>
+                            <p class="control is-expanded  has-icon has-icon-right">
+                                <input class="input" type="text" [ngClass]="{'is-danger': ctrl.dato.get('nombre').hasError('required')}" placeholder="nombre"
+                                    formControlName="nombre">
+                                <span class="icon is-small" *ngIf="ctrl.dato.get('nombre').hasError('required')">
+                                    <i class="fa fa-warning"></i>
+                                </span>
+                                <span class="help is-danger" *ngIf="ctrl.dato.get('nombre').hasError('required')">Este campo es requerido.</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div [ngClass]="{ 'is-hidden': tab != 2}">
+
+                        <div class="box">
+                            <article class="media">
+                                <div class="media-content">
+                                    <div class="content">
+                                        <div class="column is-5" style="float:left">
+                                            <nav class="panel">
+                                                <div class="panel-heading">
+                                                    <div class="field">
+                                                        <div class="b-checkbox is-info">
+                                                            <input id="Movimientos" class="styled" type="checkbox" [checked]="ctrl.todosSeleccionados.izquierda" (click)="ctrl.seleccionarTodosMover('izquierda', ctrl.tipos_servicios)">
+                                                            <label for="Movimientos">
+                                                            Servicios disponibles
+                                                        </label>
+                                                        </div>
+                                                        <a id="catalogos" (click)="ctrl.cargarCatalogo('tipos_servicios', 'servicios'); "></a>
+                                                    </div>
+                                                </div>
+                                                <label class="panel-block" *ngFor="let val of ctrl.tipos_servicios; let i=index">          
+                                                    <div class="field">
+                                                        <div class="b-checkbox">
+                                                            <input id="{{val.id}}" class="styled" type="checkbox" 
+                                                            [checked]="ctrl.izquierda.indexOf(val) > -1"
+                                                            (click)="ctrl.agregarMover('izquierda', ctrl.tipos_servicios, val)">
+                                                            <label for="{{val.id}}">
+                                                                {{val.nombre}} 
+                                                            </label>
+                                        </div>
+                                    </div>
+
+                                    </label>
+                                    </nav>
+                                </div>
+                                <div class="column is-2" style="float:left">
+
+                                    <p class="control">
+                                        <button class="button is-default" type="button" style="width:100%" [ngClass]="{'is-success': ctrl.izquierda.length > 0}"
+                                            [disabled]="ctrl.izquierda.length <= 0" (click)="ctrl.iniciarMover('izquierda', ctrl.dato.controls.clues_servicios.controls, ctrl.tipos_servicios, true)">></button>
+                                    </p>
+                                    <p class="control">
+                                        <button class="button is-default" type="button" style="width:100%" [ngClass]="{'is-success': ctrl.derecha.length > 0}" [disabled]="ctrl.derecha.length <= 0"
+                                            (click)="ctrl.iniciarMover('derecha', ctrl.tipos_servicios, ctrl.dato.controls.clues_servicios.controls, false)"><</button>
+                                    </p>
+
+                                </div>
+                                <div class="column is-5" style="float:left">
+                                    <nav class="panel" formGroupName="clues_servicios">
+                                        <div class="panel-heading">
+                                            <div class="field">
+                                                <div class="b-checkbox is-info">
+                                                    <input id="MisServicios" class="styled" type="checkbox" [checked]="ctrl.todosSeleccionados.derecha" (click)="ctrl.seleccionarTodosMover('derecha', ctrl.dato.controls.clues_servicios.controls)">
+                                                    <label for="MisServicios">
+                                                            Mis servicios
+                                                        </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <label class="panel-block" *ngFor="let item of ctrl.dato.controls.clues_servicios.controls; let i2=index">          
+                                                    <div class="field" [formGroupName]="i2">
+                                                        <div class="b-checkbox">
+                                                            <input id="{{item.value.id}}" class="styled" type="checkbox"
+                                                            [checked]="ctrl.derecha.indexOf(item) > -1"
+                                                            (click)="ctrl.agregarMover('derecha', ctrl.dato.controls.clues_servicios.controls, item)">
+                                                            <label for="{{item.value.id}}">
+                                                                {{item.value.nombre}} 
+                                                            </label>
+                                </div>
+                        </div>
+
+                        </label>
+                        </nav>
+                    </div>
+            </div>
+    </div>
+    </article>
+</div>
+
+</div>
+
+</section>
+</div>
+</form>
+</div>
+</div>

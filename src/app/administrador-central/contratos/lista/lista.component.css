@@ -1,0 +1,92 @@
+.top-bar {
+    padding: 1em ; 
+    font-size: 1.2em; 
+    background: #FFF;    
+    color: #333;
+	position: relative;
+	border-radius: 0.75em 0.75em 0 0;
+}
+.top-bar .select,
+.top-bar label {
+    font-size: 0.6em; 
+}
+.top-bar.is-primary {
+    background: #00d1b2;
+    color:#FFF;
+}
+.top-bar.is-primary h1 { color: #FFF; }
+.top-bar.is-danger {
+    background: #ff3860;
+    color:#FFF;
+}
+.top-bar.is-dark {
+    background: #333;
+    color:#FFF
+}
+.top-bar.is-dark h1 { color: #FFF;}
+
+.text-overflow {
+	display: block;
+  	overflow: hidden;
+  	white-space: nowrap;
+  	text-overflow: ellipsis;
+}
+
+.modal-carga{
+     height: 95%;
+}
+.is-tab-bottom {
+    background: white;
+}
+.is-tab-bottom ul {
+    border-top: 1px solid #dbdbdb;
+    border-bottom: 0px;
+}
+
+.is-tab-bottom li.is-active a {
+    background-color: white;
+    
+    border-top-color: transparent !important;
+    border-bottom-color: #dbdbdb !important;
+}
+.is-tab-bottom a {
+    margin-top: -1px;
+    margin-bottom: 0px;
+    border-radius: 0 0 3px 3px;
+}
+.is-tab-bottom li.is-danger a{
+    color:red;
+}
+.tabs a:hover {
+    border-top-color: #dbdbdb;
+    border-bottom-color:transparent !important;
+  }
+
+.text-overflow-ellipsis{
+   /* max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;*/
+}
+
+.import-table thead th {
+    text-align: center;
+    vertical-align: bottom;
+}
+
+.import-table tbody td {
+    cursor: pointer;
+}
+
+.select {
+    margin-bottom: 0;
+}
+
+
+@media screen and (min-width: 800px) {
+    .modal-carga{
+        width: 95%;
+        height: 95%;
+    }
+}
+

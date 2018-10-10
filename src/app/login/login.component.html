@@ -1,0 +1,101 @@
+<div class="modal is-active">
+   
+    <div class="modal-content">
+        <div class="card" style=" border-radius:1em; overflow: hidden">
+            <div class="card-header is-primary">
+                <section class="hero is-primary" style="width: 100%">
+                    <div class="hero-body" style="align-self: center;">
+                        <div class="container has-text-centered">
+                            <figure class="image" style="height:60px">
+                                <img src="assets/sial.svg" style="height:60px">
+                            </figure>
+                            <small>Cliente Versión {{cliente_version}}</small> 
+                            <small *ngIf="servidor.principal"> - Servidor Principal</small>
+                        </div>
+                        
+                    </div>
+                </section>
+            </div>
+            <!--<div class="card-image" >
+                <figure class="image " style="border-radius: 1em 1em 0em 0em; overflow: hidden;">
+                    <img src="assets/bg-login_salud.svg" alt="Image">
+                </figure>
+            </div>-->
+            <div class="card-content">
+                <form name="form" (ngSubmit)="!loading && login()" style="overflow:auto" class="has-text-centered">
+                    
+                    <h1 class="title has-text-centered">Bienvenido</h1>
+                    <div class="notification is-danger" *ngIf="mostrarMensaje">
+                        <a class="delete" (click)="mostrarMensaje = false"></a>
+                        <b>Error:</b> {{ mensaje }}
+                    </div>
+
+                    <div *ngIf="listaServidores.length" class="control is-expanded">
+                        <div class="select is-fullwidth">
+                            <select name="servidor_id" id="servidor_id" [ngClass]="{'is-danger': mensaje}" [(ngModel)]="credenciales.servidor_id"> 
+                                <option *ngFor="let item of listaServidores" value="{{item.id}}">{{ item.nombre }}</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <p class="control has-icon">
+                        <input class="input is-medium" [ngClass]="{'is-danger': mensaje}" type="text" name="id" id="id" placeholder="Usuario" [(ngModel)]="credenciales.id"  autofocus>
+                        <span class="icon is-small">
+                        <i class="fa fa-user"></i>
+                        </span>
+                    </p>
+                    <p class="control has-icon">
+                        <input class="input is-medium" [ngClass]="{'is-danger': mensaje}" type="password" name="password" id="password" placeholder="Contraseña" [(ngModel)]="credenciales.password">
+                        <span class="icon is-small">
+                        <i class="fa fa-lock"></i>
+                        </span>
+                    </p>
+                    <p class="control" >
+                        <button class="button is-primary is-large is-fullwidth" [ngClass]="{'is-loading': loading}" >Iniciar sesión</button>
+                    </p>
+                    <p class="control" *ngIf="saludIdDisponible">
+                        <button class="button is-info is-large is-fullwidth">Conectar con Salud ID</button>
+                    </p>
+                    <p class="control">
+                        <a class="button is-white is-fullwidth" (click)="mostrarRecuperarPassword=true">Olvidé mi contraseña</a>
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="footer" style="position:absolute; bottom:0px; width:100%; max-height:128px;">
+        <div class="container">
+            <div class="content has-text-centered">
+                <div class="columns is-mobile">
+                    <div class="column">
+                        <figure class="image" style="max-width:128px">
+                            <img src="assets/ssa.png">
+                        </figure>
+                    </div>
+                    <div class="column">
+                        <figure class="image" style="max-width:128px">
+                            <img src="assets/chiapas-une.svg">
+                        </figure>
+                    </div>
+                    <div class="column">
+                        <figure class="image" style="max-width:128px">
+                            <img src="assets/gob_estado.png">
+                        </figure>
+                    </div>
+                    <div class="column">
+                        <figure class="image" style="max-width:128px">
+                            <img src="assets/salud-meso.svg">
+                        </figure>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+<app-reset-password *ngIf="mostrarRecuperarPassword"
+[resetPasswordViaToken]="resetPasswordViaToken"
+[id]="resetPasswordPayload.id"
+[resetToken]="resetPasswordPayload.reset_token"
+ (onCerrar)="mostrarRecuperarPassword=false;resetPasswordViaToken=false"></app-reset-password>

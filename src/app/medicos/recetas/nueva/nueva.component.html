@@ -1,0 +1,426 @@
+<formulario #ctrl URL="medicos/recetas" titulo="Nueva receta" [dato]="dato"></formulario>
+<menu-medicos [modulo]="'Recetas'" [icono]="'assets/hub-medicos.svg'" [url]="'/medicos/recetas'"></menu-medicos>
+
+
+<form name="form" novalidate [formGroup]="dato">
+    <div class="columns">
+        <div class="column is-one-third">
+            <div style="height:60px;"></div>
+            <div style="background: #FFF; border-radius: 1em; overflow:hidden;">
+                <section class="hero is-primary">
+                    <h1 *ngIf="!tieneid" class="title" style="margin:0.5em; ">
+                        <span class="icon is-medium">
+                            <i class="fa fa-file-text"></i>
+                        </span> {{ctrl.moduloTitulo}}
+                    </h1>
+                    <h1 *ngIf="tieneid" class="title" style="margin:0.5em; ">
+                        <span class="icon is-medium">
+                            <i class="fa fa-file-text"></i>
+                        </span> Folio {{ctrl.id}}
+                    </h1>
+                </section>
+                <div>      
+                    <div>
+                        <div  style="margin:0.75rem">                               
+                            <div class="field">
+                                <label class="label">Tipo de receta:</label>
+                                <div class="control  is-expanded  has-icon has-icon-right ">
+                                    <div class="select is-fullwidth">
+                                        <select  name="tipo_receta_id" formControlName="tipo_receta_id" [ngClass]="{'is-disabled': tieneid, 'is-danger': ctrl.dato.get('tipo_receta_id').hasError('required')}">
+                                            <option *ngFor="let item of tipos_recetas" value="{{item.id}}" >{{ item.nombre }}</option>
+                                        </select>
+                                    </div>
+                                    <span class="icon is-small" *ngIf="ctrl.dato.get('tipo_receta_id').hasError('required')">
+                                        <i class="fa fa-warning"></i>
+                                    </span>
+                                    <span class="help is-danger" *ngIf="ctrl.dato.get('tipo_receta_id').hasError('required')">Este campo es requerido.</span>
+                                </div>
+                            </div>
+                            <div class="field">
+                                <label class="label">Fecha de receta:</label>
+                                <p class="control is-expanded  has-icon has-icon-right">
+                                    <input class="input" [value]="fecha_actual" [(ngModel)]='fecha_receta' formControlName="fecha_receta" ngui-datetime-picker
+                                        [min-date]="MinDate" [max-date]="MaxDate" date-only="true" [ngClass]="{'is-disabled': tieneid, 'is-danger': ctrl.dato.get('fecha_receta').hasError('required')}"
+                                        placeholder="YYYY-MM-DD" readonly/>
+
+                                    <span class="icon is-small" *ngIf="ctrl.dato.get('fecha_receta').hasError('required')">
+                                        <i class="fa fa-warning"></i>
+                                    </span>
+                                    <span class="help is-danger" *ngIf="ctrl.dato.get('fecha_receta').hasError('required')">Este campo es requerido.</span>
+                                </p>
+                            </div>
+                            <div class="field">
+                                <label class="label">Paciente:</label>
+                                <div class="control is-grouped">                               
+                                    <div class="control is-expanded  has-icon has-icon-right">
+                                        <input type="hidden" formControlName="paciente_id" id="paciente_id">
+                                        <input class="input" #autocompletePaciente   (keyup)="buscarPaciente(autocompletePaciente.value)"  [ngClass]="{'is-danger': ctrl.dato.get('paciente_id').hasError('required'), 'is-success': !ctrl.dato.get('paciente_id').hasError('required') }">
+                                        <div class="akira-autocomplete" *ngIf="mostrarAutocompletePaciente">
+                                            <ul>
+                                                <li *ngFor="let item of resultadosPaciente;"  [ngClass]="{ 'is-selected': item.seleccionado }" (click)="seleccionarPaciente(item)">
+                                                    <p>
+                                                        {{item.nombre}}<br>
+                                                        <small><i class="fa fa-{{item.sexo==1?'mars':'venus'}}" style="font-size:1em;line-height:2em;"></i> {{ item.sexo==1? "Hombre": "Mujer" }}
+                                                        {{item.edad}} años</small>
+                                                    </p>
+                                                </li>
+                                            </ul>
+                                            <p *ngIf="resultadosPaciente.length == 0 && ! buscandoAutocompletePaciente">No hay resultados</p>
+                                            <p *ngIf="buscandoAutocompletePaciente">Cargando...</p>
+                                        </div>
+                                        <span class="icon is-small" *ngIf="ctrl.dato.get('paciente_id').hasError('required')">
+                                            <i class="fa fa-warning"></i>
+                                        </span>
+                                        <span class="help is-danger" *ngIf="ctrl.dato.get('paciente_id').hasError('required')">Este campo es requerido.</span>
+                                    </div>
+                                    <p class="control">
+                                    <a class="button is-primary" (click)="agregarPaciente()" [ngClass]="{ 'is-disabled': !ctrl.dato.get('paciente_id').hasError('required') }">
+                                        <span class="icon"><i class="fa fa-plus"></i></span>
+                                    </a>
+                                    </p>
+                                </div>
+                            </div>
+                           
+                            
+                            <div class="field">
+                                <label class="label">Diagnostico:</label>
+                                <p class="control is-expanded  has-icon has-icon-right">
+                                    <textarea class="textarea" autofocus type="text" 
+                                        [ngClass]="{'is-disabled': tieneid, 'is-danger': ctrl.dato.get('diagnostico').hasError('required')}"
+                                        placeholder="Diagnostico" formControlName="diagnostico" id="diagnostico"></textarea>
+                                    <span class="icon is-small" *ngIf="ctrl.dato.get('diagnostico').hasError('required')">
+                                        <i class="fa fa-warning"></i>
+                                    </span>
+                                    <span class="help is-danger" *ngIf="ctrl.dato.get('diagnostico').hasError('required')">Este campo es requerido.</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- apartado de insumos -->
+        <div class="column" >
+            <div style="height:60px;"></div>
+            <div >
+                <section class="hero is-primary is-small" style="border-radius: 1em 1em 0 0;">
+                    <div class="hero-body">
+                        <nav class="level">
+                            <div class="level-left">
+                                <h1 class="title" style="padding-left:1em;">
+                                    <span *ngIf="!ctrl.cargando || !cargando" class="icon is-medium"><i class="fa fa-edit"></i></span>
+                                    <span *ngIf="ctrl.cargando || cargando" class="icon is-medium"><i class="fa fa-refresh fa-spin"></i></span> 
+                                    Insumos
+                                </h1>
+                            </div>
+                            <!-- Right side -->
+                            <div class="level-right">
+                                <p class="level-item"><a class="button is-primary" routerLink="/medicos/recetas">Regresar</a></p>
+                                <p class="level-item" *ngIf="tieneid"><a class="button is-primary" routerLink="/medicos/recetas/nuevo" *ngIf="!ctrl.busquedaActivada"><i class="fa fa-plus" aria-hidden="true"></i>&nbsp;<span>Nueva receta</span></a></p>
+                                <p class="level-item" *ngIf="tieneid"><a *ngIf="tieneid" class="button is-primary" (click)="imprimir()"><span class="icon"><i class="fa fa-print"></i></span></a></p>                               
+                                <p class="level-item" *ngIf="!tieneid" [title]="ctrl.dato.invalid ? 'Llene los campos en rojo' : 'Guardar'">
+                                    <button class="button is-primary" [ngClass]="{'is-loading': ctrl.cargando}" (click)="guardar_receta()"
+                                        [disabled]="ctrl.dato.invalid"> <span class="icon"><i class="fa fa-floppy-o" aria-hidden="true"></i></span> 
+                                        &nbsp; Guardar</button>
+                                </p>
+                                <p *ngIf="tieneid" class="level-item"><a class="button is-primary" title="Actualizar" (click)="ctrl.cargarDatos();"><span class="icon "><i class="fa fa-refresh"></i></span></a></p>
+                                
+                                <p class="level-item">&nbsp;</p>
+                            </div>
+                        </nav>
+                    </div>
+                </section>
+                <div class="is-fullwidth has-text-centered" *ngIf="!ctrl.datosCargados">
+                    <br>
+                    <span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span>                    &nbsp;<span>Cargando...</span></span>
+                </div>
+                <section class="section" style="border-radius: 0px 0px 1em 1em;">
+
+                    <div class="field has-addons has-addons-centered" *ngIf="!tieneid">
+
+                    
+
+                        <!-- *****************     INPUT DE BUSQUEDA DE INSUMO     ****************** -->    
+                        <div class="control is-grouped">
+                            <div class="control is-expanded">
+                                <input 
+                                    (keyup.enter)="buscarInsumo.value != '' ?  enviarAutocomplete(buscarInsumo.value) : buscarInsumo.value = ''" 
+                                    id="buscarInsumo"
+                                    name="buscarInsumo"
+                                    #buscarInsumo
+                                    class="input is-success is-medium"
+                                    type="text"
+                                    placeholder="Escriba la clave o el nombre del insumo y presione la tecla ENTER"/>
+                            </div>
+                            <div class="control">
+                                <a class="button is-success is-medium" title="Buscar insumo" (click)="buscarInsumo.value != '' ?  enviarAutocomplete(buscarInsumo.value) : buscarInsumo.value = ''">
+                                    <i class="fa fa-search" aria-hidden="true"></i> &nbsp; Buscar
+                                </a>
+                            </div>
+                            <div class="control" *ngIf="buscarInsumo.value != ''">
+                                <a class="button is-info is-medium" title="Borrar texto" (click)="res_busq_insumos=[]; buscarInsumo.value=''">
+                                    <i class="fa fa-times" aria-hidden="true"></i>
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <div class="is-fullwidth has-text-centered" *ngIf="cargando" style="height:100px;">
+                            <br>
+                            <span class="tag is-primary is-large">
+                                <span class="icon"><i class="fa fa-refresh fa-spin"></i></span> &nbsp;<span>Cargando...</span>
+                            </span>
+                        </div>
+                        <!-- *****************     RESULTADOS DE BUSQUEDA DE INSUMO     ****************** -->
+                        <div *ngIf="res_busq_insumos.length > 0 && !cargando" style="height: 200px; border:1px solid #DDD;">
+                            <div *ngIf="res_busq_insumos.length > 0 && !cargando" style="overflow: scroll; overflow-x: hidden; height: 90%;">
+                                <div style="z-index: 1; margin-bottom: none !important" *ngFor="let item_insumo of res_busq_insumos; let c = index">
+                                    <div class="card" (click)="select_insumo_autocomplete(item_insumo)" style="background: white">
+                                        <div class="card-content" style="font-size:0.8em;">
+                                            <p >{{item_insumo.descripcion}}</p>
+                                            <p>
+                                                <small>
+                                                <strong>Existencia:</strong> {{ item_insumo.existencia | number}} 
+                                                <strong>Clave: </strong> {{item_insumo.clave}}
+                                                <label class="tag is-primary" *ngIf="item_insumo.es_causes == 1">Causes</label>
+                                                <label class="tag is-warning"  *ngIf="item_insumo.es_causes == 0"  >No Causes</label>
+                                                <label class="tag" *ngIf="item_insumo.es_unidosis == 1">Unidosis </label>
+                                                </small>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr> <!-- Línea de division -->
+
+                    <!-- *****************     INSUMOS AGREGADOS     ****************** -->
+                    <div formArrayName="insumos" style="overflow-y: auto; overflow-x: hidden; min-height:180px; " [ngStyle]="{'height': res_busq_insumos.length > 0 ? '100px' : 'auto'}" >
+                        <div  *ngFor="let item of ctrl.dato.controls.insumos.controls; let i=index"  style="padding:0.75rem; border-bottom:1px solid #DDD" [ngStyle]="{'background': i%2 == 0 ? 'rgba(230, 230, 232, 0.44)' : ''}">
+                            <article class="media" [formGroupName]="i" style="font-size:0.8em">
+                                <div class="media-content">
+                                    <div class="content" >
+                                        <a *ngIf="!tieneid" class="is-danger" title="Quitar este elemento de la lista" style="float:right" (click)="ctrl.quitar_form_array(ctrl.dato.controls.insumos,i)"><span class="icon"><i class="fa fa-trash-o"></i></span></a>
+                                        <p>
+                                            <strong>
+                                                <span style="color:cornflowerblue">
+                                                    Clave: {{ ctrl.dato.controls.insumos.controls[i].controls.clave.value }} 
+                                                </span>
+                                                Nombre: {{ctrl.dato.controls.insumos.controls[i].controls.descripcion.value}}
+                                                <br>                                            
+                                                <label class="tag is-success" *ngIf="ctrl.dato.controls.insumos.controls[i].controls.es_causes.value">Causes</label>
+                                                <label class="tag is-warning" *ngIf="!ctrl.dato.controls.insumos.controls[i].controls.es_causes.value">No Causes</label>                                                                                                                                       
+                                                <label class="tag" *ngIf="ctrl.dato.controls.insumos.controls[i].controls.es_unidosis.value">Unidosis</label>
+                                            </strong>
+                                            <br> {{ctrl.dato.controls.insumos.controls[i].controls.descripcion.value}}
+                                        </p>
+                                    </div>
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <td>
+                                                    <label *ngIf="!tieneid" class="label">Dosis ({{ ctrl.dato.controls.insumos.controls[i].controls.unidad_medida.value }}):</label>
+                                                    <label *ngIf="tieneid" class="label">Dosis ({{ ctrl.dato.controls.insumos.controls[i].controls.informacion_ampliada.value.unidad_medida_nombre }}):</label>
+                                                </td>
+                                                <td>
+                                                    <label class="label">Frecuencia (hrs.):</label>
+                                                </td>
+                                                <td>
+                                                    <label class="label">Duración (días):</label>
+                                                </td>
+                                                <td>
+                                                    <label *ngIf="!tieneid" class="label">Cant. ({{ ctrl.dato.controls.insumos.controls[i].controls.presentacion_nombre.value }}):</label>
+                                                    <label *ngIf="tieneid" class="label">Cant. ({{ ctrl.dato.controls.insumos.controls[i].controls.informacion_ampliada.value.presentacion_nombre }}):</label>
+                                                </td>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    <p class="control is-expanded">
+                                                        <input type="text" autofocus class="input" formControlName="dosis" (keypress)="quitar_punto($event)"  [ngClass]="{'is-disabled': tieneid, 'is-danger': ctrl.dato.controls.insumos.controls[i].controls.dosis.hasError('required') && ctrl.dato.controls.insumos.controls[i].controls.dosis.touched}">
+                                                    </p>
+                                                </td>
+                                                <td>
+                                                    <p class="control is-expanded">
+                                                        <input type="text" class="input" formControlName="frecuencia" (keypress)="quitar_punto($event)"  [ngClass]="{'is-disabled': tieneid, 'is-danger': ctrl.dato.controls.insumos.controls[i].controls.frecuencia.hasError('required') && ctrl.dato.controls.insumos.controls[i].controls.frecuencia.touched}">
+                                                    </p>
+                                                </td>
+                                                <td>
+                                                    <p class="control is-expanded">
+                                                        <input type="text" class="input" formControlName="duracion" (keypress)="quitar_punto($event)" [ngClass]="{'is-disabled': tieneid, 'is-danger': ctrl.dato.controls.insumos.controls[i].controls.duracion.hasError('required') && ctrl.dato.controls.insumos.controls[i].controls.duracion.touched}">
+                                                    </p>
+                                                </td>
+                                                <td>
+                                                    <p class="control is-expanded">
+                                                        <input type="text" class="input" formControlName="cantidad_recetada" (keypress)="quitar_punto($event)" [ngClass]="{'is-disabled': tieneid, 'is-danger': ctrl.dato.controls.insumos.controls[i].controls.cantidad_recetada.hasError('required') && ctrl.dato.controls.insumos.controls[i].controls.cantidad_recetada.touched}">
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>                                    
+                                </div>
+                            </article>
+                        </div>
+                    </div>
+
+                </section>
+            </div>
+        </div>
+    </div>
+</form>
+        
+        
+<div class="modal" id="verLotes">
+    <div class="modal-background"></div>
+    <div class="modal-card" style="width: 70%;">
+        <header class="modal-card-head">
+            <p class="modal-card-title" id="tituloModal"> </p>
+            <button type="button" class="delete" (click)="cancelarModal('verLotes')"></button>
+        </header>
+        <section class="modal-card-body" >
+            <h2>Indicaciones del medicamento</h2>
+            <div class="columns is-flex-desktop" >
+                <div class="column is-2">
+                    <p class="control is-expanded">
+                    <label *ngIf="!tieneid" class="label">Dosis <br> ({{unidad_medida}}):</label>
+                    <label *ngIf="tieneid" class="label">Dosis ():</label>
+                        <input type="number" autofocus class="input" #dosis id="dosis" min="1" name="dosis" (keypress)="quitar_punto($event)" 
+                        (blur)="calcularCantidadSugerida(dosis.value, frecuencia.value, duracion.value);" 
+                        [ngClass]="{'is-disabled': tieneid, 'is-danger': dosis.value == ''}">
+                    </p>
+                </div>
+                <div class="column is-auto" style="vertical-align: bottom !important;">
+                        <p class="control is-expanded">
+                        <label class="label">Frecuencia <br> (hrs.):</label>
+                            <input type="number" class="input" #frecuencia id="frecuencia" min="1" name="frecuencia" (keypress)="quitar_punto($event)"
+                            (blur)="calcularCantidadSugerida(dosis.value, frecuencia.value, duracion.value);"
+                            [ngClass]="{'is-disabled': tieneid, 'is-danger': frecuencia.value == ''}">
+                        </p>
+                </div>
+                <div class="column is-2">
+                    <p class="control is-expanded">
+                    <label class="label">Duración <br> (días):</label>
+                        <input type="number" class="input" #duracion id="duracion" min="1" name="duracion" (keypress)="quitar_punto($event)" 
+                        (blur)="calcularCantidadSugerida(dosis.value, frecuencia.value, duracion.value);"
+                        [ngClass]="{'is-disabled': tieneid, 'is-danger': duracion.value == ''}">
+                    </p>
+                </div>
+                <div class="column  is-auto">
+                    <p class="control is-expanded">
+                    <label *ngIf="!tieneid" class="label">Cant. recetada <br> ({{presentacion_nombre}}):</label>
+                    <label *ngIf="tieneid" class="label">Cant. recetada ():</label>
+                        <input type="number" class="input" #cant_recetada id="cant_recetada" min="1" name="cant_recetada"
+                        (keypress)="quitar_punto($event)"
+                        
+                        [ngClass]="{'is-disabled': tieneid, 'is-danger': cant_recetada.value == ''}">
+                    </p>
+                </div>
+                <div class="column  is-auto">
+                    <p class="control is-expanded">
+                        <label *ngIf="!tieneid" class="label">Cant. sugerida <br> a surtir</label>
+                        <strong style="text-align: center;">
+                            {{cantidad_recomendada ? cantidad_recomendada : 0}}  {{presentacion_nombre}}
+                        </strong>
+                    </p>
+                </div>
+                
+            </div>
+        </section>
+        <footer class="modal-card-foot">                         
+            <a class="button is-success" [ngClass]="{'is-disabled':cant_recetada.value == ''}"  (click)="agregarLoteIsumo(dosis.value, frecuencia.value, duracion.value, cant_recetada.value)">Aceptar</a>
+            <a class="button" (click)="cancelarModal('verLotes')">Cancelar</a>
+        </footer>
+    </div>
+</div>
+
+<div class="modal" id="modalGuardarReceta">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+        <header class="modal-card-head">
+            <p class="modal-card-title"><i class="fa fa-warning"></i> Alerta</p>
+            <button class="delete" (click)="cancelarModal('modalGuardarReceta')"></button>
+        </header>
+        <section class="modal-card-body">
+            <div class="content">
+                <h1>¿Esta seguro de guardar la receta?</h1>
+                <p>Ya no se podrá realizar cambios</p>
+                <p class="modal-card-title" id="tituloGuardar"> </p>
+            </div>
+        </section>
+        <footer class="modal-card-foot">
+            <a class="button is-success" (click)="ctrl.enviar(false, 'medicos/recetas/','medicos/recetas/ver'); cancelarModal('modalGuardarReceta')">Continuar</a>
+            <a class="button" (click)="cancelarModal('modalGuardarReceta')">Cancelar</a>
+        </footer>
+    </div>
+</div>
+
+
+<div class="modal" id="modalNuevoPaciente">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+        <header class="modal-card-head">
+            <p class="modal-card-title"><i class="fa fa-user"></i> Nuevo Paciente</p>
+            <button class="delete" (click)="cancelarModal('modalNuevoPaciente')"></button>
+        </header>
+        <section class="modal-card-body">
+            <div class="notification is-danger" *ngIf="mensajeErrorPaciente!=''">
+                <button class="delete" (click)="mensajeErrorPaciente=''"></button>
+                {{mensajeErrorPaciente}}
+            </div>
+            <div class="field">
+                <label class="label">Nombre:</label>
+                <div class="control is-expanded  has-icon has-icon-right">
+                    <input class="input" [(ngModel)] = "nuevoPaciente.nombre" [ngClass]="{'is-danger': erroresPaciente.nombre != null}" />
+                    <p class="help is-danger" *ngIf="erroresPaciente.nombre == 'required'">Este campo es obligatorio.</p>      
+                </div>
+                
+            </div>
+            <div class="field">
+                <label class="label">Sexo:</label>
+                <div class="control  is-expanded  has-icon has-icon-right ">
+                    <div class="select is-fullwidth" >
+                        <select [(ngModel)] = "nuevoPaciente.sexo"  [ngClass]="{'is-danger': erroresPaciente.sexo != null}" >
+                            <option value="1">Hombre</option>
+                            <option value="2">Mujer</option>
+                        </select>
+                        <p class="help is-danger" *ngIf="erroresPaciente.sexo == 'required'">Este campo es obligatorio.</p>
+                    </div>                    
+                </div>
+                 
+            </div>
+            <div class="field">
+                <label class="label">Fecha de nacimiento:</label>
+                <div class="control is-expanded  has-icon has-icon-right">
+                    <input class="input"  ngui-datetime-picker
+                       [max-date]="MaxDate" date-only="true" placeholder="YYYY-MM-DD" [(ngModel)] = "nuevoPaciente.fecha_nacimiento" [ngClass]="{'is-danger': erroresPaciente.fecha_nacimiento != null}" />
+                    <p class="help is-danger" *ngIf="erroresPaciente.fecha_nacimiento == 'required'">Este campo es obligatorio.</p>   
+                </div>
+                
+            </div>
+            
+            <div class="field">
+                <label class="label">No expediente:</label>
+                <p class="control is-expanded  has-icon has-icon-right">
+                    <input class="input" [(ngModel)] = "nuevoPaciente.no_expediente" />
+                </p>
+            </div>
+            <div class="field">
+                <label class="label">No afiliación:</label>
+                <p class="control is-expanded  has-icon has-icon-right">
+                    <input class="input" [(ngModel)] = "nuevoPaciente.no_afiliacion" />
+                </p>
+            </div>
+            
+            <b>* Este es un formulario simplificado con los datos básicos mínimos para evitar alargar la receta, para una edición completa vaya al módulo de pacientes de filtro.</b>
+            
+            
+        </section>
+        <footer class="modal-card-foot">
+            <a class="button is-success" (click)="enviarDatosPaciente()" [ngClass]="{'is-loading': enviandoDatosPaciente}">Crear</a>
+            <a class="button" (click)="cancelarModal('modalNuevoPaciente')">Cancelar</a>
+        </footer>
+    </div>
+</div>
+

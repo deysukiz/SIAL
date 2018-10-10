@@ -1,0 +1,139 @@
+<admision-menu></admision-menu>
+<div style="height:50px;"></div>
+<div class="contenedor columns " style="height:100%; ">
+    <div class="column is-one-quarter is-hidden-mobile">
+        <admision-menu-lateral></admision-menu-lateral>
+    </div>
+    <div class="column" style="padding:2em;">
+        <div style="background: #FFF; border-radius: 1em; overflow: hidden;">
+            <section class="hero" [ngClass] = " 'is-primary' " >
+                
+                <div class="hero-body" style="position:relative;">
+                    
+                    <div class="container is-fluid">
+                        
+                        <h1 class="title">
+                            <span class="icon is-medium"><i class="fa fa-user"></i></span> Alta Paciente
+                        </h1>
+                        
+                    </div>
+                </div>
+            </section>
+            <div class="is-fullwidth has-text-centered" *ngIf="cargando">
+                <br>
+                <span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span> &nbsp;<span>Cargando...</span></span>
+                <br>
+                <br>
+            </div>
+             <section class="section">
+                <form name="form" novalidate [formGroup]="pacienteEgreso"  (ngSubmit)="enviar()">     
+                
+                  <section class="section" style="background-color: #00d1b2;">
+                    <div class="container">
+                      <div class="heading">
+                        <h1 class="title" style="color: #FFF">Datos del Paciente</h1>
+                        <h2 class="subtitle" style="color: #FFF">
+                          ID: {{ id_paciente }}<BR>
+                          NOMBRE: {{ nombre_paciente }} <BR>
+                          LOCALIDAD: {{ localidad_paciente }}<BR>
+                          FECHA DE INGRESO: {{ fecha_ingreso}}<br>
+                          AREA: {{ area_ingreso}}
+
+                        </h2>
+                      </div>
+                    </div>
+                  </section>
+
+                  <br>
+                  <div class="control is-grouped">  
+                    
+                    <p class="control is-expanded has-icon has-icon-right">
+                      <label class="label">Motivo Egreso</label> 
+                      <span class="select is-fullwidth">
+                            <select  formControlName="motivo_egreso_id" name="motivo_egreso_id"  >
+                                <option *ngFor="let item of MotivoEgreso" value="{{item.id}}">{{ item.descripcion }} </option>
+                            </select>
+                            
+                        </span> 
+                        <span class="icon is-small" *ngIf="pacienteEgreso.get('motivo_egreso_id').hasError('required') && pacienteEgreso.get('motivo_egreso_id').touched">
+                            <i class="fa fa-warning"></i>
+                        </span>
+                        <span class="help is-danger" *ngIf="pacienteEgreso.get('motivo_egreso_id').hasError('required') && pacienteEgreso.get('motivo_egreso_id').touched">Este campo es requerido.</span>
+                    </p>
+                    <p class="control is-expanded has-icon has-icon-right">
+                      <label class="label">Fecha de egreso</label>    
+                        <input class="input" type="text" placeholder="aaaa-mm-dd" formControlName="fecha_egreso"  readonly="readonly"> 
+                        <span class="icon is-small" *ngIf="pacienteEgreso.get('fecha_egreso').hasError('required') && pacienteEgreso.get('fecha_egreso').touched">
+                            <i class="fa fa-warning"></i>
+                          </span>
+                          <span class="help is-danger" *ngIf="pacienteEgreso.get('fecha_egreso').hasError('required') && pacienteEgreso.get('fecha_egreso').touched">Este campo es requerido.</span>               
+                    </p>
+                    <p class="control is-expanded has-icon has-icon-right">
+                      <label class="label">hora de egreso</label>    
+                        <input class="input" type="text" placeholder="00:00" formControlName="hora_egreso" readonly="readonly">
+                        <span class="icon is-small" *ngIf="pacienteEgreso.get('hora_egreso').hasError('required') && pacienteEgreso.get('hora_egreso').touched">
+                            <i class="fa fa-warning"></i>
+                          </span>
+                          <span class="help is-danger" *ngIf="pacienteEgreso.get('hora_egreso').hasError('required') && pacienteEgreso.get('hora_egreso').touched">Este campo es requerido.</span>
+                    </p>
+                  </div>
+                  <div class="control is-grouped">  
+                    
+                    <p class="control is-expanded has-icon has-icon-right">
+                      <label class="label">Contrareferencia</label> 
+                      <span class="select is-fullwidth">
+                            <select  formControlName="contrareferencia" name="contrareferencia" #contrareferencia (change)="referido(contrareferencia.value)">
+                                <option value="1" selected="selected">SI</option>
+                                <option value="2">NO</option>
+                            </select>
+                            
+                        </span> 
+                        <span class="icon is-small" *ngIf="pacienteEgreso.get('contrareferencia').hasError('required') && pacienteEgreso.get('contrareferencia').touched">
+                            <i class="fa fa-warning"></i>
+                        </span>
+                        <span class="help is-danger" *ngIf="pacienteEgreso.get('contrareferencia').hasError('required') && pacienteEgreso.get('contrareferencia').touched">Este campo es requerido.</span>
+                    </p>
+                    <p class="control is-expanded has-icon has-icon-right">
+                      <label class="label">Unidad Contrareferencia</label> 
+                      <span class="select is-fullwidth">
+                            <select  formControlName="unidad_referencia" name="unidad_referencia" >
+                                <option *ngFor="let item of UnidadesMedicas" value="{{item.clues}}">{{ item.nombre }} - {{ item.clues }}</option>
+                            </select>
+                            
+                        </span> 
+                        <span class="icon is-small" *ngIf="pacienteEgreso.get('unidad_referencia').hasError('required') && pacienteEgreso.get('unidad_referencia').touched">
+                            <i class="fa fa-warning"></i>
+                        </span>
+                        <span class="help is-danger" *ngIf="pacienteEgreso.get('unidad_referencia').hasError('required') && pacienteEgreso.get('unidad_referencia').touched">Este campo es requerido.</span>
+                    </p>
+                    
+                  </div>
+                  <br><br>
+                  <div class="control is-grouped">
+                    <p class="control">
+                      <button class="button is-primary" type="submit" [ngClass]="{'is-loading': cargando}" [disabled]="pacienteEgreso.invalid">Guardar</button>
+                    </p>
+                    
+                    <p class="control">
+                      <a class="button is-white" (click)="regresar()" >Regresar</a>
+                    </p>
+                  </div>
+
+              </form>
+            </section>  
+        </div>
+    </div>    
+</div>
+
+<div class="notification is-danger" style="position:fixed; left:1em;  bottom:1em;" *ngIf="mensajeError.mostrar">
+    <button class="delete" (click)="mensajeError.mostrar = false"></button>        
+    <b>Error:</b> {{ mensajeError.texto }}<br><br>
+    <p style="text-align:center" ><a  class="button is-danger is-inverted" (click)="ultimaPeticion(); mensajeError.mostrar = false"> <span class="icon"><i class="fa fa-refresh"></i></span> <span>Volver a intentar</span></a></p>        
+</div>
+
+<div class="notification is-success" style="position:fixed; left:1em;  bottom:1em; width: auto" *ngIf="mensajeExito.mostrar">       
+    <button class="delete" (click)="mensajeExito.mostrar = false"></button>
+    <p><span class="icon" style="margin-right: 0.5em;"><i class="fa fa-check-circle"></i></span> <span>{{ mensajeExito.texto }}</span></p>
+    <br>
+    <p style="text-align: center;"><small >Este mensaje desaparecerá en {{ mensajeExito.cuentaAtras }} segundos.</small></p>       
+</div>

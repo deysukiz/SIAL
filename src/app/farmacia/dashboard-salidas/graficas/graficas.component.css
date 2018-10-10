@@ -1,0 +1,9 @@
+chart {
+        display: block;
+      }
+      
+div.scroll {
+    background-color: #FFFFFF;
+    height: 400px;
+    overflow: auto;
+}      

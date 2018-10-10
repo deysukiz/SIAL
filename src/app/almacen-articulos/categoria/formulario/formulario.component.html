@@ -1,0 +1,171 @@
+<formulario #ctrl URL="categoria" titulo="Categoria / Almacen" [dato]="dato"></formulario>
+<articulos-catalogo-menu></articulos-catalogo-menu>
+<div style="height:50px;"></div>
+<div class="contenedor columns " style="height:100%">
+    <div class="column is-one-quarter is-hidden-mobile">
+        <panel-control-menu-aside></panel-control-menu-aside>
+    </div>
+    <div class="column" style="padding: 0em 2em 0em 0em;">
+        <!-- formulario -->
+        <form name="form" novalidate [formGroup]="dato" (ngSubmit)="ctrl.enviar()" >
+            <div style="background: #FFF; overflow: hidden;">
+                <section class="hero is-primary">
+                    <div class="hero-body">
+                        <!-- Opciones  -->
+                        <formulario-opciones [ctrl]="ctrl"  class="control is-grouped" style="position:absolute; top:8em; right:3em;">
+
+                        </formulario-opciones>
+
+
+                        <div class="container is-fluid">
+                            <h1 class="title">
+                                <span *ngIf="!ctrl.cargando" class="icon is-medium"><i class="fa fa-edit"></i></span>
+                                <span *ngIf="ctrl.cargando" class="icon is-medium"><i class="fa fa-refresh fa-spin"></i></span>                                {{ctrl.moduloTitulo}} categoria
+                            </h1>
+                        </div>
+                    </div>
+                </section>
+                <div class="is-fullwidth has-text-centered" *ngIf="!ctrl.datosCargados">
+                    <br>
+                    <span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span>                    &nbsp;<span>Cargando...</span></span>
+                </div>
+                <section class="section">
+
+
+
+                    <!-- cargar los catalogos que se requieran parametro 1 modelo donde se guarda el catalogo, parametro 2 ruta de la api -->
+                    <a id="catalogos" (click)="ctrl.cargarCatalogo('categorias', 'categoria'); "></a>
+                    <div class="columns">
+                        <div class="column is-12">
+                            <div class="field">
+                                <label class="label">Categoría Padre:</label>
+                                <div class="control is-expanded  has-icon has-icon-right">
+                                    <div class="select">
+                                        <select class="select" formControlName="categoria_id">
+                                            <optgroup *ngFor="let val of ctrl.categorias | groupBy:'modulo_padre'" label="{{val.key}}">
+                                                <option *ngFor="let item of val.value" value="{{item.id}}" >{{item.nombre}}</option>
+                                            </optgroup>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="columns">
+                        <div class="column is-6">
+                            <div class="field">
+                                <label class="label">Nombre:</label>
+                                <p class="control is-expanded  has-icon has-icon-right">
+                                    <input class="input" autofocus type="text" [ngClass]="{'is-danger': ctrl.dato.get('nombre').hasError('required')}" placeholder="Nombre"
+                                        formControlName="nombre">
+                                    <span class="icon is-small" *ngIf="ctrl.dato.get('nombre').hasError('required')">
+                                        <i class="fa fa-warning"></i>
+                                    </span>
+                                    <span class="help is-danger" *ngIf="ctrl.dato.get('nombre').hasError('required')">Este campo es requerido.</span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="column is-6">
+                            <br><br>
+                            <div class="b-checkbox control is-expanded  has-icon has-icon-right">
+                                <input type="checkbox" id="tiene_modulo" class="styled" formControlName="tiene_modulo" [checked]="ctrl.dato.get('tiene_modulo').value == 1 ? true : false">
+                                <label for="tiene_modulo">  Esta categoria tiene modulo de administración?
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <!-- categorias_metadatos -->
+                    <!-- <div class="">
+                        <table class="table" formArrayName="categorias_metadatos">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Descripción</th>
+                                    <th>Tipo</th>
+                                    <th>Longitud</th>
+                                    <th>Requerido</th>
+                                    <th>Requerido inventario</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let item of ctrl.dato.controls.categorias_metadatos.controls; let i=index" [formGroupName]="i">
+                                    <th style="vertical-align: middle;">
+                                        <input class="input" type="text" placeholder="Nombre" formControlName="campo">
+                                    </th>
+                                    <td style="vertical-align: middle;">
+                                        <input class="input" type="text" placeholder="Descripcion" formControlName="descripcion">
+                                    </td>
+                                    <td style="vertical-align: middle;">
+                                        <div class="select">
+                                            <select class="select" formControlName="tipo">
+                                                <option *ngFor="let val of tipos" value="{{val.id}}">{{ val.nombre }}</option>
+                                            </select>
+                                        </div>
+                                    </td>
+                                    <td style="vertical-align: middle;">
+                                        <input class="input" type="number" min="1" placeholder="Longitud" formControlName="longitud">
+                                    </td>
+                                    <td style="vertical-align: middle;">
+                                        <div class="b-checkbox control is-expanded  has-icon has-icon-right">
+                                            <input type="checkbox" id="requerido{{i}}" class="styled"
+                                                formControlName="requerido" [checked]="ctrl.dato.get('categorias_metadatos').value[i]['requerido'] == 1 ? true : false">
+                                            <label for="requerido{{i}}">  Es requerido?
+                                            </label>
+                                        </div>
+                                    </td>
+                                    <!-- <td style="vertical-align: middle;">
+                                        <div class="b-checkbox control is-expanded has-icon has-icon-right" if="ctrl.dato.get('categorias_metadatos').value[i]">
+                                            <input type="checkbox" id="requerido{{i}}"
+                                                [checked]="ctrl.dato.get('categorias_metadatos').value[i]?.requerido == 1 ? true : false"
+                                                class="styled" formControlName="requerido">
+                                            <label for="requerido{{i}}">  Es requerido?
+                                            </label>
+                                        </div>
+                                    </td>
+                                    <td style="vertical-align: middle;">
+                                        <div class="b-checkbox control is-expanded  has-icon has-icon-right">
+                                            <input type="checkbox" id="requerido_inventario{{i}}" class="styled"
+                                            formControlName="requerido_inventario" [checked]="ctrl.dato.get('categorias_metadatos').value[i].requerido_inventario == 1 ? true : false">
+                                            <label for="requerido_inventario{{i}}">  Es requerido en inventario?
+                                            </label>
+                                        </div>
+                                    </td>
+
+                                    <td style="vertical-align: middle;">
+                                        <div class="b-checkbox control is-expanded has-icon has-icon-right" if="ctrl.dato.get('categorias_metadatos').value[i]">
+                                            <input type="checkbox" id="requerido_inventario{{i}}"
+                                                [checked]="ctrl.dato.get('categorias_metadatos').value[i]?.requerido_inventario == 1 ? true : false"
+                                                class="styled" formControlName="requerido_inventario">
+                                            <label for="requerido_inventario{{i}}">  Es requerido?
+                                            </label>
+                                        </div>
+                                    </td>
+                                    <td style="vertical-align: middle;">
+                                        <a class="is-danger" (click)="ctrl.quitar_form_array(ctrl.dato.controls.categorias_metadatos, i)">
+                                            <span class="icon"><i class="fa fa-trash-o"></i></span>
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th colspan="7">
+                                        <a class="button is-primary is-outlined is-fullwidth" (click)="ctrl.agregar_form_array(ctrl.dato.controls.categorias_metadatos, form_categorias_metadatos)">
+                                            <span class="icon"><i class="fa fa-plus"></i></span>&nbsp; Agregar Campo
+                                        </a>
+                                    </th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div> -->
+
+
+
+                </section>
+            </div>
+        </form>
+    </div>
+</div>

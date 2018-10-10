@@ -1,0 +1,174 @@
+<administrador-central-menu></administrador-central-menu>
+<div style="height:50px;"></div>
+<div class="contenedor columns " style="height:100%; ">
+    <div class="column is-narrow is-hidden-mobile">
+        <administrador-central-menu-lateral></administrador-central-menu-lateral>
+    </div>
+    <div class="column">
+        <div style="background: #FFF; border-radius: 1em; overflow: hidden; margin:20px">
+            <div class="top-bar is-primary" [ngClass] = " {'is-dark': busquedaActivada, 'is-primary': !busquedaActivada } ">
+                <h1 class="title" *ngIf="!busquedaActivada">
+                    <span class="icon is-medium"><i class="fa fa-check-square-o"></i></span> Validación de pedidos alternos
+                </h1>
+                <h1 class="title" *ngIf="busquedaActivada">
+                    <span class="icon is-medium"><i class="fa fa-search"></i></span> Búsqueda 
+                </h1>
+                <a class="button  is-dark" *ngIf="busquedaActivada" style="position:absolute; top:1em; right:1em;" (click)="busquedaActivada=false;searchBox.value='';resultadosBusqueda=[]"><span class="icon "><i class="fa fa-close"></i></span></a>
+                <a class="button  is-dark" *ngIf="busquedaActivada" style="position:absolute; top:1em; right:3.5em;" (click)="listarBusqueda(searchBox.value,1)"><span class="icon "><i class="fa fa-refresh"></i></span></a>
+                <a class="button  is-primary" *ngIf="!busquedaActivada" style="position:absolute; top:1em; right:1em;" (click)="listar(1)"><span class="icon "><i class="fa fa-refresh"></i></span></a>               
+                
+                <div class="control is-grouped">
+                    <p class="control is-expanded">
+                        <input class="input is-medium" type="text" placeholder="Buscar" #searchBox  id="search-box" (keyup)="buscar(searchBox.value)">
+                    </p>
+                </div>
+               
+            </div> 
+            <br>
+            <div class="tabs  is-boxed is-centered" style="margin-bottom:0px;">
+                <ul>
+                  <li [ngClass]="{ 'is-active': tab== 1 }"><a (click)="cambiarTab(1)"><span class="icon is-small"><i class="fa fa-inbox"></i></span> <span>Nuevos</span></a></li>
+                  <li [ngClass]="{ 'is-active': tab== 2 }"><a (click)="cambiarTab(2)"><span class="icon is-small"><i class="fa fa-check-square-o"></i></span> <span>Validados</span></a></li>
+                </ul>
+              </div>
+            <div class="is-fullwidth has-text-centered" *ngIf="cargando">
+                <br>
+                <span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span> &nbsp;<span>Cargando...</span></span>
+                <br>
+                <br>
+            </div>
+        
+            <table class="table" style="font-size:0.9em" *ngIf="!cargando">
+                <thead>
+                    <tr>
+                        <th>Folio</th>
+                        <th>Descripción</th>
+                        <th>Unidad Médica</th>
+                        <th>Fecha</th>
+                        <th>Claves</th>
+                        <th>Cantidad</th>
+                        <th>Monto</th>
+                    </tr>
+                </thead>
+                <tbody  *ngIf="!busquedaActivada">
+                    <tr *ngFor="let item of lista; let i=index">                         
+                        <!--<td style="vertical-align: middle;"><a routerLink="/administrador-central/claves-basicas/editar/{{item.id}}">{{ item.nombre }}</a></td>                        -->
+                        <th style="vertical-align: middle;"><a routerLink="/administrador-central/validacion-pedidos-alternos/{{item.id}}">
+                            {{ item.folio?item.folio:'S/F' }}</a>
+                        </th>
+                        <td style="vertical-align: middle;"><a routerLink="/administrador-central/validacion-pedidos-alternos/{{item.id}}">{{ item.descripcion }}</a></td>                        
+                        <td style="vertical-align: middle;"><a routerLink="/administrador-central/validacion-pedidos-alternos/{{item.id}}">{{ item.unidad_medica }}</a></td>                        
+                        <td style="vertical-align: middle;"><a [ngClass]="{'estatus-rojo':(item.status == 'PS' && item.expira_en_dias <= 0),'estatus-amarillo':(item.status == 'PS' && (item.expira_en_dias > 0 && item.expira_en_dias <= 5))}" >{{ item.fecha | date:'y-MM-dd' }} <span *ngIf="item.status == 'PS'">({{item.expira_en_dias?item.expira_en_dias:'hoy'}})</span></a></td>
+                        <td style="text-align:center;vertical-align: middle;">
+                            <a routerLink="/administrador-central/validacion-pedidos-alternos/{{item.id}}"> 
+                                {{ item.total_claves_solicitadas | number }}
+                            </a>
+                        </td>
+                        <td style="text-align:center;vertical-align: middle;">
+                            <a routerLink="/administrador-central/validacion-pedidos-alternos/{{item.id}}"> 
+                                {{ item.total_cantidad_solicitada | number }}
+                            </a>
+                        </td>
+                        <td style="text-align:right;vertical-align: middle;">
+                            <a routerLink="/administrador-central/validacion-pedidos-alternos/{{item.id}}">
+                                ${{ item.total_monto_solicitado | number:'1.2-2' }}
+                            </a>
+                        </td>
+                        <!--
+                        <td style="vertical-align: middle;"><a routerLink="/administrador-central/validacion-pedidos-alternos/{{item.id}}"> 
+                            {{ (item.total_claves_recibidas || 0) | number }} / {{ item.total_claves_solicitadas | number }} [{{(item.total_claves_recibidas/item.total_claves_solicitadas)*100 | number:'1.0-2'}}%]
+                        </a></td>-->
+                        <!--
+                        <td style="vertical-align: middle;"><a routerLink="/administrador-central/validacion-pedidos-alternos/{{item.id}}"> 
+                            {{ (item.total_cantidad_recibida || 0) | number }} / {{ item.total_cantidad_solicitada | number }} [{{(item.total_cantidad_recibida/item.total_cantidad_solicitada)*100 | number:'1.0-2'}}%]
+                        </a></td>-->
+                        <!--<td style="vertical-align: middle;"><a routerLink="/administrador-central/validacion-pedidos-alternos/{{item.id}}">
+                            $ {{ (item.total_monto_recibido || 0) | number:'1.2-2' }} / $ {{ item.total_monto_solicitado | number:'1.2-2' }} [{{(item.total_monto_recibido/item.total_monto_solicitado)*100 | number:'1.0-2'}}%]
+                        </a></td>-->
+                        <!--
+                        <td style="vertical-align: middle;" class="has-text-centered">
+                            <span class="icon " *ngIf="item.cargando"><i class="fa fa-circle-o-notch fa-spin"></i></span>
+                            <a *ngIf="!item.cargando && item.status == 'BR'" class="status-rojo" (click)="eliminar(item, i)"><span class="icon"><i class="fa fa-trash-o"></i></span></a>
+                            <a *ngIf="!item.cargando && item.status == 'PS' && item.expira_en_dias >= 0" routerLink="/almacen/pedidos/recepcion/{{item.id}}" title="Recibir pedido"><span class="icon"><i class="fa fa-truck"></i></span></a>
+                            <span *ngIf="!item.cargando && item.status == 'PS' && item.expira_en_dias < 0" class="tag is-danger" title="Expirado"><span class="icon"><i class="fa fa-exclamation"></i></span></span>
+                            <span *ngIf="!item.cargando && item.status == 'FI'" class="estatus-verde" title="Finalizado"><span class="icon"><i class="fa fa-check-circle"></i></span></span>
+                            <span *ngIf="!item.cargando && item.status == 'EX-CA'" class="estatus-rojo" title="Expirado - Cancelado"><span class="icon"><i class="fa fa-times-circle"></i></span></span>
+                            <span *ngIf="!item.cargando && item.status == 'EX'" class="estatus-amarillo" title="Expirado"><span class="icon"><i class="fa fa-exclamation-circle"></i></span></span>
+                        </td>-->
+                    </tr>
+                    <tr *ngIf="lista.length == 0">
+                        <td colspan="5" style="vertical-align: middle; color:#888;">Esta lista está vacía.</td>                    
+                    </tr>
+                </tbody>
+                <tbody *ngIf="busquedaActivada">
+                    <tr *ngFor="let item of resultadosBusqueda; let i=index">
+                        <th style="vertical-align: middle;"><a routerLink="/administrador-central/validacion-pedidos-alternos/{{item.id}}">
+                            {{ item.folio?item.folio:'S/F' }}</a>
+                        </th>
+                        <td style="vertical-align: middle;"><a routerLink="/administrador-central/validacion-pedidos-alternos/{{item.id}}">{{ item.descripcion }}</a></td>                        
+                        <td style="vertical-align: middle;"><a routerLink="/administrador-central/validacion-pedidos-alternos/{{item.id}}">{{ item.unidad_medica }}</a></td>                        
+                        <td style="vertical-align: middle;"><a [ngClass]="{'estatus-rojo':(item.status == 'PS' && item.expira_en_dias <= 0),'estatus-amarillo':(item.status == 'PS' && (item.expira_en_dias > 0 && item.expira_en_dias <= 5))}" >{{ item.fecha | date:'y-MM-dd' }} <span *ngIf="item.status == 'PS'">({{item.expira_en_dias?item.expira_en_dias:'hoy'}})</span></a></td>
+                        <td style="text-align:center;vertical-align: middle;">
+                            <a routerLink="/administrador-central/validacion-pedidos-alternos/{{item.id}}"> 
+                                {{ item.total_claves_solicitadas | number }}
+                            </a>
+                        </td>
+                        <td style="text-align:center;vertical-align: middle;">
+                            <a routerLink="/administrador-central/validacion-pedidos-alternos/{{item.id}}"> 
+                                {{ item.total_cantidad_solicitada | number }}
+                            </a>
+                        </td>
+                        <td style="text-align:right;vertical-align: middle;">
+                            <a routerLink="/administrador-central/validacion-pedidos-alternos/{{item.id}}">
+                                ${{ item.total_monto_solicitado | number:'1.2-2' }}
+                            </a>
+                        </td>
+                    </tr>
+
+                    <tr *ngIf="resultadosBusqueda.length == 0 && busquedaActivada">
+                        <td colspan="5" style="vertical-align: middle; color:#888;">No se encontraron resultados.</td>                    
+                    </tr>
+                </tbody>
+            </table>
+            <!-- Paginación para la lista  -->
+            <paginacion 
+                [total]="total" 
+                [paginasTotales]="paginasTotales" 
+                [resultadosPorPagina]="resultadosPorPagina" 
+                [paginaActual]="paginaActual" 
+                [indicePaginas]="indicePaginas"
+                (onSiguiente)="paginaSiguiente()" 
+                (onAnterior)="paginaAnterior()" 
+                (onListar)="listar($event)" 
+                *ngIf="total>0 && total > resultadosPorPagina && !busquedaActivada"></paginacion>
+            <!-- Paginación para la búsqueda  -->
+            <paginacion 
+                [total]="totalBusqueda" 
+                [paginasTotales]="paginasTotalesBusqueda" 
+                [resultadosPorPagina]="resultadosPorPaginaBusqueda" 
+                [paginaActual]="paginaActualBusqueda" 
+                [indicePaginas]="indicePaginasBusqueda"
+                (onSiguiente)="paginaSiguienteBusqueda(searchBox.value)" 
+                (onAnterior)="paginaAnteriorBusqueda(searchBox.value)" 
+                (onListar)="listarBusqueda(searchBox.value,$event)" 
+                *ngIf="totalBusqueda > 0 && totalBusqueda > resultadosPorPaginaBusqueda && busquedaActivada"></paginacion>
+           
+           
+            
+        </div>
+        
+    </div>
+</div>
+
+<div class="notification is-danger" style="position:fixed; left:1em;  bottom:1em;" *ngIf="mensajeError.mostrar">
+    <button class="delete" (click)="mensajeError.mostrar = false"></button>        
+    <b>Error:</b> {{ mensajeError.texto }}<br><br>
+    <p style="text-align:center" ><a  class="button is-danger is-inverted" (click)="ultimaPeticion(); mensajeError.mostrar = false"> <span class="icon"><i class="fa fa-refresh"></i></span> <span>Volver a intentar</span></a></p>        
+</div>
+
+<div class="notification is-success" style="position:fixed; left:1em;  bottom:1em; width: auto" *ngIf="mensajeExito.mostrar">       
+    <button class="delete" (click)="mensajeExito.mostrar = false"></button>
+    <p><span class="icon" style="margin-right: 0.5em;"><i class="fa fa-check-circle"></i></span> <span>{{ mensajeExito.texto }}</span></p>
+    <br>
+    <p style="text-align: center;"><small >Este mensaje desaparecerá en {{ mensajeExito.cuentaAtras }} segundos.</small></p>       
+</div>

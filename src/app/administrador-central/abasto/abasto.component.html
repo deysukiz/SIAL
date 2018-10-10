@@ -1,0 +1,138 @@
+<administrador-central-menu></administrador-central-menu>
+<div style="height:50px;"></div>
+<div class="contenedor columns " style="height:100%; ">
+    <div class="column is-narrow is-hidden-mobile">
+        <administrador-central-menu-lateral></administrador-central-menu-lateral>
+    </div>
+    <div class="column" style="padding:2em; overflow: scroll;">
+      
+        <div style="background: #FFF; border-radius: 1em; overflow: hidden;">
+            <section class="hero is-primary"  >
+                
+                <div class="hero-body" style="position:relative;">                    
+                    
+                    <a class="button  is-primary" *ngIf="!cargando" style="position:absolute; top:1em; right:1em;" (click)="exportar()"><span class="icon "><i class="fa fa-file-excel-o"></i></span> <span>Exportar</span></a>
+                    <div class="container is-fluid">
+                        
+                        <h1 class="title">
+                            <span class="icon is-medium"><i class="fa fa-line-chart"></i></span> Abasto
+                        </h1>
+                        
+                        <div class="control is-grouped">
+                        <p class="control is-expanded">
+                            <input class="input is-medium" type="text" placeholder="Buscar por CLUES" [(ngModel)] = "clues" (keyup)="filtrarClues($event)">
+                        </p>
+                        </div>
+                        <div class="columns">                            
+                            <div class="column">
+                                <label for="jurisdicciones">Proveedores:</label>
+                       
+                                <p class="control is-expanded">
+                                    <span class="select is-fullwidth">
+                                    <select #proveedoresSelect (change)="cambioSeleccionProveedor(proveedoresSelect.value)">
+                                        <option value="-1">Todos</option>
+                                        <option *ngFor="let item of proveedores" value="{{item.id}}">{{ item.nombre }}</option>
+                                    </select>
+                                    </span>
+                                </p>                   
+                          
+                            </div>
+                            <div class="column">
+                                <label for="jurisdicciones">Jurisdicciones:</label>
+                             
+                                <p class="control is-expanded">
+                                    <span class="select is-fullwidth">
+                                    <select #js id="jurisdicciones"  (change)="cambioSeleccionJurisdiccion(js.value)">
+                                        <option value="-1">Todas</option>
+                                        <option *ngFor="let item of jurisdicciones" value="{{item.id}}">JS {{ item.numero }} - {{ item.nombre }}</option>
+                                    </select>
+                                    </span>
+                                </p>
+                                                       
+                               
+                            </div>
+                        </div>
+                        <div *ngIf="jurisdiccionesSeleccionadas.length>0 || proveedoresSeleccionados.length>0">
+                            <h1 class="title is-6">Filtro aplicado:</h1>
+                            <span class="tag is-dark is-medium" style="margin-bottom:0.5em; margin-right:0.2em;" *ngFor="let item of proveedoresSeleccionados; let i = index">{{ item.nombre_corto }}<button class="delete is-small" (click)="quitarProveedor(i)"></button></span>
+                            <span class="tag is-white is-medium" style="margin-bottom:0.5em; margin-right:0.2em;" *ngFor="let item of jurisdiccionesSeleccionadas;  let i = index">JS {{ item.numero }}<button class="delete is-small" (click)="quitarJurisdiccion(i)"></button></span>
+                            
+                        </div>
+                        <nav class="level">
+                            <div class="level-left"><h1 class="title is-5">Resultados: <b>{{ total }}</b></h1></div>
+                            <div class="level-right">
+                                <div class="block">
+                                <button class="button " *ngIf="jurisdiccionesSeleccionadas.length>0 || proveedoresSeleccionados.length>0 || clues != ''" (click)="clues = ''; jurisdiccionesSeleccionadas = []; proveedoresSeleccionados = []; js.value = -1; proveedoresSelect.value= -1 "><span class="icon"><i class="fa fa-times"></i></span> <span>Limpiar filtro</span></button>
+                                <button class="button is-primary is-inverted" (click)="listar(1)"><span class="icon"><i class="fa fa-filter"></i></span> <span>Filtrar</span></button>
+                                </div>
+                            </div>
+                        </nav>
+                    
+                        
+                    </div>
+                </div>
+            </section>
+            <div class="is-fullwidth has-text-centered" *ngIf="cargando">
+                <br>
+                <span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span> &nbsp;<span>Cargando...</span></span>
+                <br>
+                <br>
+            </div>
+            
+            <table class="table" *ngIf="!cargando">
+                <thead>
+                    <tr>
+                    <th>Proveedor</th>
+                    <th>Clues</th>
+                    <th>Nombre</th>
+                    <th style="cursor:pointer" (click)="toggleCauses()"><span><abbr title="Causes">CA</abbr></span><span class="icon is-small"><i class="fa" [ngClass]="{ 'fa-sort': ordenarCauses == '', 'fa-sort-asc': ordenarCauses == 'ASC', 'fa-sort-desc': ordenarCauses == 'DESC' }"></i></span></th>
+                    <th style="cursor:pointer" (click)="toggleNoCauses()"><abbr title="No causes">NCA</abbr><span class="icon is-small"><i class="fa" [ngClass]="{ 'fa-sort': ordenarNoCauses == '', 'fa-sort-asc': ordenarNoCauses == 'ASC', 'fa-sort-desc': ordenarNoCauses == 'DESC' }"></i></span></th>
+                    <th style="cursor:pointer" (click)="toggleMaterialCuracion()"><abbr title="Material de curación">MC</abbr><span class="icon is-small"><i class="fa" [ngClass]="{ 'fa-sort': ordenarMaterialCuracion == '', 'fa-sort-asc': ordenarMaterialCuracion == 'ASC', 'fa-sort-desc': ordenarMaterialCuracion == 'DESC' }"></i></span></th>
+                    </tr>
+                </thead>
+                
+                <tbody>
+                    <tr *ngFor="let item of lista; let i=index">                        
+                        <td style="vertical-align: middle;">{{ item.proveedor }}</td>
+                        <td style="vertical-align: middle;">{{ item.clues }}</td>
+                        <td style="vertical-align: middle;">{{ item.unidad_medica }}</td>
+                        <td style="vertical-align: middle;">{{ item.porcentaje_causes }}</td>
+                        <td style="vertical-align: middle;">{{ item.porcentaje_no_causes }}</td>
+                        <td style="vertical-align: middle;">{{ item.porcentaje_material_curacion }}</td>
+                    </tr>
+                    <tr *ngIf="lista.length == 0">
+                        <td colspan="5" style="vertical-align: middle; color:#888;">Esta lista está vacía.</td>                    
+                    </tr>
+                </tbody>
+            </table>
+            <!-- Paginación para la lista  -->
+            
+            <paginacion 
+                [total]="total" 
+                [paginasTotales]="paginasTotales" 
+                [resultadosPorPagina]="resultadosPorPagina" 
+                [paginaActual]="paginaActual" 
+                [indicePaginas]="indicePaginas"
+                (onSiguiente)="paginaSiguiente()" 
+                (onAnterior)="paginaAnterior()" 
+                (onListar)="listar($event)" 
+                *ngIf="total>0 && total > resultadosPorPagina"></paginacion>
+           
+            
+        </div>
+        
+    </div>
+</div>
+
+<div class="notification is-danger" style="position:fixed; left:1em;  bottom:1em;" *ngIf="mensajeError.mostrar">
+    <button class="delete" (click)="mensajeError.mostrar = false"></button>        
+    <b>Error:</b> {{ mensajeError.texto }}<br><br>
+    <p style="text-align:center" ><a  class="button is-danger is-inverted" (click)="ultimaPeticion(); mensajeError.mostrar = false"> <span class="icon"><i class="fa fa-refresh"></i></span> <span>Volver a intentar</span></a></p>        
+</div>
+
+<div class="notification is-success" style="position:fixed; left:1em;  bottom:1em; width: auto" *ngIf="mensajeExito.mostrar">       
+    <button class="delete" (click)="mensajeExito.mostrar = false"></button>
+    <p><span class="icon" style="margin-right: 0.5em;"><i class="fa fa-check-circle"></i></span> <span>{{ mensajeExito.texto }}</span></p>
+    <br>
+    <p style="text-align: center;"><small >Este mensaje desaparecerá en {{ mensajeExito.cuentaAtras }} segundos.</small></p>       
+</div>

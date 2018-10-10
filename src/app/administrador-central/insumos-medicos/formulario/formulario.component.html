@@ -1,0 +1,353 @@
+<administrador-central-menu></administrador-central-menu>
+<div style="height:50px;"></div>
+<div class="contenedor columns " style="height:100%; ">
+    <div class="column is-narrow is-hidden-mobile">
+        <administrador-central-menu-lateral></administrador-central-menu-lateral>
+    </div>
+    <div class="column" style="overflow: scroll;">
+        <div style="background: #FFF; border-radius: 1em;  margin:20px">
+            <div class="top-bar is-primary" [ngClass]=" {'is-dark': busquedaActivada, 'is-primary': !busquedaActivada } ">
+                <h1 class="title" style="margin-bottom:0px" *ngIf="esEditar">
+                    <span class="icon is-medium">
+                        <i class="fa fa-edit"></i>
+                    </span> Editar insumo médico
+                </h1>
+                <h1 class="title" style="margin-bottom:0px" *ngIf="!esEditar">
+                    <span class="icon is-medium">
+                        <i class="fa fa-medkit"></i>
+                    </span> Nuevo insumo médico
+                </h1>
+                <a class="button  is-primary" routerLink="/administrador-central/insumos-medicos/" style="position:absolute; top:1em; right:1em;">
+                    <span class="icon ">
+                        <i class="fa fa-close"></i>
+                    </span>
+                </a>
+
+            </div>
+            <div class="is-fullwidth has-text-centered" *ngIf="cargando">
+                <br>
+                <span class="tag is-primary is-large ">
+                    <span class="icon">
+                        <i class="fa fa-refresh fa-spin"></i>
+                    </span> &nbsp;
+                    <span>Cargando...</span>
+                </span>
+                <br>
+                <br>
+            </div>
+
+            <section style="padding:1em;" *ngIf="!cargando">
+                <div class="field">
+                    <label class="label">Clave:</label>
+                    <p class="control is-expanded  has-icon has-icon-right">
+                        <input class="input" autofocus type="text" [ngClass]="{'is-danger': errores.clave != null, 'is-disabled': guardando}" placeholder="Clave: Ej. 010.000.0000000.00"
+                            [(ngModel)]="insumo_medico.clave">
+                        <span class="icon is-small" *ngIf="false">
+                            <i class="fa fa-warning"></i>
+                        </span>
+                        <span class="help is-danger" *ngIf="errores.clave == 'required'">Este campo es requerido.</span>
+                        <span class="help is-danger" *ngIf="errores.clave == 'unique'">Esta clave ya fue utilizada.</span>
+                    </p>
+                </div>
+                <br>
+                <div class="columns" style="font-size: 0.8em">
+                    <div class="column" >
+                        <div class="field">
+                            <p class="control">
+                                <label class="checkbox" [ngClass]="{ 'is-disabled': guardando}">
+                                    <input type="checkbox" (change)="insumo_medico.atencion_medica = !insumo_medico.atencion_medica" [checked]="insumo_medico.atencion_medica"> <strong>ATENCIÓN MÉDICA</strong>
+                                </label>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="column" style="text-align: center">
+                        <div class="field">
+                            <p class="control">
+                                <label class="checkbox" [ngClass]="{ 'is-disabled': guardando}">
+                                    <input type="checkbox" (change)="insumo_medico.salud_publica = !insumo_medico.salud_publica" [checked]="insumo_medico.salud_publica"> <strong>SALUD PÚBLICA</strong>
+                                </label>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="column"  style="text-align: center">
+                        <div class="field">
+                            <p class="control">
+                                <label class="checkbox" [ngClass]="{ 'is-disabled': guardando}">
+                                    <input type="checkbox" (change)="insumo_medico.es_causes = !insumo_medico.es_causes" [checked]="insumo_medico.es_causes"> CAUSES
+                                </label>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="field ">
+                    <label class="label">Tipo:</label>
+                    <p class="control is-expanded">
+                        <span class="select is-fullwidth">
+                            <select (change)="seleccionarTipo($event.target.value)" [ngClass]="{'is-danger': errores.tipo != null, 'is-disabled': guardando}">
+                                <option value="">Selecciona un tipo</option>
+                                <option value="ME" [selected]="insumo_medico.tipo == 'ME'">ME Medicamentos</option>
+                                <option value="MC" [selected]="insumo_medico.tipo == 'MC'">ME Material de curación</option>
+                            </select>
+                        </span>
+                        <span class="help is-danger" *ngIf="errores.tipo == 'required'">Este campo es requerido.</span>
+                    </p>
+                </div>
+                <div class="columns"  style="font-size: 0.8em">
+                    <div class="column">
+                        <div class="field">
+                            <p class="control">
+                                <label class="checkbox" [ngClass]="{ 'is-disabled': guardando}">
+                                    <input type="checkbox" (change)="insumo_medico.es_unidosis = !insumo_medico.es_unidosis" [checked]="insumo_medico.es_unidosis"> Unidosis
+                                </label>
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="column is-4">
+                        <div class="field">
+                            <p class="control">
+                                <label class="checkbox" [ngClass]="{ 'is-disabled': guardando}">
+                                    <input type="checkbox" (change)="insumo_medico.tiene_fecha_caducidad = !insumo_medico.tiene_fecha_caducidad" [checked]="insumo_medico.tiene_fecha_caducidad"> Fecha de caducidad
+                                </label>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="column is-4">
+                        <div class="field">
+                            <p class="control">
+                                <label class="checkbox" [ngClass]="{ 'is-disabled': guardando}">
+                                    <input type="checkbox" (change)="insumo_medico.no_disponible_pedidos = !insumo_medico.no_disponible_pedidos" [checked]="insumo_medico.no_disponible_pedidos"> Bloquear en pedidos
+                                </label>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="column">
+                        <div class="field">
+                            <p class="control">
+                                <label class="checkbox" [ngClass]="{ 'is-disabled': guardando}">
+                                    <input type="checkbox" (change)="insumo_medico.descontinuado = !insumo_medico.descontinuado" [checked]="insumo_medico.descontinuado"> Descontinuado
+                                </label>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">Descripción completa del insumo:</label>
+                    <div class="control">
+                        <textarea name="observaciones" class="textarea" [ngClass]="{'is-danger': errores.descripcion != null, 'is-disabled': guardando}"
+                            placeholder="Ej. ÁCIDO ACETILSALICÍLICO Tableta 500 mg 20 tabletas" [(ngModel)]="insumo_medico.descripcion"></textarea>
+                        <span class="help is-danger" *ngIf="errores.descripcion == 'required'">Este campo es requerido.</span>
+                    </div>
+                </div>
+            </section>
+            <section *ngIf="insumo_medico.tipo =='ME'" style="padding: 1em;">
+                <div class="columns">
+                    <div class="column">
+                        <div class="field">
+                            <p class="control">
+                                <label class="checkbox" [ngClass]="{ 'is-disabled': guardando}">
+                                    <input type="checkbox" (change)="insumo_medico.medicamento.es_controlado = !insumo_medico.medicamento.es_controlado" [checked]="insumo_medico.medicamento.es_controlado"> Controlado
+                                </label>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="column">
+                        <div class="field">
+                            <p class="control">
+                                <label class="checkbox" [ngClass]="{ 'is-disabled': guardando}">
+                                    <input type="checkbox" (change)="insumo_medico.medicamento.es_surfactante = !insumo_medico.medicamento.es_surfactante" [checked]="insumo_medico.medicamento.es_surfactante"> Surfactante
+                                </label>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="columns">
+                    <div class="column">
+                        <div class="field ">
+                            <label class="label">Presentacion:</label>
+                            <p class="control is-expanded">
+                                <span class="select is-fullwidth">
+                                    <select (change)="seleccionarPresentacion($event.target.value)" [ngClass]="{'is-danger': errores.medicamento  && errores.medicamento.presentacion_id, 'is-disabled': guardando}">
+                                        <option value="">Selecciona una opción</option>
+                                        <option *ngFor="let item of presentaciones" value="{{ item.id }}" [selected]="insumo_medico.medicamento.presentacion_id == item.id">{{ item.nombre }}</option>
+                                    </select>
+                                </span>
+                                <span class="help is-danger" *ngIf="errores.medicamento && errores.medicamento.presentacion_id == 'required'">Este campo es requerido.</span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="column">
+                        <div class="field">
+                            <label class="label">Contenido:</label>
+                            <p class="control is-expanded  has-icon has-icon-right">
+                                <input class="input" autofocus type="text" [ngClass]="{'is-danger': errores.medicamento  && errores.medicamento.contenido, 'is-disabled': guardando}"
+                                    placeholder="Ej. Caja con un frasco ámpula o una ampolleta con 1 ml." [(ngModel)]="insumo_medico.medicamento.contenido">
+
+                                <span class="help is-danger" *ngIf="errores.medicamento && errores.medicamento.contenido == 'required'">Este campo es requerido.</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="columns">
+                    <div class="column">
+                        <div class="field">
+                            <label class="label">Concentración :</label>
+                            <p class="control is-expanded  has-icon has-icon-right">
+                                <input class="input" autofocus type="text" [ngClass]="{'is-danger': errores.medicamento  && errores.medicamento.concentracion, 'is-disabled': guardando}"
+                                    placeholder="Ejemplos: 5 mg, 40 mg/200 mg, etc." [(ngModel)]="insumo_medico.medicamento.concentracion">
+                                <span class="icon is-small" *ngIf="false">
+                                    <i class="fa fa-warning"></i>
+                                </span>
+                                <span class="help is-danger" *ngIf="errores.medicamento &&  errores.medicamento.concentracion == 'required'">Este campo es requerido.</span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="column">
+                        <div class="field">
+                            <label class="label">Cantidad x envase:</label>
+                            <p class="control is-expanded  has-icon has-icon-right">
+                                <input class="input" autofocus type="number" [ngClass]="{'is-danger': errores.medicamento  && errores.medicamento.cantidad_x_envase, 'is-disabled': guardando}"
+                                    [(ngModel)]="insumo_medico.medicamento.cantidad_x_envase">
+                                <span class="icon is-small" *ngIf="false">
+                                    <i class="fa fa-warning"></i>
+                                </span>
+                                <span class="help is-danger" *ngIf="errores.medicamento && errores.medicamento.cantidad_x_envase == 'required'">Este campo es requerido.</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="columns">
+                    <div class="column">
+                        <div class="field ">
+                            <label class="label">Unidad de medida:</label>
+                            <p class="control is-expanded">
+                                <span class="select is-fullwidth">
+                                    <select (change)="seleccionarUnidadMedida($event.target.value)" [ngClass]="{'is-danger': errores.medicamento  && errores.medicamento.unidad_medida_id, 'is-disabled': guardando}">
+                                        <option value="">Selecciona una opción</option>
+                                        <option *ngFor="let item of unidades_medida" value="{{ item.id }}" [selected]="insumo_medico.medicamento.unidad_medida_id == item.id">{{ item.clave }} - {{ item.nombre }}</option>
+                                    </select>
+                                </span>
+                                <span class="help is-danger" *ngIf="errores.medicamento && errores.medicamento.unidad_medida_id == 'required'">Este campo es requerido.</span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="column">
+                        <div class="field ">
+                            <label class="label">Vía de administración:</label>
+                            <p class="control is-expanded">
+                                <span class="select is-fullwidth">
+                                    <select (change)="seleccionarViaAdministracion($event.target.value)" [ngClass]="{'is-disabled': guardando}">
+                                        <option value="">Selecciona una opción</option>
+                                        <option *ngFor="let item of vias_administracion" value="{{ item.id }}" [selected]="insumo_medico.medicamento.via_administracion_id == item.id">{{ item.nombre }}</option>
+                                    </select>
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="columns">
+                    <div class="column">
+                        <div class="field">
+                            <label class="label">Dosis</label>
+                            <div class="control">
+                                <textarea name="dosis" class="textarea" [ngClass]="{'is-disabled': guardando}" placeholder="Ej. La que el médico señale"
+                                    [(ngModel)]="insumo_medico.medicamento.dosis"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="column">
+                        <div class="field">
+                            <label class="label">Indicaciones</label>
+                            <div class="control">
+                                <textarea name="indicaciones" class="textarea" [ngClass]="{'is-disabled': guardando}" placeholder="Ej. Enfermedades alérgicas. Enfermedades inflamatorias, etc..."
+                                    [(ngModel)]="insumo_medico.medicamento.indicaciones"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </section>
+            <section *ngIf="insumo_medico.tipo =='MC'" style="padding: 1em;">
+                <div class="columns">
+                    <div class="column">
+                        <div class="field">
+                            <label class="label">Cantidad x envase:</label>
+                            <p class="control is-expanded  has-icon has-icon-right">
+                                <input class="input" autofocus type="number" [ngClass]="{'is-danger': errores.material_curacion  && errores.material_curacion.cantidad_x_envase, 'is-disabled': guardando}"
+                                    [(ngModel)]="insumo_medico.material_curacion.cantidad_x_envase">
+                                <span class="icon is-small" *ngIf="false">
+                                    <i class="fa fa-warning"></i>
+                                </span>
+                                <span class="help is-danger" *ngIf="errores.material_curacion && errores.material_curacion.cantidad_x_envase == 'required'">Este campo es requerido.</span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="column">
+                        <div class="field ">
+                            <label class="label">Unidad de medida:</label>
+                            <p class="control is-expanded">
+                                <span class="select is-fullwidth">
+                                    <select (change)="seleccionarUnidadMedida($event.target.value)" [ngClass]="{'is-danger': errores.material_curacion  && errores.material_curacion.unidad_medida_id, 'is-disabled': guardando}">
+                                        <option value="">Selecciona una opción</option>
+                                        <option *ngFor="let item of unidades_medida" value="{{ item.id }}" [selected]="insumo_medico.material_curacion.unidad_medida_id == item.id">{{ item.clave }} - {{ item.nombre }}</option>
+                                    </select>
+                                </span>
+                                <span class="help is-danger" *ngIf="errores.material_curacion && errores.material_curacion.unidad_medida_id == 'required'">Este campo es requerido.</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <div style="padding: 1em;">
+                <p class="control">
+                    <a class="button  is-primary is-inverted " routerLink="/administrador-central/insumos-medicos">
+                        <span class="icon">
+                            <i class="fa fa-arrow-left"></i>
+                        </span>
+                        <span>Regresar</span>
+                    </a>
+                    <a class="button  is-primary " (click)="guardar()">
+                        <span class="icon">
+                            <i class="fa fa-save"></i>
+                        </span>
+                        <span>Guardar</span>
+                    </a>
+                </p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="notification is-danger" style="position:fixed; left:1em;  bottom:1em;" *ngIf="mensajeError.mostrar">
+    <button class="delete" (click)="mensajeError.mostrar = false"></button>
+    <b>Error:</b> {{ mensajeError.texto }}
+    <br>
+    <br>
+    <p style="text-align:center">
+        <a class="button is-danger is-inverted" (click)="ultimaPeticion(); mensajeError.mostrar = false">
+            <span class="icon">
+                <i class="fa fa-refresh"></i>
+            </span>
+            <span>Volver a intentar</span>
+        </a>
+    </p>
+</div>
+
+<div class="notification is-success" style="position:fixed; left:1em;  bottom:1em; width: auto" *ngIf="mensajeExito.mostrar">
+    <button class="delete" (click)="mensajeExito.mostrar = false"></button>
+    <p>
+        <span class="icon" style="margin-right: 0.5em;">
+            <i class="fa fa-check-circle"></i>
+        </span>
+        <span>{{ mensajeExito.texto }}</span>
+    </p>
+    <br>
+    <p style="text-align: center;">
+        <small>Este mensaje desaparecerá en {{ mensajeExito.cuentaAtras }} segundos.</small>
+    </p>
+</div>

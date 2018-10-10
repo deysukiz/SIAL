@@ -1,0 +1,163 @@
+<section class="hero" [ngClass]=" {'is-dark': ctrl.busquedaActivada, 'is-primary': !ctrl.busquedaActivada } ">
+    <div class="hero-body" style="position:relative;">
+
+        <div class="control is-grouped" style="position:absolute; top:0.5em; right:0em;">
+            
+            <p class="control" *ngIf="!ctrl.busquedaActivada">
+                <a class="button is-primary tooltip"  (click)="ctrl.listar(1)">
+                    <span class="icon ">
+                        <i class="fa fa-refresh"></i>
+                    </span>
+                    <span class="tooltiptext">Actualizar</span>
+                </a>
+            </p>
+
+            <p class="control" *ngIf="ctrl.busquedaActivada">
+                <a class="button is-dark tooltip"  (click)="ctrl.listarBusqueda(searchBox.value,1)" id="cargar_datos_actualizar">
+                    <span class="icon ">
+                        <i class="fa fa-refresh"></i>
+                    </span>
+                    <span class="tooltiptext">Actualizar</span>
+                </a>
+            </p>
+
+            <p class="control" *ngIf="nuevo">
+                <a  class="button is-{{ctrl.busquedaActivada ? 'dark' : 'primary'}} tooltip"  routerLink="{{url_nuevo}}">
+                    <span class="icon ">
+                        <i class="fa fa-file"></i>
+                    </span>
+                    <span class="tooltiptext">Nuevo</span>
+                </a>
+            </p>
+
+            <p class="control" *ngIf="excel_export">
+                <a class="button is-{{ctrl.busquedaActivada ? 'dark' : 'primary'}} tooltip" (click)="imprimirExcel()">
+                    <span class="icon ">
+                        <i class="fa fa-file-excel-o"></i>
+                    </span>
+                    <span class="tooltiptext">Exportar Excel</span>
+                </a>
+            </p>
+
+            <p class="control">
+                <a class="button is-{{ctrl.busquedaActivada ? 'dark' : 'primary'}} tooltip" (click)="imprimir()">
+                    <span class="icon ">
+                        <i class="fa fa-print"></i>
+                    </span>
+                    <span class="tooltiptext">Imprimir</span>
+                </a>
+            </p>
+            <p class="control">
+                <a class="button  is-dark tooltip" *ngIf="ctrl.busquedaActivada" (click)="ctrl.cerrar_busqueda(searchBox)">
+                    <span class="icon ">
+                        <i class="fa fa-close"></i>
+                    </span>
+                    <span class="tooltiptext">Cerrar Busqueda</span>
+                </a>
+            </p>
+        </div>
+
+        <div class="container is-fluid" *ngIf="busqueda">
+
+            <h1 class="title" *ngIf="!ctrl.busquedaActivada && mostrar_nombre">
+                <span class="icon"><i class="{{icono}}"></i></span>&nbsp; {{nombre}}
+            </h1>
+            <h1 class="title" *ngIf="ctrl.busquedaActivada">
+                <span class="icon"><i class="fa fa-search"></i></span> Búsqueda
+            </h1>
+            <div class="control is-grouped">
+                <p class="control is-expanded">
+                    <input class="input" type="text" placeholder="Buscar" #searchBox id="search-box" (keyup)="ctrl.buscar(searchBox.value)">
+                </p>
+                
+            </div>
+        </div>
+
+        <div class="container is-fluid">
+            <div class="control is-grouped">
+                <!--
+                <p class="control">
+                    <span class="select">
+                        <select style="width: 150px" name="tipo_busqueda" #tipoBusqueda (change)="tipo_busqueda = tipoBusqueda.value">
+                            <option value="TODO" selected>TODO</option>
+                            <option value="OPTIMA">OPTIMA</option>
+                            <option value="MEDIA">MEDIA</option>
+                            <option value="PRONTA">PRONTA</option>
+                            <option value="CADUCADO">CADUCADO</option>
+                        </select>
+                    </span>
+                </p>
+                -->
+                <p class="control">&nbsp;</p>
+                <p class="control b-checkbox is-info is-circular" style="margin-top: -15px;">
+                    <input class="styled" type="radio" id="buscar_en_mis_claves" #claves [checked]="buscar_en == 'MIS_CLAVES'" (click)="buscar_en = 'MIS_CLAVES'" [value]="'MIS_CLAVES'" name="buscar_en">
+                    <label class="radio" for="buscar_en_mis_claves">
+                        <span class="tag is-medium" [ngClass]="{'is-dark':buscar_en == 'MIS_CLAVES'}">Mis claves</span>
+                    </label>
+                </p>
+                <p class="control">&nbsp;</p>
+                <p class="control  b-checkbox is-circular" style="margin-top: -15px;">
+                    <input class="styled" type="radio" id="buscar_en_todas_claves" #claves [checked]="buscar_en == 'TODAS_LAS_CLAVES'" (click)="buscar_en = 'TODAS_LAS_CLAVES'" [value]="'TODAS_LAS_CLAVES'" name="buscar_en">
+                    <label class="radio" for="buscar_en_todas_claves">
+                        <span class="tag is-medium" [ngClass]="{'is-dark':buscar_en == 'TODAS_LAS_CLAVES'}">Todas las claves</span>
+                    </label>    
+                </p>
+                <p class="control">
+                    <span class="select">
+                        <select name="tipo_insumo" #tipoInsumo title="Tipo de insumo"
+                            (change)="tipo_insumo = tipoInsumo.value; tipoInsumo.value == 'MC' ? tipoCauses.value = 'TODO' : ''; 
+                            tipoInsumo.value == 'MC' ? tipo_causes = 'TODO' : ''; tipoInsumo.value == 'MC' ? tipoControlado.value = 'TODO' : '';
+                            tipoInsumo.value == 'MC' ? tipo_controlado = 'TODO' : '';">
+                            <option value="TODO">TODO</option>
+                            <option value="ME">MEDICAMENTOS</option>
+                            <option value="MC">MATERIAL DE CURACIÓN</option>
+                        </select>
+                    </span>
+                </p>
+                <p class="control">
+                    <span class="select">
+                        <select style="width: 150px"  name="tipo_causes" title="Clasificación de CAUSES" #tipoCauses (change)="tipo_causes = tipoCauses.value"
+                            [ngClass]="{'is-disabled': tipoInsumo.value == 'MC'}">
+                            <option value="TODO">TODO</option>
+                            <option value="CAUSES">CAUSES</option>
+                            <option value="NO_CAUSES">NO CAUSES</option>
+                        </select>
+                    </span>
+                </p>
+                <p class="control">
+                    <span class="select">
+                        <select name="tipo_controlados" title="Tipo de controlado" #tipoControlado (change)="tipo_controlado = tipoControlado.value"
+                            [ngClass]="{'is-disabled': tipoInsumo.value == 'MC'}">>
+                            <option value="TODO">TODO</option>
+                            <option value="CONTROLADOS">CONTROLADOS</option>
+                            <option value="NO_CONTROLADOS">NO CONTROLADOS</option>
+                        </select>
+                    </span>
+                </p>
+                <p class="control is-expanded">
+                    <input class="input" type="text" #claveInsumo (change)="clave_insumo = claveInsumo.value"
+                    placeholder="Descripción o clave del insumo" id="clave_insumo" name="clave_insumo">
+                </p>
+                <p class="control">
+                    <button class="button is-default" type="button" [ngClass]="{'is-loading': ctrl.cargando}" 
+                    (click)="buscar_en='TODAS_LAS_CLAVES';
+                    tipoInsumo.value='TODO'; tipoCauses.value='TODO'; tipoControlado.value='TODO'; claveInsumo.value='';
+                    tipo_insumo='TODO'; tipo_causes='TODO'; tipo_controlado='TODO'; clave_insumo=''" >Limpiar</button>
+                </p>
+                <p class="control">
+                    <button class="button" (click)="ctrl.listar(1)">
+                        <span class="icon"><i class="fa fa-filter"></i></span> <span>Filtrar</span>
+                    </button>
+                </p>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<div class="is-fullwidth has-text-centered" *ngIf="ctrl.cargando">
+    <br>
+    <span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span> &nbsp;<span>Cargando...</span></span>
+    <br>
+    <br>
+</div>

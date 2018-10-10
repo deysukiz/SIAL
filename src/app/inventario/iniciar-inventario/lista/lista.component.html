@@ -1,0 +1,237 @@
+<listar #ctrl URL="inicializar-inventario-me?fecha_desde={{fecha_desde}}&fecha_hasta={{fecha_hasta}}&q={{query}}" titulo="Inicialización de inventario de insumos médicos"></listar>
+<!-- <app-menu-dam [modulo]="'Pedidos DAM'" [icono]="'assets/hub-estandar.svg'" [url]="'/pedidos/dam'" [urlAyuda]="'ayuda'"></app-menu-dam> -->
+<app-menu-inventario [modulo]="'Inicialización de inventario de insumos médicos'" [icono]="'assets/icono-salidas.svg'" [url]="'/inventario/iniciar-inventario'"></app-menu-inventario>
+<div style="height:40px;"></div>
+<div class="contenedor columns " >
+    <div class="column" style="padding:2em;  z-index: initial; height:100%;">
+        <div style="background: #FFF;">
+            <section class="hero is-hidden-touch" [ngClass]=" {'is-dark': ctrl.busquedaActivada, 'is-primary': !ctrl.busquedaActivada}"
+                    style="min-height:200px; height: 25%">
+                <div class="hero-body" style="position:relative; height: 90%">
+                    <nav class="level">
+                        <div class="level-left"></div>
+                        <!-- Right side -->
+                        <div class="level-right">
+                            <p class="level-item"><a class="button is-dark is-medium" routerLink="nuevo" *ngIf="ctrl.busquedaActivada"><i class="fa fa-plus" aria-hidden="true"></i>&nbsp;<span>Nueva inicialización</span></a></p>
+                            <p class="level-item"><a class="button is-primary is-medium" routerLink="nuevo" *ngIf="!ctrl.busquedaActivada"><i class="fa fa-plus" aria-hidden="true"></i>&nbsp;<span>Nueva inicialización</span></a></p>
+                            <p class="level-item"><a class="button  is-dark" *ngIf="ctrl.busquedaActivada" (click)="ctrl.busquedaActivada=false;searchBox.value=''; ctrl.resultadosBusqueda=[]"><span class="icon "><i class="fa fa-close"></i></span></a></p>
+                            <p class="level-item"><a class="button  is-dark" *ngIf="ctrl.busquedaActivada" title="Actualizar" (click)="ctrl.listarBusqueda(searchBox.value,1)"><span class="icon "><i class="fa fa-refresh"></i></span></a></p>
+                            <p class="level-item"><a class="button  is-primary" *ngIf="!ctrl.busquedaActivada" title="Actualizar" (click)="ctrl.listar(1)"><span class="icon "><i class="fa fa-refresh"></i></span></a></p>
+
+                            <p class="level-item"><a class="button  is-dark" *ngIf="ctrl.busquedaActivada" title="PDF" (click)="imprimir()"><span class="icon "><i class="fa fa-file-pdf-o"></i></span></a></p>
+                            <p class="level-item"><a class="button  is-primary" *ngIf="!ctrl.busquedaActivada" title="PDF" (click)="imprimir()"><span class="icon "><i class="fa fa-file-pdf-o"></i></span></a></p>
+
+                            <p class="level-item"><a class="button  is-dark" *ngIf="ctrl.busquedaActivada" title="Excel" (click)="export_excel()"><span class="icon "><i class="fa fa-file-excel-o"></i></span></a></p>
+                            <p class="level-item"><a class="button  is-primary" *ngIf="!ctrl.busquedaActivada" title="Excel" (click)="export_excel()"><span class="icon "><i class="fa fa-file-excel-o"></i></span></a></p>
+                            <p class="level-item">&nbsp;</p>
+                        </div>
+                    </nav>               
+                    <div class="container is-fluid">
+                        <span></span>
+                        <div class="is-hidden-desktop">
+                            <h1 class="title" *ngIf="!ctrl.busquedaActivada">
+                                <span class="icon is-medium"><i class="fa fa-user"></i></span> Entradas  de medicamentos
+                            </h1>
+                        </div>
+                        <h1 class="title" *ngIf="ctrl.busquedaActivada">
+                            <span class="icon is-medium"><i class="fa fa-search"></i></span> Búsqueda
+                        </h1>
+                        <div class="control is-grouped">
+                            <div class="control" style="z-index: 1000;">
+                                <div class="field">   
+                                    <label class="label">Desde:</label>                         
+                                    <input  style="width: 150px; z-index: 1000;" class="input is-medium" [(ngModel)]='fecha_desde' ngui-datetime-picker date-only="true" placeholder="YYYY-MM-DD" />
+                                </div>
+                            </div>
+                            <div class="control is-expanded" style="z-index: 1000;">
+                                <div class="field">   
+                                    <label class="label">Hasta:</label>                         
+                                    <input readonly style="width: 150px; z-index: 1000;" class="input is-medium" [(ngModel)]='fecha_hasta' ngui-datetime-picker date-only="true" placeholder="YYYY-MM-DD" />
+                                </div>
+                            </div>
+                            <div class="control is-expanded">
+                                <div class="field">   
+                                    <label class="label">Consulta:</label>                         
+                                    <input class="input is-medium" type="text" placeholder="Ingrese búsqueda por folio o descripción" [(ngModel)]="query">
+                                </div>
+                            </div>
+                            <div class="control">
+                                <div class="field">  
+                                <label class="label">&nbsp;</label>
+                                <button class="button is-default is-medium" type="button" [ngClass]="{'is-loading': ctrl.cargando}" (click)="recibe='';fecha_desde=''; fecha_hasta='';" >Limpiar</button>
+                                </div>
+                            </div>
+                            <div class="control">
+                                <div class="field">  
+                                <label class="label">&nbsp;</label>
+                                <button class="button is-info is-medium" type="button" [ngClass]="{'is-loading': ctrl.cargando}" (click)="ctrl.listar(1)" >Filtrar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section><!-- 25/100% height -->
+            <section class="hero is-hidden-desktop" [ngClass]=" {'is-dark': ctrl.busquedaActivada, 'is-primary': !ctrl.busquedaActivada}">
+                <div class="hero-body" style="position:relative; height: 90%">
+                        <div class="is-hidden-desktop">
+                            <h1 class="title" *ngIf="!ctrl.busquedaActivada">
+                                <span class="icon is-medium"><i class="fa fa-user"></i></span> Entradas  de medicamentos
+                            </h1>
+                        </div>
+                    <nav class="level">
+                        <div class="level-left"></div>
+                        <!-- Right side -->
+                        <div class="level-right">
+                            <p class="level-item"><a class="button is-dark is-medium" routerLink="nuevo" *ngIf="ctrl.busquedaActivada"><i class="fa fa-plus" aria-hidden="true"></i>&nbsp;<span>Aperturar pedido</span></a></p>
+                            <p class="level-item"><a class="button is-primary is-medium" routerLink="nuevo" *ngIf="!ctrl.busquedaActivada"><i class="fa fa-plus" aria-hidden="true"></i>&nbsp;<span>Aperturar pedido</span></a></p>
+                            <p class="level-item"><a class="button  is-dark" *ngIf="ctrl.busquedaActivada" (click)="ctrl.busquedaActivada=false;searchBox.value=''; ctrl.resultadosBusqueda=[]"><span class="icon "><i class="fa fa-close"></i></span></a></p>
+                            <p class="level-item"><a class="button  is-dark" *ngIf="ctrl.busquedaActivada" title="Actualizar" (click)="ctrl.listarBusqueda(searchBox.value,1)"><span class="icon "><i class="fa fa-refresh"></i></span></a></p>
+                            <p class="level-item"><a class="button  is-primary" *ngIf="!ctrl.busquedaActivada" title="Actualizar" (click)="ctrl.listar(1)"><span class="icon "><i class="fa fa-refresh"></i></span></a></p>
+
+                            <p class="level-item"><a class="button  is-dark" *ngIf="ctrl.busquedaActivada" title="PDF" (click)="imprimir()"><span class="icon "><i class="fa fa-file-pdf-o"></i></span></a></p>
+                            <p class="level-item"><a class="button  is-primary" *ngIf="!ctrl.busquedaActivada" title="PDF" (click)="imprimir()"><span class="icon "><i class="fa fa-file-pdf-o"></i></span></a></p>
+
+                            <p class="level-item"><a class="button  is-dark" *ngIf="ctrl.busquedaActivada" title="Excel" (click)="export_excel()"><span class="icon "><i class="fa fa-file-excel-o"></i></span></a></p>
+                            <p class="level-item"><a class="button  is-primary" *ngIf="!ctrl.busquedaActivada" title="Excel" (click)="export_excel()"><span class="icon "><i class="fa fa-file-excel-o"></i></span></a></p>
+                            <p class="level-item">&nbsp;</p>
+                        </div>
+                    </nav>
+                </div>
+            </section>
+            
+        <div class="is-fullwidth has-text-centered" *ngIf="ctrl.cargando" style="height:75%;"> <!-- 75/100% height -->
+            <br>
+            <span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span> &nbsp;<span>Cargando...</span></span>
+            <br>
+            <br>
+        </div>
+        <div id="exportable"><!-- 75/100% height -->
+            <div style="overflow:auto; display:block" [style.maxHeight.px]="ctrl.tamano-350">
+                <div class="is-fullwidth has-text-centered" *ngIf="cargandoPdf">
+                    <br>
+                    <span class="tag is-primary is-large "><span class="icon"><i class="fa fa-refresh fa-spin"></i></span> &nbsp;<span>Generando PDF...</span></span>
+                    <br>
+                    <br>
+                </div>
+                <div style="overflow:auto; display:block">
+                    <table class="table" *ngIf="!ctrl.cargando && !cargandoPdf">
+                        <thead>
+                            <tr>
+                                <th style=" text-align: center;"><abbr title="Folio">Folio</abbr></th>
+                                <th>Programas</th>
+                                <th>Claves</th>
+                                <th>Lotes</th>
+                                <th>Insumos</th>
+                                <th style=" text-align: center;">Monto</th>
+                                <th style=" text-align: center;">Estatus</th>
+                            </tr>
+                        </thead>
+                        <tbody *ngIf="!ctrl.busquedaActivada && ctrl.dato">
+                            <tr *ngFor="let item of ctrl.dato; let i=index">
+                                <!-- Folio -->
+                                <th style="vertical-align: middle; text-align: center;" *ngIf="(item.estatus == 'INICIALIZADO' || item.estatus == 'NOINICIALIZADO')">
+                                    <a *ngIf="item.estatus == 'INICIALIZADO'" routerLink="/inventario/iniciar-inventario/ver/{{item.id}}">{{ item.id ? item.id : 'No disponible' }}</a>
+                                    <a *ngIf="item.estatus == 'NOINICIALIZADO'" routerLink="/inventario/iniciar-inventario/editar/{{item.id}}">{{ item.id ? item.id : 'No disponible' }}</a>
+                                </th>
+                                <!-- Programas -->
+                                <td *ngIf="item.cantidad_programas && (item.estatus == 'INICIALIZADO' || item.estatus == 'NOINICIALIZADO')">
+                                    <a *ngIf="item.estatus == 'INICIALIZADO'" routerLink="/inventario/iniciar-inventario/ver/{{item.id}}"> 
+                                        <p> {{item.cantidad_programas}}</p>
+                                    </a>
+                                    <a *ngIf="item.estatus == 'NOINICIALIZADO'" routerLink="/inventario/iniciar-inventario/editar/{{item.id}}"> 
+                                        <p> {{item.cantidad_programas}}</p>
+                                    </a>
+                                </td>
+                                <td *ngIf="!item.cantidad_programas && (item.estatus == 'INICIALIZADO' || item.estatus == 'NOINICIALIZADO')">
+                                    Programas no disponibles
+                                </td>
+                                <!-- Claves -->
+                                <td *ngIf="item.cantidad_claves && (item.estatus == 'INICIALIZADO' || item.estatus == 'NOINICIALIZADO')">
+                                    <a *ngIf="item.estatus == 'INICIALIZADO'" routerLink="/inventario/iniciar-inventario/ver/{{item.id}}"> 
+                                        <p> {{item.cantidad_claves}}</p>
+                                    </a>
+                                    <a *ngIf="item.estatus == 'NOINICIALIZADO'" routerLink="/inventario/iniciar-inventario/editar/{{item.id}}"> 
+                                        <p> {{item.cantidad_claves}}</p>
+                                    </a>
+                                </td>
+                                <td *ngIf="!item.cantidad_claves && (item.estatus == 'INICIALIZADO' || item.estatus == 'NOINICIALIZADO')">
+                                    Claves no disponible
+                                </td>
+                                <!-- Lotes -->
+                                <td *ngIf="item.cantidad_lotes && (item.estatus == 'INICIALIZADO' || item.estatus == 'NOINICIALIZADO')">
+                                    <a *ngIf="item.estatus == 'INICIALIZADO'" routerLink="/inventario/iniciar-inventario/ver/{{item.id}}"> 
+                                        <p> {{item.cantidad_lotes}}</p>
+                                    </a>
+                                    <a *ngIf="item.estatus == 'NOINICIALIZADO'" routerLink="/inventario/iniciar-inventario/editar/{{item.id}}"> 
+                                        <p> {{item.cantidad_lotes}}</p>
+                                    </a>
+                                </td>
+                                <td *ngIf="!item.cantidad_lotes && (item.estatus == 'INICIALIZADO' || item.estatus == 'NOINICIALIZADO')">
+                                    Lotes no disponibles
+                                </td>
+                                <!-- Insumos -->
+                                <td *ngIf="item.cantidad_insumos && (item.estatus == 'INICIALIZADO' || item.estatus == 'NOINICIALIZADO')">
+                                    <a *ngIf="item.estatus == 'INICIALIZADO'" routerLink="/inventario/iniciar-inventario/ver/{{item.id}}"> 
+                                        <p> {{item.cantidad_insumos}}</p>
+                                    </a>
+                                    <a *ngIf="item.estatus == 'NOINICIALIZADO'" routerLink="/inventario/iniciar-inventario/editar/{{item.id}}"> 
+                                        <p> {{item.cantidad_insumos}}</p>
+                                    </a>
+                                </td>
+                                <td *ngIf="!item.cantidad_insumos && (item.estatus == 'INICIALIZADO' || item.estatus == 'NOINICIALIZADO')">
+                                    Insumos no disponibles
+                                </td>
+                                <!-- Monto -->
+                                <th style="vertical-align: middle; text-align: right;" *ngIf="(item.estatus == 'INICIALIZADO' || item.estatus == 'NOINICIALIZADO')">
+                                    <a *ngIf="item.estatus == 'INICIALIZADO'" routerLink="/inventario/iniciar-inventario/ver/{{item.id}}">{{ item.monto_total ? (item.monto_total | currency:'') : 'No disponible' }}</a>
+                                    <a *ngIf="item.estatus == 'NOINICIALIZADO'" routerLink="/inventario/iniciar-inventario/editar/{{item.id}}">{{ item.monto_total ? (item.monto_total | currency:'') : 'No disponible' }}</a>
+                                </th>
+                                <!-- Estatus -->
+                                <td style=" text-align: center;" *ngIf="(item.estatus == 'INICIALIZADO' || item.estatus == 'NOINICIALIZADO')">
+                                    <a *ngIf="item.estatus == 'INICIALIZADO'" routerLink="/inventario/iniciar-inventario/ver/{{item.id}}"><span class="tag is-success is-medium" *ngIf="item.estatus == 'INICIALIZADO'">Finalizado</span></a>
+                                    <a *ngIf="item.estatus == 'NOINICIALIZADO'" routerLink="/inventario/iniciar-inventario/editar/{{item.id}}"><span class="tag is-warning is-medium" *ngIf="item.estatus == 'NOINICIALIZADO'">Borrador</span></a>
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tbody *ngIf="!ctrl.dato">
+                            <tr>
+                                <td colspan="6" style="vertical-align: middle; color:#888;">No se encontraron resultados.</td>
+                            </tr>
+                        </tbody>
+                        <tbody *ngIf="ctrl.busquedaActivada && ctrl.dato">
+                            <tr *ngFor="let item of ctrl.resultadosBusqueda; let i=index">
+                                <th style="vertical-align: middle; text-align: center;"><a routerLink="/inventario/iniciar-inventario/ver/{{item.id}}">{{ item.id }}</a></th>
+                                <td style="vertical-align: middle;" *ngIf="item.movimiento_metadato"><a *ngIf="item.movimiento_metadato.servicio.nombre" routerLink="/inventario/iniciar-inventario/ver/{{item.id}}">{{ item.movimiento_metadato.servicio.nombre }}</a></td>
+                                <td style="vertical-align: middle;" *ngIf="!item.movimiento_metadato">No disponible</td>
+                                <td style="vertical-align: middle;" *ngIf="item.movimiento_metadato"><a *ngIf="item.movimiento_metadato.turno.nombre" routerLink="/inventario/iniciar-inventario/ver/{{item.id}}">{{ item.movimiento_metadato.turno.nombre }} </a></td>
+                                <td style="vertical-align: middle;" *ngIf="!item.movimiento_metadato">No disponible</td>
+                                <td style="vertical-align: middle;"><a routerLink="/inventario/iniciar-inventario/ver/{{item.id}}">{{ item.movimiento_usuario.nombre }} {{ item.movimiento_usuario.apellidos }} </a></td>
+                                <td style="vertical-align: middle;"><a routerLink="/inventario/iniciar-inventario/ver/{{item.id}}">{{ item.estatus }} </a></td>
+                                <td style="vertical-align: middle; text-align: center;"><a routerLink="/inventario/iniciar-inventario/ver/{{item.id}}">{{ item.created_at | date}} </a></td>
+                                <td style="vertical-align: middle; text-align: center;"><a routerLink="/inventario/iniciar-inventario/ver/{{item.id}}">{{ item.updated_at | date}} </a></td>
+                            </tr>
+
+                            <tr *ngIf="ctrl.resultadosBusqueda.length == 0 && ctrl.busquedaActivada">
+                                <td colspan="5" style="vertical-align: middle; color:#888;">No se encontraron resultados.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+            <!-- Paginación para la lista  -->
+            <paginacion [total]="ctrl.total" [paginasTotales]="ctrl.paginasTotales" [resultadosPorPagina]="ctrl.resultadosPorPagina"
+                [paginaActual]="ctrl.paginaActual" [indicePaginas]="ctrl.indicePaginas" (onSiguiente)="ctrl.paginaSiguiente()"
+                (onAnterior)="ctrl.paginaAnterior()" (onListar)="ctrl.listar($event)" *ngIf="ctrl.total>0 && ctrl.total > ctrl.resultadosPorPagina && !ctrl.busquedaActivada"></paginacion>
+            <!-- Paginación para la búsqueda  -->
+            <paginacion [total]="ctrl.totalBusqueda" [paginasTotales]="ctrl.paginasTotalesBusqueda" [resultadosPorPagina]="ctrl.resultadosPorPaginaBusqueda"
+                [paginaActual]="ctrl.paginaActualBusqueda" [indicePaginas]="ctrl.indicePaginasBusqueda" (onSiguiente)="ctrl.paginaSiguienteBusqueda(searchBox.value)"
+                (onAnterior)="ctrl.paginaAnteriorBusqueda(searchBox.value)" (onListar)="ctrl.listarBusqueda(searchBox.value,$event)"
+                *ngIf="ctrl.totalBusqueda > 0 && ctrl.totalBusqueda > ctrl.resultadosPorPaginaBusqueda && ctrl.busquedaActivada"></paginacion>
+
+
+
+        </div>
+
+    </div>
+</div>
