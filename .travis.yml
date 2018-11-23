@@ -12,4 +12,4 @@ addons:
   chrome: stable
 
 script:
-  - ng build
+  - ng build --env prod
