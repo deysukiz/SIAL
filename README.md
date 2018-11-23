@@ -2,7 +2,8 @@ Esta herramienta digital forma parte del catálogo de herramientas del **Banco I
 
 
 ## Cliente Web SIAL (Sistema de Información para la Administración Logística).
-  
+
+[![Build Status](https://travis-ci.org/EL-BID/SIAL-cliente.svg?branch=master)](https://travis-ci.org/EL-BID/SIAL-cliente)
   
 ### Descripción y contexto
 
