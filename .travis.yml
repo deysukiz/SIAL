@@ -1,16 +1,15 @@
 language: node_js
 node_js:
   - "8"
+dist: trusty
+sudo: false
 
-branches:
-  only:
-    - master
+cache:
+  directories:
+    - node_modules
 
-install:
-  - npm install
-
-before_script:
-  - npm install -g @angular/cli
+addons:
+  chrome: stable
 
 script:
-  - ng build --aot --env prod
+  - ng build
