@@ -208,7 +208,9 @@ Puedes ver el código de conducta para este proyecto en el siguiente archivo [CO
 ---
 
 
-La Documentación de Soporte y Uso del software se encuentra licenciada bajo Creative Commons IGO 3.0 Atribución-NoComercial-SinObraDerivada (CC-IGO 3.0 BY-NC-ND) [LICENCIA.md](https://github.com/EL-BID/CLIENTE-SIAL)
+La Documentación de Soporte y Uso del software se encuentra licenciada bajo Creative Commons IGO 3.0 Atribución-NoComercial-SinObraDerivada (CC-IGO 3.0 BY-NC-ND).
+
+El código de este repo usa la [ Licencia AM-331-A3](LICENSE.md).
 
   
 
